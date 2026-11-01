@@ -1,0 +1,219 @@
+{
+  "reference": "Mac arm64 AppleClang 21, Eigen 3.4.0",
+  "actual": "Linux x86_64 GCC 13.3, Eigen 3.4.0",
+  "limits": {
+    "position_m": 0.001,
+    "velocity_m_s": 1e-06,
+    "a_m": 0.001,
+    "eccentricity": 1e-10,
+    "inclination_parameters": 1e-10,
+    "angle_deg": 1e-07,
+    "angle_residual_rad": 1e-10,
+    "J": 1e-06
+  },
+  "files": [
+    {
+      "case": "iod_gl",
+      "file": "gl_residuals.txt",
+      "byte_equal": false,
+      "angle_residual_rad": 1.6209256159527285e-14,
+      "exceeded": {}
+    },
+    {
+      "case": "iod_gl",
+      "file": "gl_solution.txt",
+      "byte_equal": false,
+      "position_m": 1.6539637848519857e-05,
+      "velocity_m_s": 7.413935969420114e-08,
+      "angle_residual_rad": 1.8614396048860504e-15,
+      "exceeded": {}
+    },
+    {
+      "case": "iod_glml",
+      "file": "glml_residuals.txt",
+      "byte_equal": false,
+      "angle_residual_rad": 4.621791965928692e-07,
+      "exceeded": {
+        "angle_residual_rad": {
+          "difference": 4.621791965928692e-07,
+          "limit": 1e-10
+        }
+      }
+    },
+    {
+      "case": "iod_glml",
+      "file": "glml_candidates.csv",
+      "byte_equal": false,
+      "candidate_rows": 10001,
+      "source_flags_differ": 9,
+      "max_candidate_position_m": 5442712.339018891,
+      "max_candidate_J": 10444869886.967987,
+      "exceeded": {}
+    },
+    {
+      "case": "iod_glml",
+      "file": "glml_solution.txt",
+      "byte_equal": false,
+      "position_m": 15387.335212427453,
+      "velocity_m_s": 31.01981378620805,
+      "angle_residual_rad": 4.2578074203553984e-10,
+      "selected_candidate": [
+        "592",
+        "335"
+      ],
+      "J": 0.0004672870152262476,
+      "source_flag": [
+        "-1",
+        "-1"
+      ],
+      "exceeded": {
+        "position_m": {
+          "difference": 15387.335212427453,
+          "limit": 0.001
+        },
+        "velocity_m_s": {
+          "difference": 31.01981378620805,
+          "limit": 1e-06
+        },
+        "angle_residual_rad": {
+          "difference": 4.2578074203553984e-10,
+          "limit": 1e-10
+        },
+        "J": {
+          "difference": 0.0004672870152262476,
+          "limit": 1e-06
+        }
+      }
+    },
+    {
+      "case": "odn_batch",
+      "file": "bodn_residuals.txt",
+      "byte_equal": false,
+      "angle_residual_rad": 2.886579864025407e-15,
+      "exceeded": {}
+    },
+    {
+      "case": "opn_cartesian",
+      "file": "propagation_ephemeris_nsg2.txt",
+      "byte_equal": false,
+      "epoch_days": 0.0,
+      "a_m": 6.366462912410498e-09,
+      "eccentricity": 4.753142324176451e-16,
+      "inclination_parameters": 2.220446049250313e-16,
+      "angle_deg": 4.973799150320701e-14,
+      "exceeded": {}
+    },
+    {
+      "case": "opn_cartesian",
+      "file": "propagation_ephemeris_cartesian.txt",
+      "byte_equal": false,
+      "epoch_days": 0.0,
+      "position_m": 1.8189894035458565e-09,
+      "velocity_m_s": 2.220446049250313e-12,
+      "exceeded": {}
+    },
+    {
+      "case": "opn_cartesian",
+      "file": "propagation_ephemeris_keplerian.txt",
+      "byte_equal": false,
+      "epoch_days": 0.0,
+      "a_m": 6.366462912410498e-09,
+      "eccentricity": 6.106226635438361e-16,
+      "angle_deg": 1.9202417433916708e-12,
+      "exceeded": {}
+    },
+    {
+      "case": "opn_nonsingular2",
+      "file": "propagation_ephemeris_nsg2.txt",
+      "byte_equal": false,
+      "epoch_days": 0.0,
+      "a_m": 0.0,
+      "eccentricity": 7.632783294297951e-17,
+      "inclination_parameters": 2.7755575615628914e-17,
+      "angle_deg": 1.4210854715202004e-14,
+      "exceeded": {}
+    },
+    {
+      "case": "opn_nonsingular2",
+      "file": "propagation_ephemeris_cartesian.txt",
+      "byte_equal": false,
+      "epoch_days": 0.0,
+      "position_m": 5.98126754901655e-09,
+      "velocity_m_s": 5.924889052322839e-12,
+      "exceeded": {}
+    },
+    {
+      "case": "opn_nonsingular2",
+      "file": "propagation_ephemeris_keplerian.txt",
+      "byte_equal": false,
+      "epoch_days": 0.0,
+      "a_m": 0.0,
+      "eccentricity": 1.734723475976807e-17,
+      "angle_deg": 6.110667527536862e-13,
+      "exceeded": {}
+    },
+    {
+      "case": "opn_cislunar",
+      "file": "propagation_ephemeris_cartesian.txt",
+      "byte_equal": true,
+      "epoch_days": 0.0,
+      "position_m": 0.0,
+      "velocity_m_s": 0.0,
+      "exceeded": {}
+    },
+    {
+      "case": "convert_osculating_to_mean",
+      "file": "o2m_ephemeris_mean_keplerian.txt",
+      "byte_equal": false,
+      "epoch_days": 0.0,
+      "a_m": 1.8189894035458565e-09,
+      "eccentricity": 8.012254054667878e-17,
+      "angle_deg": 9.350742402602918e-12,
+      "exceeded": {}
+    },
+    {
+      "case": "convert_keplerian_to_cartesian",
+      "file": "result.txt",
+      "byte_equal": false,
+      "epoch_days": 0.0,
+      "position_m": 2.6031257322754127e-10,
+      "velocity_m_s": 0.0,
+      "exceeded": {}
+    },
+    {
+      "case": "convert_cartesian_to_keplerian",
+      "file": "result.txt",
+      "byte_equal": false,
+      "epoch_days": 0.0,
+      "a_m": 0.0,
+      "eccentricity": 1.0842021724855044e-18,
+      "angle_deg": 3.410605131648481e-13,
+      "exceeded": {}
+    }
+  ],
+  "code_commit": "4b58175861e24b2859e5a0805901c6dcc82205ef",
+  "release_tag": "v1.0.0",
+  "server": "cdc-114",
+  "server_project": "/home/cdc/projects/ASTER",
+  "server_build": "build/linux-gcc-release",
+  "gcc": "13.3.0",
+  "clang": "18.1.3; OpenMP headers/runtime unavailable",
+  "cmake": "3.28.3",
+  "python": "3.12.3",
+  "boost": "1.87.0, 15899 headers verified",
+  "mac_compatibility_checks": {
+    "ctest_passed": 12,
+    "ctest_failed": 0,
+    "delimiter_probe": "passed"
+  },
+  "linux_checks": {
+    "initial_ctest_passed": 10,
+    "initial_ctest_failed": 9,
+    "input_contract_after_test_fix": "passed",
+    "core_checks": 7,
+    "data_integrity": "passed",
+    "iod_batch_handoff": "passed",
+    "delimiter_probe": "passed",
+    "remaining_mac_byte_reference_differences": 8
+  }
+}

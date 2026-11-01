@@ -45,5 +45,6 @@ python3 tests/run_case.py --case iod_gl --binary build/release/bin/aster_iod_gl 
 - [科学数据及校验](data/README.md)
 - [测试和验证范围](tests/README.md)
 - [迁移来源与验收](doc/migration.md)
+- [服务器使用与数值对照](doc/server.md)
 - [版本记录](CHANGELOG.md)
 - [后续维护规则](AGENTS.md)
