@@ -88,7 +88,9 @@ int main(int argc, const char* argv[]) {
             ++line_number;
             std::istringstream row(line);
             row >> std::ws;
+
             if (row.eof()) continue;
+
             CartesianRecord record{};
             // 每行读入历元和六个有限数值，行末只允许空白。
             bool valid_record = static_cast<bool>(row >> record.mjd_utc) && std::isfinite(record.mjd_utc);
@@ -102,6 +104,7 @@ int main(int argc, const char* argv[]) {
 
             if (!valid_record || !row.eof())
                 throw std::runtime_error("Expected seven finite numbers at line " + std::to_string(line_number));
+
             input.push_back(record);
         }
         if (input_file.bad()) throw std::runtime_error("Failed while reading: " + input_path);

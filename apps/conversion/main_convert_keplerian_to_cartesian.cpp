@@ -79,7 +79,9 @@ int main(int argc, const char* argv[]) {
             ++line_number;
             std::istringstream row(line);
             row >> std::ws;
+
             if (row.eof()) continue;
+
             KeplerianRecord record{};
             // 每行读入历元和六个有限数值，行末只允许空白。
             bool valid_record = static_cast<bool>(row >> record.mjd_utc) && std::isfinite(record.mjd_utc);
@@ -93,6 +95,7 @@ int main(int argc, const char* argv[]) {
 
             if (!valid_record || !row.eof())
                 throw std::runtime_error("Expected seven finite numbers at line " + std::to_string(line_number));
+
             // 现有转换公式仅用于椭圆轨道；在进入归一化和求解前检查 a、e。
             if (!(record.km_deg[0] > 0.0 && record.km_deg[1] >= 0.0 && record.km_deg[1] < 1.0))
                 throw std::runtime_error("Expected an elliptical orbit (a > 0, 0 <= e < 1) at line " +

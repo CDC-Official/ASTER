@@ -12,3 +12,5 @@ python3 tests/run_case.py --case opn_nonsingular2 --binary build/release/bin/ast
 `core/` 保存坐标、瞬转平、批处理、附加参数、RKF78、Adams 和偏心率公式检查。偏心率检查使用已保存的独立参考表；Adams 检查保留导师参考实现及来源说明。只用于旧、新 IOD 求解器相互比较的测试留在原工程。
 
 `check_failures.py` 检查七列输入、有限值、空行和尾随空白、额外列拒绝、缺少配置、随机种子范围、程序版本以及后期报告写出失败。输入输出格式和错误行为随这些检查一起维护。
+
+本版从独立源码副本完成 19 项 CTest，全部通过。`check_handoff.py` 另核对 GL、GLML 初轨文件与显式填写同一状态进入批处理后的残差一致。
