@@ -42,7 +42,10 @@ def main():
         path = root / (case + '-spaces.txt')
         path.write_text('\n  ' + first + '   \n\n')
         execute(case + '-spaces', target, [str(path), str(path) + '.out'] + unit, good=True)
-        assert Path(str(path) + '.out').read_bytes() == (tests / case / 'reference/result.txt').read_bytes()
+        plain = root / (case + '-plain.txt')
+        plain.write_text(first + '\n')
+        execute(case + '-plain', target, [str(plain), str(plain) + '.out'] + unit, good=True)
+        assert Path(str(path) + '.out').read_bytes() == Path(str(plain) + '.out').read_bytes()
 
     cases = json.loads((tests / 'cases.json').read_text())
     for case, info in cases.items():
