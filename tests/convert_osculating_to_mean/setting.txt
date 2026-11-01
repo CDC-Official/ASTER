@@ -1,0 +1,19 @@
+# 输入路径相对于本配置；输出写入本次运行目录。
+input_file = input/o2m_input_keplerian.txt
+output_file = o2m_ephemeris_mean_keplerian.txt
+log_file = 
+gravity_degree = 10
+iteration_count = 3
+hansen_expansion_order = 4
+use_J2 = true
+use_J22 = true
+use_frame = true
+use_JL = true
+use_JLM = true
+use_lunar = true
+use_solar = true
+use_SRP = true
+lunar_short_period = single_fastarg
+SRP_AMR_normalized = 1468568181.9309881
+reflectivity = 1.44
+display_records = false

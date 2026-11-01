@@ -1,0 +1,26 @@
+{
+  "declared_release": "2018-01-30",
+  "origin": "/Users/chendingcun/Desktop/学习资料/sofa/c",
+  "corroborating_identical_sources": [
+    "/usr/local/include/sofa",
+    "/Users/chendingcun/Desktop/code/cppLib/SOFA_C",
+    "/Users/chendingcun/Desktop/code/cppLib/sofa/c/src"
+  ],
+  "source_files_c": 241,
+  "library_functions_c": 240,
+  "upstream_test": "src/t_sofa_c.c",
+  "manifest": "sofa-20180130.sha256.json",
+  "legacy_dynamic_library": "/usr/local/lib/libSOFA_C.dylib",
+  "legacy_dynamic_sha256": "84bbdfae2180259985496720fd90ca808627b58be84f483d5a559f1136fff5eb",
+  "binary_source_relationship": "Headers match exactly; binary origin not established by hashes. Test both builds before concluding behavioral compatibility.",
+  "upstream_authenticity": "Local release copy with intact license notices; not yet compared against a newly downloaded official release archive.",
+  "verification": {
+    "legacy_test": "passed",
+    "static_test": "passed",
+    "external_rollback_test": "passed",
+    "byte_identical_ephemeris_files": 6,
+    "total_ephemeris_files": 7,
+    "glml_position_difference_m": 6.019842048809301e-07,
+    "report": "../doc/sofa_migration_20261020.md"
+  }
+}

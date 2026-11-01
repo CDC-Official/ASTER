@@ -1,0 +1,144 @@
+{
+  "iod_gl": {
+    "target": "aster_iod_gl",
+    "input_keys": [
+      "file_EOP",
+      "file_JPLEPH",
+      "file_apriori_orbit",
+      "file_atmosphere_density",
+      "file_initial_orbit",
+      "file_lunar_gravity_field",
+      "file_observation",
+      "file_observer",
+      "input_file"
+    ],
+    "references": [
+      "gl_residuals.txt",
+      "gl_solution.txt"
+    ]
+  },
+  "iod_glml": {
+    "target": "aster_iod_glml",
+    "input_keys": [
+      "file_EOP",
+      "file_JPLEPH",
+      "file_apriori_orbit",
+      "file_atmosphere_density",
+      "file_initial_orbit",
+      "file_lunar_gravity_field",
+      "file_observation",
+      "file_observer",
+      "input_file"
+    ],
+    "references": [
+      "glml_residuals.txt",
+      "glml_candidates.csv",
+      "glml_solution.txt"
+    ]
+  },
+  "odn_batch": {
+    "target": "aster_odn_batch",
+    "input_keys": [
+      "file_EOP",
+      "file_JPLEPH",
+      "file_apriori_orbit",
+      "file_atmosphere_density",
+      "file_initial_orbit",
+      "file_lunar_gravity_field",
+      "file_observation",
+      "file_observer",
+      "input_file"
+    ],
+    "references": [
+      "bodn_residuals.txt"
+    ]
+  },
+  "opn_cartesian": {
+    "target": "aster_opn_cartesian",
+    "input_keys": [
+      "file_EOP",
+      "file_JPLEPH",
+      "file_apriori_orbit",
+      "file_atmosphere_density",
+      "file_initial_orbit",
+      "file_lunar_gravity_field",
+      "file_observation",
+      "file_observer",
+      "input_file"
+    ],
+    "references": [
+      "propagation_ephemeris_nsg2.txt",
+      "propagation_ephemeris_cartesian.txt",
+      "propagation_ephemeris_keplerian.txt"
+    ]
+  },
+  "opn_nonsingular2": {
+    "target": "aster_opn_nonsingular2",
+    "input_keys": [
+      "file_EOP",
+      "file_JPLEPH",
+      "file_apriori_orbit",
+      "file_atmosphere_density",
+      "file_initial_orbit",
+      "file_lunar_gravity_field",
+      "file_observation",
+      "file_observer",
+      "input_file"
+    ],
+    "references": [
+      "propagation_ephemeris_nsg2.txt",
+      "propagation_ephemeris_cartesian.txt",
+      "propagation_ephemeris_keplerian.txt"
+    ]
+  },
+  "opn_cislunar": {
+    "target": "aster_opn_cislunar",
+    "input_keys": [
+      "file_EOP",
+      "file_JPLEPH",
+      "file_apriori_orbit",
+      "file_atmosphere_density",
+      "file_initial_orbit",
+      "file_lunar_gravity_field",
+      "file_observation",
+      "file_observer",
+      "input_file"
+    ],
+    "references": [
+      "propagation_ephemeris_cartesian.txt"
+    ]
+  },
+  "convert_osculating_to_mean": {
+    "target": "aster_convert_osculating_to_mean",
+    "input_keys": [
+      "file_EOP",
+      "file_JPLEPH",
+      "file_apriori_orbit",
+      "file_atmosphere_density",
+      "file_initial_orbit",
+      "file_lunar_gravity_field",
+      "file_observation",
+      "file_observer",
+      "input_file"
+    ],
+    "references": [
+      "o2m_ephemeris_mean_keplerian.txt"
+    ]
+  },
+  "convert_keplerian_to_cartesian": {
+    "target": "aster_convert_keplerian_to_cartesian",
+    "references": [
+      "result.txt"
+    ],
+    "conversion": true,
+    "unit": ""
+  },
+  "convert_cartesian_to_keplerian": {
+    "target": "aster_convert_cartesian_to_keplerian",
+    "references": [
+      "result.txt"
+    ],
+    "conversion": true,
+    "unit": "m"
+  }
+}

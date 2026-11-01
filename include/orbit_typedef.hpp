@@ -1,0 +1,43 @@
+//
+// Created by 陈酊存 on 25-5-30.
+// 文件摘要：定义轨道类型
+//
+
+#ifndef CDC_LIB_INCLUDE_ORBIT_TYPEDEF_HPP_
+#define CDC_LIB_INCLUDE_ORBIT_TYPEDEF_HPP_
+
+#endif //CDC_LIB_INCLUDE_ORBIT_TYPEDEF_HPP_
+
+/* -------------- GENERAL TYPES ----------------- */
+// Type definitions below are exclusive.
+
+#define ORBIT_GEN_TYPE_INVALID                  -1
+#define ORBIT_GEN_TYPE_UNKNOWN                  0
+#define ORBIT_GEN_TYPE_LOW_NEAR_CIRCULAR        1
+#define ORBIT_GEN_TYPE_MEDIUM_NEAR_CIRCULAR     2
+#define ORBIT_GEN_TYPE_HIGH_NEAR_CIRCULAR       3
+#define ORBIT_GEN_TYPE_HIGHLY_ECCENTRIC_ORBIT   4
+#define ORBIT_GEN_TYPE_PARABOLIC_ORBIT          5
+
+/* -------------- SPECIFIC TYPES ---------------- */
+
+#define ORBIT_SPEC_TYPE_UNSPECIFIC              100
+#define ORBIT_SPEC_TYPE_MOLNIYA                 101
+#define ORBIT_SPEC_TYPE_GEOSTATIONARY           102
+#define ORBIT_SPEC_TYPE_INCLINED_GEOSYNCHRONOUS 103
+#define ORBIT_SPEC_TYPE_CRITICALLY_ECCENTRIC    104
+#define ORBIT_SPEC_TYPE_MEDIUM_AND_ECCENTRIC    105
+#define ORBIT_SPEC_TYPE_HIGH_AND_ECCENTRIC      106
+
+/* -- DEFINITIONS OF VARIOUS DELIMITING VALUES -- */
+#define ORBIT_DEF_ALTITUDE_DELIMIT_LOW_MEDIUM                   2000.0
+#define ORBIT_DEF_ALTITUDE_DELIMIT_MEDIUM_HIGH                  30000.0
+//#define ORBIT_DEF_ECCENTRICITY_MINIMUM_ECCENTRIC                0.25
+#define ORBIT_DEF_ECCENTRICITY_MINIMUM_ECCENTRIC                0.1
+#define ORBIT_DEF_ECCENTRICITY_MINIMUM_PARABOLIC                1.0
+
+// Minimum perigee altitude for *high and eccentric* orbit
+#define ORBIT_DEF_ALTITUDEPERIGEE_MINIMUM_MEDIUM_ECCENTRIC      1000
+#define ORBIT_DEF_SEMIMAJORAXIS_DELIMIT_MEDIUM_HIGH_ECCENTRIC   20000
+// Minimum eccentricity for *critically eccentric* orbit
+#define ORBIT_DEF_ECCENTRICITY_MINIMUM_CRITICALLY_ECCENTRIC     0.5

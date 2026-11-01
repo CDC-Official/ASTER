@@ -1,0 +1,17 @@
+# 输入路径相对于本配置；输出写入本次运行目录。
+file_observation = input/observations.obs
+file_observer = input/observers.txt
+file_EOP = ../../data/eop/EOP-All_250516.txt
+observations_to_use = 10
+noise_sigma_arcsecond = 3.0
+reference_epoch = First
+dynamics_model_GL = 5
+iteration_method_GL = 2
+constraint_type_GL = 1
+iteration_maxround = 40
+iteration_state_tolerance = 1e-10
+display_iterations = 1
+output_state_units = 2
+file_orbit_solution_GL = gl_solution.txt
+file_residual = gl_residuals.txt
+file_report = gl_report.txt

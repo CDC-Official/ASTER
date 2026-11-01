@@ -1,0 +1,40 @@
+[
+  {
+    "file": "eop/EOP-All_250516.txt",
+    "bytes": 2427460,
+    "sha256": "d60ce7d6de3befd2699804d1069c29297604c270e05f13f27bf34ce95bb24882",
+    "description": "EOP 1.1，更新于 2025-05-15",
+    "source": "/Users/chendingcun/CLionProjects/CDC_lib/cases/propagation/cartesian-leo/data/EOP-All_250516.txt",
+    "resolved_source": "/Users/chendingcun/CLionProjects/CDC_lib/cases/propagation/cartesian-leo/data/EOP-All_250516.txt",
+    "coverage": "1962-01-01 through 2025-11-12; observed and predicted sections"
+  },
+  {
+    "file": "ephemeris/JPLEPH_C.430",
+    "bytes": 27909488,
+    "sha256": "9459bf98bb46dfec80bf7a931e9957cc4877eb011ccaca4c2175a254f8e25427",
+    "description": "JPL DE430 本地二进制资料",
+    "source": "/Users/chendingcun/CLionProjects/CDC_lib/cases/propagation/cartesian-leo/data/JPLEPH_C.430",
+    "resolved_source": "/Users/chendingcun/Desktop/data/JPL/JPLEPH_C.430",
+    "coverage": {
+      "start_jed": 2433264.5,
+      "end_jed": 2542864.5,
+      "step_days": 32
+    }
+  },
+  {
+    "file": "gravity/grail.txt",
+    "bytes": 405282,
+    "sha256": "979d49f6b7e7a5d79bb885dff4ed603e8949095bdc413cace066df4a64000ad0",
+    "description": "原工程月球重力场系数表",
+    "source": "/Users/chendingcun/CLionProjects/CDC_lib/test/grail.txt",
+    "resolved_source": "/Users/chendingcun/CLionProjects/CDC_lib/test/grail.txt"
+  },
+  {
+    "file": "atmosphere/atmosphere.txt",
+    "bytes": 5728,
+    "sha256": "edd6fb3e96f3450e620500cb0186cab9ae15e3457897afc73078b52c80ef8715",
+    "description": "原工程大气密度表，Ap=10、F10.7=150",
+    "source": "/Users/chendingcun/CLionProjects/CDC_lib/cases/propagation/cartesian-leo/data/atmosphere.txt",
+    "resolved_source": "/Users/chendingcun/CLionProjects/CDC_lib/cases/propagation/cartesian-leo/data/atmosphere.txt"
+  }
+]

@@ -1,0 +1,21 @@
+{
+  "official_archive_url": "https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz",
+  "archive_sha256": "8586084f71f9bde545ee7fa6d00288b264a2b7ac3607b974e54d13e7162c1c72",
+  "Eigen_files_checked": 337,
+  "differences": [
+    "Eigen/src/Core/DenseCoeffsBase.h"
+  ],
+  "extra_local_files": [],
+  "version": "3.4.0",
+  "vendored_files": 1784,
+  "local_difference_explanation": "DenseCoeffsBase.h: opening brace and eigen_assert were joined on one line locally; official formatting restored, no token change.",
+  "source_policy": "Official archive copied without changes; integration in cmake/Eigen.cmake",
+  "header_manifest": "eigen-3.4.0.sha256.json",
+  "integration_only_changes": {
+    "gitignore_files": [
+      ".gitignore"
+    ],
+    "reason": "Prevent case-insensitive ignore rules such as core and Testing from dropping source on macOS.",
+    "vendored_manifest": "eigen-vendored.sha256.json"
+  }
+}

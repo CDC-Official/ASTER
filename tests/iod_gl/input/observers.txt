@@ -1,0 +1,4 @@
+# Ground station catalogue: id coordinate_type coord1 coord2 coord3
+# Type 1: latitude_deg longitude_deg height_m
+# Type 2: ITRF_X_m ITRF_Y_m ITRF_Z_m
+0 1 41.725892 86.174633 943.0
