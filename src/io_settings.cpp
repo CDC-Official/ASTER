@@ -317,10 +317,10 @@ void io::SimpleInput::GetRecord(bastion::Overwatch& tracer, const size_t idx, Si
 
 void io::SimpleInput::SetDelimiter(bastion::Overwatch& tracer, char delimiter)
 {
-	// 此函数基本没报错的可能
+	// 设置后续读取关键词时使用的分隔字符。
 	tracer.CheckIn(__FILE__, __func__, __LINE__);
 
-	strcpy(&(this->m_delimiter), &delimiter);
+	this->m_delimiter = delimiter;
 
 	tracer.CheckOut(__func__);
 }
