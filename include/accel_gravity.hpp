@@ -161,7 +161,7 @@ extern LunarGravityField moon_gravity_field;
 
 
 //递推计算数组的，高效
-int Norm_LP_Array(int l, double mu, double LP[l + 1]);
+int Norm_LP_Array(int l, double mu, double* LP);
 
 int Norm_LPD_Array(int l, double mu, const double* LP, double* LPD);
 
