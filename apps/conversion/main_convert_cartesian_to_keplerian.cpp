@@ -13,7 +13,8 @@
  * @par 本次整理维护记录
  * 2026-10-20：恢复 Cartesian 转根数的独立入口、CMake 目标及 CLion 配置，补齐与反向转换配套的程序。
  * 显式指定输入、输出路径，保留 m／km 与交互式单位选择；增加逐行格式及有限数值检查。
- * 已对比历史算例并验证双向转换，结果在浮点精度范围内吻合；详见 doc/cart_to_kep_restoration_20261020.md。
+ * 已对比历史算例并验证双向转换，结果在浮点精度范围内吻合。
+ * 输入输出格式见 doc/05_data-formats.md，最小输入和参考结果位于 tests/convert_cartesian_to_keplerian/。
  */
 #include "math_backend.hpp"
 #include "utils_constants.hpp"

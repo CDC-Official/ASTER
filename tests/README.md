@@ -1,35 +1,77 @@
-# 最小算例与检查
+# 算例与检查
 
-## 1.2.0 观测生成功能
+`tests/` 保存小输入、配置、科学参考和检查程序。实际运行结果写入构建目录。只想使用程序时，先按[程序指南](../doc/03_programs.md)准备配置副本；这里说明检查各自比较什么。
 
-`generate_observations/` 保存原 CDC_lib LEO 配置、8,641 条星历与测站；`source.json` 记录实际来源及 SHA-256。复用的 `observation_runtime.py`、`observation_geometry.py`、`angular_noise_runtime.py` 检查观测和真值对齐、可见性与单位、输入错误、误差模型和固定种子复现。`check_observation_handoff.py` 将理论及带噪观测交给 GL/GLML 的实际入口。命令、输出位置和随机流区别见 [观测生成](../doc/observations.md)。
+## 日常选择检查
 
-## 1.1.0 后端验收
-
-默认 OPENLIBM 使用 `math_backend_cases/run_checks.py` 的四个单 GL、两个完整 GLML 及其既有输入/科学输出哈希。七个普通程序使用原 `cases.json` 输入，由 `check_math_backend_apps.py` 按既有物理量门限比较；原始字节 fixture 保留。
+构建当前版本后，从仓库根目录执行对应命令。以下一组覆盖核心计算、SOFA、输入约束、数据校验、初轨到批处理接续，以及观测生成与加噪：
 
 ```sh
-ctest --test-dir build/release -R '^(core_|math_backend_|invalid_inputs|data_integrity)' --output-on-failure
-python3 tests/check_math_backend_apps.py --bin-dir build/release/bin --output build/release/acceptance/apps
+ctest --test-dir build/v1.2.0 \
+    -R '^(core_|math_backend_sofa|invalid_inputs|data_integrity|iod_batch_handoff|observation_)' \
+    --output-on-failure
 ```
 
-两端已验收范围为各 8 项核心/SOFA 检查、4 个单 GL 逐轮核对、2 个各 10001 候选的完整 GLML、7 个普通程序物理量比较；SYSTEM 的坐标/SOFA 各 2 项通过。e010 另补测四个已有场景的 GL 与完整 GLML 真值精度。数值范围、性能与限制见 [后端说明](../doc/math-backend.md)。
+按改动范围选择正则即可，例如 `-R '^observation_'` 只运行三项观测检查，`-R '^core_frame_coordinates$'` 只检查坐标。
 
-`invalid_inputs` 从 CMake 项目声明读取版本，检查九程序版本首行及后端信息，并保留原输入契约检查。完整无过滤 CTest 中的旧 `run_case.py` 检查要求与 1.0.0 fixture 逐字节相同，属于原始回归对照；数学路径切换后的差异使用上述后端验收判断。
+| 检查 | 关注内容 |
+| --- | --- |
+| `core_frame_coordinates` | 测站、地固/天球位置、单位和观测几何 |
+| `core_orbit_averaging` | 瞬转平公式、模型选项与状态转换 |
+| `core_batch_determination` / `core_batch_parameters` | 批处理轨道、权重、剔除、协方差及附加 AMR |
+| `core_rkf78_safety` / `core_adams_safety` | 实际阶段历元、反向/零时长、接受步长、起步与错误状态 |
+| `core_iod_eccentricity` | 偏心率约束与独立参考表 |
+| `math_backend_sofa` | SOFA 本身的验证入口，与当前后端一起构建 |
+| `invalid_inputs` | 九个原有主程序的格式、有限值、版本和写出失败路径；新增生成器的输入检查由 observation_runtime 覆盖 |
+| `data_integrity` | `data/manifest.json` 中的大小与 SHA-256 |
+| `iod_batch_handoff` | 已保存 GL/GLML 轨道文件与显式相同初态进入 BODN 后，残差一致 |
+| `observation_runtime` / `observation_geometry` | 观测、真值和分弧，筛选、单位、EOP、输入约束和独立几何 |
+| `observation_angular_noise` | 误差模型、固定种子、输入顺序、样本扩展、零噪声与失败情况 |
 
-## 1.0.0 迁移参考与输入检查
+## 当前数学后端的应用比较
 
-九个程序各有一个最小算例目录，保存输入、配置和迁移前参考科学结果。`cases.json` 记录入口与参考文件。`run_case.py` 为每次运行创建独立目录，解析配置中的相对输入路径，并逐字节比较输出；结果写入构建目录。
+默认 OPENLIBM 的四个单 GL 使用已有观测和科学输出哈希，同时核对逐轮状态与停止分支：
 
 ```sh
-ctest --test-dir build/release --output-on-failure
-python3 tests/run_case.py --case opn_nonsingular2 --binary build/release/bin/aster_opn_nonsingular2 --output build/manual/nonsingular2
+python3 tests/math_backend_cases/run_checks.py --bin-dir build/v1.2.0/bin \
+    --output build/v1.2.0/acceptance/gl --only-gl
 ```
 
-配置型算例共七个，另外两项转换直接使用输入表。九个算例合计比较 16 份科学文件，覆盖轨道解、残差、候选表、预报星历和转换结果。参考结果来自迁移前当前工作区，已经包含 GLML 角度与随机种子修复。
+需要完整候选验收时，去掉 `--only-gl`，执行四个单 GL 和 e010/e070 两个各含 10,001 候选的 GLML；`math_backend_iod` 这一 CTest 调用的就是该完整入口，只在 OPENLIBM 构建中注册。
 
-`core/` 保存坐标、瞬转平、批处理、附加参数、RKF78、Adams 和偏心率公式检查。偏心率检查使用已保存的独立参考表；Adams 检查保留导师参考实现及来源说明。只用于旧、新 IOD 求解器相互比较的测试留在原工程。
+七个普通程序使用 `cases.json` 中已有输入，按物理量门限比较：
 
-`check_failures.py` 检查七列输入、有限值、空行和尾随空白、额外列拒绝、缺少配置、随机种子范围、程序版本以及后期报告写出失败。输入输出格式和错误行为随这些检查一起维护。
+```sh
+python3 tests/check_math_backend_apps.py --bin-dir build/v1.2.0/bin \
+    --output build/v1.2.0/acceptance/apps
+```
 
-1.0.0 曾从独立源码副本完成 19 项 CTest，全部通过。`check_handoff.py` 另核对 GL、GLML 初轨文件与显式填写同一状态进入批处理后的残差一致。
+门限为位置/半长轴 1 mm、速度 1 μm/s、偏心率与倾角参数 1e−10、角度 1e−7 deg、角残差 1e−10 rad；历元、编号和文本对应，角度按 360° 周期处理。可用 `--native-summary` 指定已有同平台原生运行清单；默认与仓库参考比较。范围、构建条件和历史结果见[数学后端指南](../doc/08_math-backend.md)及[1.1.0 验收](../doc/validation/03_math-backend.md)。
+
+## 观测生成与定轨接续
+
+`generate_observations/` 保存 CDC_lib 原 LEO 配置、8,641 条星历与测站，`source.json` 记录来源与 SHA-256。[观测指南](../doc/06_observations.md)给出直接生成和加噪命令。
+
+```sh
+ctest --test-dir build/v1.2.0 -R '^observation_' --output-on-failure
+python3 tests/check_observation_handoff.py --bin-dir build/v1.2.0/bin \
+    --output build/v1.2.0/acceptance/observation-handoff-new
+```
+
+接续检查的输出目录须为新目录。它两次生成理论值，以 seed 42 生成两组 3″ 样本，再把理论及首组带噪观测分别交给现有 GL、GLML 十条观测入口。科学结果、日志和 `summary.json` 一起保存。发布时的原/新入口与 Mac/Linux 对照见[1.2.0 验收记录](../doc/validation/04_observations.md)。
+
+## 1.0.0 原始字节参考
+
+九个原有程序各有一套迁移输入与参考，`cases.json` 记录入口、输入路径关键词和参考文件名。七套为配置型，另两项转换直接接收输入表，合计比较 16 份科学文件。参考包含迁移前已验证的 GLML 角度与随机种子修复。
+
+`run_case.py` 在独立目录运行并逐字节比较原始参考，目录内有准备后的 setting 和 console。它用于 1.0.0 迁移追溯，例如：
+
+```sh
+python3 tests/run_case.py --case opn_nonsingular2 \
+    --binary build/v1.2.0/bin/aster_opn_nonsingular2 \
+    --output build/v1.2.0/legacy-reference/nonsingular2
+```
+
+命令执行后仍会比较旧字节；默认 OPENLIBM 与原生数学结果可能不同。无过滤的 `ctest` 包含这九个旧参考检查，当前后端的科学结果按上面的哈希与物理量比较入口判断。
+
+`core/` 中的偏心率公式使用已保存独立参考，Adams 保留导师参考实现及来源说明。仅用于旧、新 IOD 求解器互比的测试留在旧工程。1.0.0 的迁移范围与当时的 19 项 CTest 结果见[迁移记录](../doc/validation/01_index.md#migration)。

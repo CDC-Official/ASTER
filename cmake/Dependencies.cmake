@@ -50,5 +50,5 @@ if(NOT ASTER_OPENMP_DYNAMIC_LINKS)
     message(WARNING
         "OpenMP dynamic scheduling cannot link with this compiler/runtime. "
         "aster_iod_glml need a compatible toolchain. "
-        "Other main targets can still be built explicitly. See doc/build.md.")
+        "Other main targets can still be built explicitly. See doc/02_quick-start.md.")
 endif()

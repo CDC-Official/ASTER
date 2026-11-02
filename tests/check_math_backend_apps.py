@@ -13,7 +13,7 @@ import time
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from run_case import prepare
 
-# 复用 doc/linux-validation.json 的阈值。历元、记录编号和文本必须相同。
+# 复用 doc/validation/evidence/03_linux-validation.json 的阈值。历元、记录编号和文本必须相同。
 LIMITS = {'position_m': 1e-3, 'velocity_m_s': 1e-6, 'a_m': 1e-3,
           'eccentricity': 1e-10, 'inclination_parameters': 1e-10,
           'angle_deg': 1e-7, 'angle_residual_rad': 1e-10}

@@ -1,53 +1,12 @@
-# math_backend 开发说明
+# 1.1.0 数学后端验收记录
 
-`dev/1.1.0` 从 `963e44c` 建立。开发阶段使用临时 dev worktree；正式发布后，日常源码统一为 Mac 的 `/Users/chendingcun/CLionProjects/ASTER` 和服务器的 `/home/cdc/projects/ASTER`，版本通过 Git 分支/标签管理。历史未提交试验另有已校验备份与本地 stash，现有 `v1.0.0` 标签不动。
-
-## 接入与构建
-
-`include/math_backend.hpp`、`src/math_backend.cpp` 和 `cmake/MathBackend.cmake` 集中管理公共入口、版本信息与浮点编译条件。九个正式程序共用 `aster_core` 和 `aster_sofa`，通过 `ASTER::math_backend` 传播对象和规则；不再构建 IOD 专属 core/SOFA。新增调用者链接 `ASTER::core` 或 `ASTER::math_backend` 即可取得相同条件。所有可执行文件放在构建目录的 `bin` 中。
-
-```sh
-cmake -S . -B build/openlibm -DCMAKE_BUILD_TYPE=Release
-cmake --build build/openlibm -j 8
-build/openlibm/bin/aster_iod_gl --version
-
-cmake -S . -B build/system -DCMAKE_BUILD_TYPE=Release -DASTER_MATH_BACKEND=SYSTEM
-cmake --build build/system -j 8
-```
-
-服务器追加 `-DASTER_BOOST_ROOT=/home/cdc/projects/aster-deployment-20261101/dependencies/boost_1_87_0`，复用既有 Boost。Eigen 实际版本固定为 3.4.0，SOFA 保持 2018-01-30。
-
-默认 `OPENLIBM` 使用已验证的官方 OpenLibm 0.8.8。来源、提交和归档 SHA-256 见 `third_party/openlibm-source.json`；许可见 `third_party/openlibm/LICENSE.md`，上游源文件及其 CMake 保持原样。OpenLibm 按其上游规则构建为邻接私有共享库，Linux 增加 `-Wl,-Bsymbolic-functions`，防止库内调用回到主程序入口。
-
-公共 core、SOFA、主程序和数学入口使用 `-fno-builtin-sin -fno-builtin-cos -fno-fast-math -ffp-contract=off`，C++ 同时定义 `EIGEN_DONT_VECTORIZE`。只限制 sin/cos 的内建替换及合并，保留硬件 sqrt、常数幂与小内存复制优化。上游 OpenLibm 自身仍有其 `-fno-builtin`，该选项不传播给 ASTER。`SYSTEM` 使用原生数学及工具链默认浮点/Eigen 优化。两种后端都将 `__FILE__` 的源码路径映射为相对路径。各程序 `--version` 显示实际后端、构建类型和主要浮点条件。
-
-标准 double 函数入口涵盖源码实际使用的 sin/cos、tan、asin/acos/atan/atan2、sqrt、pow、exp/log、hypot、floor/ceil、fmod/remainder、copysign、frexp/ldexp/scalbn、modf，以及常用其他指数、双曲和特殊函数。sin/cos 使用此前已验收的完整 binary64 键缓存，每函数每线程 65536 项，碰撞重新求值。矩阵四则运算仍为 double。float/long double 重载不属于本次统一入口，当前正式源码数值路径使用 double。
-
-程序通过自身位置加载同目录的 `libopenlibm.dylib` 或 `libopenlibm.so`。移动程序时一起移动该库；不安装或替换系统 libm。链接 SYSTEM 的程序不加载 OpenLibm。
-
-Ljung–Box 调用按既定决定注释保留，任务入口把四个遗留 Q/p 字段置为 −1。科学公式、收敛条件、迭代上限及按最终 J 选优的规则不变。
-
-## 有限验收命令
-
-先运行四个原有单 GL，再按需要运行完整 GLML；输入来自已保存的观测弧段。
-
-```sh
-python3 tests/math_backend_cases/run_checks.py --bin-dir build/openlibm/bin --output build/openlibm/acceptance/gl --only-gl
-python3 tests/math_backend_cases/run_checks.py --bin-dir build/openlibm/bin --output build/openlibm/acceptance/iod
-python3 tests/check_math_backend_apps.py --bin-dir build/openlibm/bin --output build/openlibm/acceptance/apps
-ctest --test-dir build/openlibm -R '^(core_|math_backend_sofa)' --output-on-failure
-```
-
-四个 GL 和两个各含 10001 候选的 GLML 复用已验收科学输出的 SHA-256，要求精确相同。七个普通程序各用既有代表算例，比较历元、编号和文本，并按 `doc/linux-validation.json` 的原有物理量阈值验收：位置/半长轴 1 mm、速度 1 μm/s、偏心率/倾角参数 1e−10、角度 1e−7 度、角残差 1e−10 rad。脚本可用 `--native-summary` 指定此前同平台原生运行清单，读取其基线输出；默认与仓库 fixture 比较。NaN 必须对应 NaN，角度按 360 度周期比较。
-
-旧 `iod_gl`、`iod_glml` 字节 fixture 保留，属于此前系统数学路径。`math_backend_iod` 仅为 OPENLIBM 注册。完整旧 CTest 不作为新后端通过标准；本次实际验收结果与性能记录另见 `doc/math-backend-validation.json`。
-
+本篇保存 2026-11-02 的九程序数值、计时和四场景真值对照。适用正式版本为 `v1.1.0`，Eigen 3.4.0、SOFA 2018-01-30 与 OpenLibm 0.8.8。原始构建条件、实现提交和逐项结果见[验收 JSON](evidence/06_math-backend-validation.json)。当前开关和接入方式见[数学后端指南](../08_math-backend.md)。
 
 ## 九程序验收结果（2026-11-02）
 
 全库公共后端的跨平台一致性目标通过：九个程序在相同输入、参数和线程数下，OPENLIBM 的科学输出在 Mac arm64 / AppleClang 21 与 Linux x86_64 / GCC 13.3 间全部逐字节一致，数值差均为 0。四个单 GL 的逐轮状态、停止分支及 Q/p=−1 检查通过；两个完整 GLML 样本 e010、e070 的各 10001 行候选、最终解与残差均复用既有验收哈希通过。两端各 8 项核心/SOFA 检查通过，SYSTEM 的坐标/SOFA 各 2 项通过。全套旧 CTest 未作为通过标准。
 
-下表的同平台差异使用既有代表算例，Δr、Δv 为位置、速度的最大绝对分量，Δres 为逐条角残差最大差，Δa 为半长轴差，Δ角按 360° 周期计算。位置/半长轴 1 mm、速度 1 μm/s、角残差 1e−10 rad、角度 1e−7°、偏心率/倾角参数 1e−10、J 1e−6 的原门限保持不变。完整分量及文件检查见 [机器可读结果](math-backend-validation.json)。
+下表的同平台差异使用既有代表算例，Δr、Δv 为位置、速度的最大绝对分量，Δres 为逐条角残差最大差，Δa 为半长轴差，Δ角按 360° 周期计算。位置/半长轴 1 mm、速度 1 μm/s、角残差 1e−10 rad、角度 1e−7°、偏心率/倾角参数 1e−10、J 1e−6 的原门限保持不变。完整分量及文件检查见 [机器可读结果](evidence/06_math-backend-validation.json)。
 
 | 程序 | OPENLIBM Mac↔Linux | Mac SYSTEM→OPENLIBM 科学差异 | Linux SYSTEM→OPENLIBM 科学差异 | 同平台近似门限 |
 |---|---|---|---|---|
@@ -67,7 +26,7 @@ GLML 的原生→OPENLIBM 全候选表也有显著变化：Mac/Linux 分别有 2
 
 ## 同平台耗时对照
 
-两端均为 Release、`-O3 -DNDEBUG`，Eigen 3.4.0、SOFA 2018-01-30、Boost 1.87.0。SYSTEM 保留工具链默认 FMA/Eigen/builtin；OPENLIBM 使用上文统一条件。因此耗时是整套后端配置切换的成本。GL 为 1 线程，GLML 为 4 线程，其余为 2 线程，`OMP_DYNAMIC=FALSE`。三次交错运行取中位数，包含进程启动、动态库加载、计算及输出。输入与参数指纹相同；每次科学输出哈希都与已有结果相同，两平台各 54 次全部通过。
+两端均为 Release、`-O3 -DNDEBUG`，Eigen 3.4.0、SOFA 2018-01-30、Boost 1.87.0。SYSTEM 保留工具链默认 FMA/Eigen/builtin；OPENLIBM 使用 `-fno-builtin-sin -fno-builtin-cos -fno-fast-math -ffp-contract=off`，C++ 定义 `EIGEN_DONT_VECTORIZE`。因此耗时是整套后端配置切换的成本。GL 为 1 线程，GLML 为 4 线程，其余为 2 线程，`OMP_DYNAMIC=FALSE`。三次交错运行取中位数，包含进程启动、动态库加载、计算及输出。输入与参数指纹相同；每次科学输出哈希都与已有结果相同，两平台各 54 次全部通过。
 
 | 程序 | Mac SYSTEM / s | Mac OPENLIBM / s | 变化 | Linux SYSTEM / s | Linux OPENLIBM / s | 变化 |
 |---|---:|---:|---:|---:|---:|---:|

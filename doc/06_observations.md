@@ -1,6 +1,6 @@
 # 观测生成
 
-`aster_generate_observations` 从目标星历和一个地面测站生成理论 RA/Dec，按可见性和输入 ID 连续性划分弧段，并输出同历元轨道真值。随后用 `tools/add_angular_noise.py` 加入随机误差。两部分来自 CDC_lib 实际工作区的 `apps/og/main_arcs.cpp` 和配套脚本，源码及原验收输入的 SHA-256 记录在 [source.json](../tests/generate_observations/source.json)。
+`aster_generate_observations` 从目标星历和一个地面测站生成理论 RA/Dec，按可见性和输入 ID 连续性划分弧段，并输出同历元轨道真值。随后用 `tools/add_angular_noise.py` 加入随机误差，供 GL/GLML 使用；真值用于在相同历元评价定轨误差。来源及原验收输入的 SHA-256 见 [source.json](../tests/generate_observations/source.json)。
 
 ## 运行原 LEO 算例
 
@@ -36,7 +36,7 @@ ID MJD_UTC a e i OMEGA omega M
 
 数值关键词保留普通 SimpleInput 的读取规则：缺项或无法读取时警告并返回零，再由主程序检查业务范围。因此归一化和输出/筛选开关缺省为 0，最低高度角缺省为 0°；观测类型、启用筛选时的太阳模型和夜间阈值应显式填写。完整取值与条件项见配置注释。
 
-文件共用 `目标号_站号_弧号_起始UTC_MJD.txt` 后缀：
+`obs_`、`kep_`、`cart_` 共用 `目标号_站号_弧号_起始UTC_MJD.txt` 后缀，弧号为五位，MJD 保留十位小数。`all_` 保存整份输入，其文件名为 `all_目标号_站号_首条UTC_MJD.txt`。
 
 | 文件 | 每行内容 |
 | --- | --- |
@@ -45,7 +45,7 @@ ID MJD_UTC a e i OMEGA omega M
 | `cart_*.txt` | UTC MJD、x、y、z(km)、vx、vy、vz(km/s) |
 | `all_*.txt` | 与 OBS 相同的前六列，再加可见标记和输入 ID；包含不可见点 |
 
-`need_output_Keplerian`、`need_output_Cartesian`、`need_output_all` 分别控制可选输出。弧段中的真值和观测逐行对应；可见 ID 中断时分弧，单点和双点弧也会保留。标准输出仅给出 OBS 文件数和路径，运行摘要写入标准错误。`all_` 是检查资料，应将 `obs_` 或加噪样本交给 GL/GLML。
+`need_output_Keplerian`、`need_output_Cartesian`、`need_output_all` 分别控制可选输出。弧段中的真值和观测逐行对应；可见 ID 中断时分弧，单点和双点弧也会保留。GL/GLML 使用前应选择至少三条观测的弧段。标准输出仅给出 OBS 文件数和路径，运行摘要写入标准错误。`all_` 是检查资料，定轨读取 `obs_` 或加噪样本。
 
 ## 随机误差与复现
 
@@ -57,6 +57,8 @@ Dec = Dec0 + ηN
 ```
 
 σ 由 `--sigma-arcsec` 指定，内部为 rad，输出为 deg；分母使用理论赤纬。`--seed` 必须为非负整数；脚本保留 `random.Random`/MT19937/`gauss` 及 SHA-256 派生种子的原实现，输入文件内容摘要和样本号决定各弧随机流。`noise.json` 记录模型、seed、源资料与脚本摘要和 Python 版本。移动文件、改变输入顺序、追加样本数都不改变已有样本。零噪声原样复制文件，真值保留在理论资料目录。
+
+从旧配置迁移时，删除理论生成 setting 中的 `noise_sigma_as` 和 `random_seed`，把噪声大小与种子填写到加噪命令。当前生成器会对这两个遗留字段报错。加噪种子控制观测误差，GLML 配置的 `random_seed` 控制求解回退，实验中分别记录。
 
 极点处该小角度模型无定义；正噪声在理论极点或加噪赤纬越极时明确失败。当前不含光行时、光行差和折射。2026-10-30 论文批次采用相同东西/南北误差公式，但使用 NumPy `SeedSequence/default_rng`、先整批抽取东西再抽取南北分量；本脚本保留 CDC_lib 的标准库随机流，相同 seed 不对应论文批次的相同样本。
 
@@ -70,27 +72,6 @@ python3 tests/check_observation_handoff.py --bin-dir build/v1.2.0/bin \
 
 交接检查的输出目录须为新目录。它复用原 LEO 配置，两次生成理论值、以 seed 42 生成两组 3″ 样本，并将理论及首组带噪观测分别交给现有 GL、GLML 的十条观测配置。完整科学输出、日志和 `summary.json` 保存到指定构建目录。几何、输入约束和加噪检查复用 CDC_lib 原验收脚本。
 
-## 本轮 Mac 核对结果
+## 发布验收记录
 
-- 原运行检查 239 项、独立几何检查 62 项和原加噪检查通过；OPENLIBM、SYSTEM 两种构建均通过。原算例的可见记录数在无筛选、黑夜、地影和联合筛选下分别为 364、106、306、48，解析和 JPL 太阳历表在该算例中一致。
-- SYSTEM 与 CDC_lib 原入口的 19 份观测、完整观测和真值文件逐字节一致。相同理论输入、3″、seed 42、两组样本下，原/新加噪脚本的 12 份文件逐字节一致。
-- 默认 OPENLIBM 与旧 SYSTEM 相比，全部历元最大角差为 3.98×10⁻¹¹ deg，Cartesian 真值位置分量差不超过 1.01×10⁻¹¹ km、速度分量差不超过 1.07×10⁻¹⁴ km/s；历元、ID、可见标记、分弧和 Keplerian 真值相同。独立站心矢量反算与生成角度的最大差为 5.69×10⁻¹⁴ deg。
-- 理论值及 seed 42 的带噪资料分别通过现有 GL、GLML 的十条观测入口，四次运行均写出有限轨道与十条残差；原算例单次生成约 0.1 s。结果用于功能和迁移核对。
-
-加噪派生种子包含源文件内容摘要。因此切换数学后端造成的理论文件末位变化，也会改变派生随机流；逐样本复现需要相同输入字节、脚本、Python 环境及 seed。详细本地结果位于 `build/v1.2.0/acceptance/observations-final/summary.json` 和 `build/v1.2.0/acceptance/migration-vs-cdc-lib/migration-summary.json`。
-
-## Linux 与跨平台核对
-
-Linux x86_64 / GCC 13.3 的原观测运行、几何、加噪和坐标/SOFA 五项 CTest 全部通过，四次 GL/GLML 资料交接也通过。Mac arm64 / AppleClang 21 与 Linux 共用 OpenLibm 0.8.8、Eigen 3.4.0 和同一原 LEO 输入，输出比较如下：
-
-| 输出 | 文件数 | Mac/Linux 逐字节一致 |
-| --- | --- | --- |
-| 理论 OBS、完整观测及两类真值 | 19 | 19 |
-| 3″、seed 42、两组带噪样本 | 12 | 12 |
-| 理论/带噪资料的 GL、GLML 轨道解和残差 | 8 | 8 |
-
-本轮加噪实际使用 Mac Python 3.9.6、Linux Python 3.12.3；结论限于这组已比较的输入与环境。两端内部重复生成、反转加噪输入顺序均保持文件一致，四次求解的收敛标志相同；生成原算例的实际单次耗时约 0.12—0.15 s。
-
-Linux 还以字节不变的原 `main_arcs.cpp`，通过四行头文件适配链接当前 ASTER 公共 core/math_backend，进行同后端的旧新入口受控比较，19 份输出逐字节一致。该对照只在构建目录内编译原主程序。Mac 使用旧 CDC_lib 原二进制的独立 SYSTEM 对照见上一节。
-
-两端日常仓库均使用 main，正式版本为 1.2.0；v1.1.0 标签保持在 `c18178a`。跨平台哈希、Linux 测试日志及旧入口摘要保存在 `build/v1.2.0/acceptance/cross-platform/`，其中 `comparison.json` 为逐类比较结果。
+1.2.0 的迁移、独立几何和跨平台结果集中保存在[观测生成验收记录](validation/04_observations.md)。日常检查入口见[测试说明](../tests/README.md)。
