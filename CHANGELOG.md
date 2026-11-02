@@ -1,5 +1,24 @@
 # 版本记录
 
+## 1.1.0 — 2026-11-02
+
+- **公共数学后端**：九程序、公共 core 与 SOFA 共用 `math_backend`，通过 `ASTER_MATH_BACKEND=OPENLIBM/SYSTEM` 选择，默认官方 OpenLibm 0.8.8；`--version` 显示版本、后端和构建条件。
+- **计算规则**：Ljung–Box 调用注释保留，未计算 Q/p 为 −1。科学公式、残差/J、原门限、迭代上限及按最小 J 选优的规则保持不变。
+- **平台与依赖**：已验证 Mac arm64 / AppleClang 21、Linux x86_64 / GCC 13.3，Boost 1.87.0 与现有 OpenMP。需要 CMake ≥3.26、C++17；Eigen 3.4.0、SOFA 2018-01-30、OpenLibm 0.8.8 固定源码及许可随库保存。
+- **验证范围**：代表输入下九程序 OPENLIBM 的 Mac/Linux 科学输出逐字节一致；七个非 IOD 程序同平台前后差异满足原物理门限。两端各 8 项核心/SOFA、4 个单 GL 逐轮检查、2 个各 10001 候选的完整 GLML 通过，SYSTEM 坐标/SOFA 各 2 项通过。敏感 GL/GLML 的轨迹与候选可能改变。e010 四样本中普通 GL 和三组 GLML 基本不变，3″、27秒短弧 GLML 换候选后误差下降，但新来源仍达 40 轮上限，位置误差约 93.720 km；这些结果不推广为所有场景更准确。
+- **效率备忘**：九程序已有计时保留在[后端验收](doc/math-backend.md)。完整 e070 GLML 的 Mac 中位耗时 5.063→6.372 s（+25.8%），Linux 4.109→3.995 s（−2.8%）；Linux 两个地球预报增加约 118%—120%，瞬时根数转平根数的 Mac/Linux 增加约 170%/132%。毫秒级程序百分比噪声较大。后续优先分析这些热点，并继续保持现有数值验收门限；本版不追加性能试验。
+- **版本管理**：每台机器日常只用原 ASTER 仓库，通过标签和对应构建目录切换版本。`v1.0.0` 保持原提交，`v1.1.0` 为正式 annotated 标签。历史试验保存在本地备份/stash，不混入 main；GitHub 自动提供源码归档，本版不附未经验证的安装器或二进制包。
+
+默认 OPENLIBM 构建：
+
+```sh
+cmake -S . -B build/v1.1.0 -DCMAKE_BUILD_TYPE=Release
+cmake --build build/v1.1.0 --parallel 3
+build/v1.1.0/bin/aster_iod_gl --version
+```
+
+SYSTEM 使用单独构建目录，并添加 `-DASTER_MATH_BACKEND=SYSTEM`。移动 OPENLIBM 程序时，一起移动同目录私有 `libopenlibm.dylib` / `libopenlibm.so`。测试脚本现从 CMake 读取项目版本；旧 1.0.0 字节 fixture 保留，完整旧 CTest 不作为数学路径切换后的通过标准，当前命令见[测试说明](tests/README.md)。
+
 ## 1.0.0 — 2026-11-01
 
 建立独立 ASTER 工程，收录九个轨道研究程序。GL、GLML 采用已整理的实验版实现，预报和批处理保留当前科研流程与输出规则。状态转换的短输入检查在主程序中展开。

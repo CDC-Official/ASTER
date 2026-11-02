@@ -1,5 +1,11 @@
 # 实验室服务器
 
+## 1.1.0 当前使用
+
+日常源码统一使用原 `/home/cdc/projects/ASTER` 的 main，Mac 使用原 `/Users/chendingcun/CLionProjects/ASTER`；正式程序位于各自 `build/v1.1.0/bin/`。版本以标签回切，临时 dev worktree 在发布后收束，必要验证材料保存在原仓库的构建目录。当前数学后端、构建与验证范围见 [构建说明](build.md)、[后端验收](math-backend.md)和 [版本更新记录](../CHANGELOG.md)。
+
+## 1.0.0 部署与兼容性历史
+
 ASTER 已部署到 `cdc-114` 的 `/home/cdc/projects/ASTER`。主机为 lenovo-ThinkStation-PX，Ubuntu x86_64，用户为 cdc。GCC 构建目录为 `build/linux-gcc-release`，Clang 构建目录为 `build/linux-clang-release`，各自的九个程序位于对应目录的 `bin/`。
 
 ## 版本与依赖

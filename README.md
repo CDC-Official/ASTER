@@ -1,26 +1,29 @@
-# ASTER 1.0.0
+# ASTER 1.1.0
 
 ASTER 是用于轨道研究的个人 C++ 程序库。本版包含 GL、GLML 初轨确定，三套轨道预报、批处理定轨，以及三项轨道状态转换程序。科学计算采用现有工程中已整理的实现，最小算例集中在 `tests/`，配套科学数据保存在 `data/`。
 
 ## 构建和检查
 
-需要 CMake 3.26 或更新版本、支持 C++17 的 C/C++ 编译器、Boost 头文件和 OpenMP。Eigen 3.4.0 与 SOFA 2018-01-30 源码已随库保存。
+需要 CMake 3.26 或更新版本、支持 C++17 的 C/C++ 编译器、Boost 头文件和 OpenMP。Eigen 3.4.0、SOFA 2018-01-30 和官方 OpenLibm 0.8.8 源码及许可已随库保存。默认数学后端为 OPENLIBM，覆盖九程序与公共/SOFA 路径；已验证平台为 Mac arm64 / AppleClang 21 与 Linux x86_64 / GCC 13.3。
 
 ```sh
 cmake --preset release
 cmake --build --preset release
-ctest --preset release
+ctest --test-dir build/release -R '^(core_|math_backend_|invalid_inputs|data_integrity)' --output-on-failure
+python3 tests/check_math_backend_apps.py --bin-dir build/release/bin --output build/release/acceptance/apps
 ```
 
 若 Boost 不在默认搜索路径中，配置时添加 `-DASTER_BOOST_ROOT=/path/to/boost`。Mac 上的 OpenMP 由现有 libomp 提供；具体工具链要求见 [构建与迁移](doc/build.md)。
 
-先运行一个 GL 算例：
+先检查四个已有单 GL 样本：
 
 ```sh
-python3 tests/run_case.py --case iod_gl --binary build/release/bin/aster_iod_gl --output build/manual/iod_gl
+python3 tests/math_backend_cases/run_checks.py --bin-dir build/release/bin --output build/release/acceptance/gl --only-gl
 ```
 
-脚本会创建本次运行目录，准备配置并比较科学结果。输出中的目录路径可直接用于查看配置、控制台和轨道解。
+脚本使用仓库内的原样观测，创建独立运行目录并核对既有科学结果。完整旧 CTest 中的 1.0.0 字节参考继续保留；1.1.0 的后端验收入口和物理门限见 [测试说明](tests/README.md)。
+
+使用系统数学时另建构建目录，配置 `-DASTER_MATH_BACKEND=SYSTEM`；默认值为 `OPENLIBM`。OPENLIBM 的程序与同目录 `libopenlibm.dylib` / `libopenlibm.so` 一起移动。构建与开关详见 [math_backend 说明与验收](doc/math-backend.md)。
 
 ## 程序入口
 
@@ -46,5 +49,6 @@ python3 tests/run_case.py --case iod_gl --binary build/release/bin/aster_iod_gl 
 - [测试和验证范围](tests/README.md)
 - [迁移来源与验收](doc/migration.md)
 - [服务器使用与数值对照](doc/server.md)
+- [1.1.0 更新公告](https://github.com/CDC-Official/ASTER/releases/tag/v1.1.0)
 - [版本记录](CHANGELOG.md)
 - [后续维护规则](AGENTS.md)

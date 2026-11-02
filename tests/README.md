@@ -1,5 +1,20 @@
 # 最小算例与检查
 
+## 1.1.0 后端验收
+
+默认 OPENLIBM 使用 `math_backend_cases/run_checks.py` 的四个单 GL、两个完整 GLML 及其既有输入/科学输出哈希。七个普通程序使用原 `cases.json` 输入，由 `check_math_backend_apps.py` 按既有物理量门限比较；原始字节 fixture 保留。
+
+```sh
+ctest --test-dir build/release -R '^(core_|math_backend_|invalid_inputs|data_integrity)' --output-on-failure
+python3 tests/check_math_backend_apps.py --bin-dir build/release/bin --output build/release/acceptance/apps
+```
+
+两端已验收范围为各 8 项核心/SOFA 检查、4 个单 GL 逐轮核对、2 个各 10001 候选的完整 GLML、7 个普通程序物理量比较；SYSTEM 的坐标/SOFA 各 2 项通过。e010 另补测四个已有场景的 GL 与完整 GLML 真值精度。数值范围、性能与限制见 [后端说明](../doc/math-backend.md)。
+
+`invalid_inputs` 从 CMake 项目声明读取版本，检查九程序版本首行及后端信息，并保留原输入契约检查。完整无过滤 CTest 中的旧 `run_case.py` 检查要求与 1.0.0 fixture 逐字节相同，属于原始回归对照；数学路径切换后的差异使用上述后端验收判断。
+
+## 1.0.0 迁移参考与输入检查
+
 九个程序各有一个最小算例目录，保存输入、配置和迁移前参考科学结果。`cases.json` 记录入口与参考文件。`run_case.py` 为每次运行创建独立目录，解析配置中的相对输入路径，并逐字节比较输出；结果写入构建目录。
 
 ```sh
@@ -13,4 +28,4 @@ python3 tests/run_case.py --case opn_nonsingular2 --binary build/release/bin/ast
 
 `check_failures.py` 检查七列输入、有限值、空行和尾随空白、额外列拒绝、缺少配置、随机种子范围、程序版本以及后期报告写出失败。输入输出格式和错误行为随这些检查一起维护。
 
-本版从独立源码副本完成 19 项 CTest，全部通过。`check_handoff.py` 另核对 GL、GLML 初轨文件与显式填写同一状态进入批处理后的残差一致。
+1.0.0 曾从独立源码副本完成 19 项 CTest，全部通过。`check_handoff.py` 另核对 GL、GLML 初轨文件与显式填写同一状态进入批处理后的残差一致。

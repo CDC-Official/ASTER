@@ -3,6 +3,7 @@
 import argparse
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import tempfile
@@ -47,10 +48,16 @@ def main():
         execute(case + '-plain', target, [str(plain), str(plain) + '.out'] + unit, good=True)
         assert Path(str(path) + '.out').read_bytes() == Path(str(plain) + '.out').read_bytes()
 
+    version_match = re.search(r'project\(ASTER VERSION (\d+\.\d+\.\d+) LANGUAGES',
+                              (tests.parent / 'CMakeLists.txt').read_text())
+    assert version_match, 'Missing ASTER project version'
+    version = version_match.group(1)
     cases = json.loads((tests / 'cases.json').read_text())
     for case, info in cases.items():
         proc = execute(case + '-version', info['target'], ['--version'], good=True)
-        assert proc.stdout.decode().strip() == info['target'] + ' 1.0.0'
+        version_lines = proc.stdout.decode().splitlines()
+        assert version_lines[0] == info['target'] + ' ' + version
+        assert len(version_lines) >= 2 and version_lines[1].startswith('backend=')
         if not info.get('conversion'):
             execute(case + '-missing-setting', info['target'], ['-I', str(root / 'missing.txt')])
 
