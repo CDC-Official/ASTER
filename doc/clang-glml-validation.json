@@ -1,0 +1,1354 @@
+{
+  "date": "2026-11-02",
+  "status": {
+    "linux_clang_validation": "passed",
+    "gcc_clang_scientific_files_byte_equal": 16,
+    "mac_linux_programs_within_existing_limits": 8,
+    "mac_linux_programs_exceeding_limits": [
+      "iod_glml"
+    ],
+    "glml_instability_localized": true,
+    "glml_cross_platform_acceptance": "Mac/Linux GLML 短弧在原有门限下未通过；作者确认保留现有选择规则。"
+  },
+  "source": {
+    "source_commit": "4e0e1f4cb72b7ada6c659eb6fd9a405fd2b53948",
+    "mac_clang": "Apple clang version 21.0.0 (clang-2100.1.1.101)",
+    "inputs_sha256": {
+      "apps/iod/main_iod_glml.cpp": "27cf3a1f83e2cbd3dbe804e1d28d1536a625298530cef464f2d1e22186905a8d",
+      "src/core_iod_solver.cpp": "82f4ab7b8bc6290c0119042c1193b0d8e4508eec0ed34aa9c60ff416ef4d60cd",
+      "include/core_iod.hpp": "a53cd61e18b66aa827c69df703e5ca66f68d5d928ad0c8f4176679aba1e06c30",
+      "include/utils_constants.hpp": "77800af28a60c1c170806c8c87abad6095449cbb7c051f1153f75d988a1d00ba",
+      "tests/iod_glml/setting.txt": "dc78da783b21c112fff35a1f388df4bccefd8961a8200d2e92c3b2385f2570ee",
+      "tests/iod_glml/input/observations.obs": "af7162642cdc65ef2c30fa643b477dbec186935f4b4253eea9fd967d277b3881",
+      "tests/iod_glml/input/observers.txt": "c6e72782bee0286b3893e48a44fa3f568d00d11c2dc25cc682137a1fbe2afe1b",
+      "data/eop/EOP-All_250516.txt": "d60ce7d6de3befd2699804d1069c29297604c270e05f13f27bf34ce95bb24882"
+    },
+    "scripts_sha256": {
+      "reproduce_server.sh": "185c08e8e8c35e429c259282f8c36883200d5a2b4f3bbb8e75b7a46089192906",
+      "run_cases.py": "1ebf35e4ef3ddebd06ee7ac28eee3fde224b99ab72e4c2cbe89d9b04bc1e8908",
+      "make_glml_probe.py": "163b4c0142033714c2d695dfb7d6e2ba34e019fc3d4b6b550f0c6aadfb097e37",
+      "analyze_glml.py": "82e8f9e4287e8c18d99989ff547fdc3675b72f0bee934def4d6b7d36437329f7",
+      "compare_cases.py": "80956f3105606db9649454205c09459f0b99fdeb9f41aa5d18f2e750c982f75b"
+    }
+  },
+  "server": {
+    "source_commit": "4e0e1f4cb72b7ada6c659eb6fd9a405fd2b53948",
+    "source_and_inputs_match_mac": {
+      "apps/iod/main_iod_glml.cpp": true,
+      "src/core_iod_solver.cpp": true,
+      "include/core_iod.hpp": true,
+      "include/utils_constants.hpp": true,
+      "tests/iod_glml/setting.txt": true,
+      "tests/iod_glml/input/observations.obs": true,
+      "tests/iod_glml/input/observers.txt": true,
+      "data/eop/EOP-All_250516.txt": true
+    },
+    "platform": "Linux-6.17.0-1017-oem-x86_64-with-glibc2.39",
+    "machine": "x86_64",
+    "compilers": {
+      "g++": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+      "clang++-18": "Ubuntu clang version 18.1.3 (1ubuntu1)",
+      "cmake": "cmake version 3.28.3",
+      "python3": "Python 3.12.3"
+    },
+    "package_versions": "clang-18\t1:18.1.3-1ubuntu1\nlibgomp1:amd64\t14.2.0-4ubuntu2~24.04.1\nlibllvm18:amd64\t1:18.1.3-1ubuntu1\nlibstdc++6:amd64\t14.2.0-4ubuntu2~24.04.1\n",
+    "git_status_before_documentation": ""
+  },
+  "openmp_packages": [
+    {
+      "file": "libomp-18-dev_18.1.3-1ubuntu1_amd64.deb",
+      "version": "1:18.1.3-1ubuntu1",
+      "sha256": "62cd9360bccd2f8134a5d6c5f2e5ab462fc0b5e1288add907e3983b0ad6bc212",
+      "size": 968210,
+      "url": "https://archive.ubuntu.com/ubuntu/pool/universe/l/llvm-toolchain-18/libomp-18-dev_18.1.3-1ubuntu1_amd64.deb",
+      "checksum_source": "cdc-114 cached Ubuntu noble-updates APT package metadata"
+    },
+    {
+      "file": "libomp5-18_18.1.3-1ubuntu1_amd64.deb",
+      "version": "1:18.1.3-1ubuntu1",
+      "sha256": "d3952fab5027e984259edda4c85b7c3e83ea11d61e7fc2c111ab3ee00e30c1ed",
+      "size": 607896,
+      "url": "https://archive.ubuntu.com/ubuntu/pool/universe/l/llvm-toolchain-18/libomp5-18_18.1.3-1ubuntu1_amd64.deb",
+      "checksum_source": "cdc-114 cached Ubuntu noble-updates APT package metadata"
+    }
+  ],
+  "checks": {
+    "clang_ctest_passed": [
+      "core_frame_coordinates",
+      "core_orbit_averaging",
+      "core_batch_determination",
+      "core_batch_parameters",
+      "core_rkf78_safety",
+      "core_adams_safety",
+      "core_iod_eccentricity",
+      "invalid_inputs",
+      "data_integrity",
+      "iod_batch_handoff"
+    ],
+    "clang_ctest_failed": 0,
+    "clang_ctest_seconds": 107.53,
+    "official_programs_run": 9,
+    "probe_matches_official_scientific_files": {
+      "mac": {
+        "glml_solution.txt": true,
+        "glml_candidates.csv": true,
+        "glml_residuals.txt": true
+      },
+      "gcc": {
+        "glml_solution.txt": true,
+        "glml_candidates.csv": true,
+        "glml_residuals.txt": true
+      },
+      "clang": {
+        "glml_solution.txt": true,
+        "glml_candidates.csv": true,
+        "glml_residuals.txt": true
+      }
+    }
+  },
+  "comparisons": {
+    "gcc-vs-clang": {
+      "limits": {
+        "position_m": 0.001,
+        "velocity_m_s": 1e-06,
+        "a_m": 0.001,
+        "eccentricity": 1e-10,
+        "inclination_parameters": 1e-10,
+        "angle_deg": 1e-07,
+        "angle_residual_rad": 1e-10,
+        "J": 1e-06,
+        "epoch_days": 0.0
+      },
+      "reference": "diagnostics/20261102/linux/gcc-all",
+      "actual": "diagnostics/20261102/linux/clang-official",
+      "cases": {
+        "iod_gl": true,
+        "iod_glml": true,
+        "odn_batch": true,
+        "opn_cartesian": true,
+        "opn_nonsingular2": true,
+        "opn_cislunar": true,
+        "convert_osculating_to_mean": true,
+        "convert_keplerian_to_cartesian": true,
+        "convert_cartesian_to_keplerian": true
+      },
+      "files": [
+        {
+          "case": "iod_gl",
+          "file": "gl_residuals.txt",
+          "byte_equal": true,
+          "angle_residual_rad": 0.0,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "iod_gl",
+          "file": "gl_solution.txt",
+          "byte_equal": true,
+          "position_m": 0.0,
+          "velocity_m_s": 0.0,
+          "angle_residual_rad": 0.0,
+          "epoch_days": 0.0,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "iod_glml",
+          "file": "glml_residuals.txt",
+          "byte_equal": true,
+          "angle_residual_rad": 0.0,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "iod_glml",
+          "file": "glml_candidates.csv",
+          "byte_equal": true,
+          "candidate_rows": 10001,
+          "source_flags_differ": 0,
+          "max_candidate_position_m": 0.0,
+          "max_candidate_velocity_m_s": 0.0,
+          "max_candidate_J": 0.0,
+          "use": "diagnostic; final-state acceptance uses the selected solution and residuals",
+          "exceeded": {},
+          "passed": null
+        },
+        {
+          "case": "iod_glml",
+          "file": "glml_solution.txt",
+          "byte_equal": true,
+          "position_m": 0.0,
+          "velocity_m_s": 0.0,
+          "angle_residual_rad": 0.0,
+          "epoch_days": 0.0,
+          "J": 0.0,
+          "selected_candidate": [
+            "335",
+            "335"
+          ],
+          "source_flag": [
+            "-1",
+            "-1"
+          ],
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "odn_batch",
+          "file": "bodn_residuals.txt",
+          "byte_equal": true,
+          "angle_residual_rad": 0.0,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "opn_cartesian",
+          "file": "propagation_ephemeris_nsg2.txt",
+          "byte_equal": true,
+          "epoch_days": 0.0,
+          "a_m": 0.0,
+          "eccentricity": 0.0,
+          "inclination_parameters": 0.0,
+          "angle_deg": 0.0,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "opn_cartesian",
+          "file": "propagation_ephemeris_cartesian.txt",
+          "byte_equal": true,
+          "epoch_days": 0.0,
+          "position_m": 0.0,
+          "velocity_m_s": 0.0,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "opn_cartesian",
+          "file": "propagation_ephemeris_keplerian.txt",
+          "byte_equal": true,
+          "epoch_days": 0.0,
+          "a_m": 0.0,
+          "eccentricity": 0.0,
+          "angle_deg": 0.0,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "opn_nonsingular2",
+          "file": "propagation_ephemeris_nsg2.txt",
+          "byte_equal": true,
+          "epoch_days": 0.0,
+          "a_m": 0.0,
+          "eccentricity": 0.0,
+          "inclination_parameters": 0.0,
+          "angle_deg": 0.0,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "opn_nonsingular2",
+          "file": "propagation_ephemeris_cartesian.txt",
+          "byte_equal": true,
+          "epoch_days": 0.0,
+          "position_m": 0.0,
+          "velocity_m_s": 0.0,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "opn_nonsingular2",
+          "file": "propagation_ephemeris_keplerian.txt",
+          "byte_equal": true,
+          "epoch_days": 0.0,
+          "a_m": 0.0,
+          "eccentricity": 0.0,
+          "angle_deg": 0.0,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "opn_cislunar",
+          "file": "propagation_ephemeris_cartesian.txt",
+          "byte_equal": true,
+          "epoch_days": 0.0,
+          "position_m": 0.0,
+          "velocity_m_s": 0.0,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "convert_osculating_to_mean",
+          "file": "o2m_ephemeris_mean_keplerian.txt",
+          "byte_equal": true,
+          "epoch_days": 0.0,
+          "a_m": 0.0,
+          "eccentricity": 0.0,
+          "angle_deg": 0.0,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "convert_keplerian_to_cartesian",
+          "file": "result.txt",
+          "byte_equal": true,
+          "epoch_days": 0.0,
+          "position_m": 0.0,
+          "velocity_m_s": 0.0,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "convert_cartesian_to_keplerian",
+          "file": "result.txt",
+          "byte_equal": true,
+          "epoch_days": 0.0,
+          "a_m": 0.0,
+          "eccentricity": 0.0,
+          "angle_deg": 0.0,
+          "exceeded": {},
+          "passed": true
+        }
+      ]
+    },
+    "mac-vs-gcc": {
+      "limits": {
+        "position_m": 0.001,
+        "velocity_m_s": 1e-06,
+        "a_m": 0.001,
+        "eccentricity": 1e-10,
+        "inclination_parameters": 1e-10,
+        "angle_deg": 1e-07,
+        "angle_residual_rad": 1e-10,
+        "J": 1e-06,
+        "epoch_days": 0.0
+      },
+      "reference": "/Users/chendingcun/CLionProjects/ASTER/tests",
+      "actual": "diagnostics/20261102/linux/gcc-all",
+      "cases": {
+        "iod_gl": true,
+        "iod_glml": false,
+        "odn_batch": true,
+        "opn_cartesian": true,
+        "opn_nonsingular2": true,
+        "opn_cislunar": true,
+        "convert_osculating_to_mean": true,
+        "convert_keplerian_to_cartesian": true,
+        "convert_cartesian_to_keplerian": true
+      },
+      "files": [
+        {
+          "case": "iod_gl",
+          "file": "gl_residuals.txt",
+          "byte_equal": false,
+          "angle_residual_rad": 1.6209256159527285e-14,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "iod_gl",
+          "file": "gl_solution.txt",
+          "byte_equal": false,
+          "position_m": 1.6539637848519857e-05,
+          "velocity_m_s": 7.413935969420114e-08,
+          "angle_residual_rad": 1.8614396048860504e-15,
+          "epoch_days": 0.0,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "iod_glml",
+          "file": "glml_residuals.txt",
+          "byte_equal": false,
+          "angle_residual_rad": 4.621791965928692e-07,
+          "exceeded": {
+            "angle_residual_rad": {
+              "difference": 4.621791965928692e-07,
+              "limit": 1e-10
+            }
+          },
+          "passed": false
+        },
+        {
+          "case": "iod_glml",
+          "file": "glml_candidates.csv",
+          "byte_equal": false,
+          "candidate_rows": 10001,
+          "source_flags_differ": 9,
+          "max_candidate_position_m": 5442712.339018891,
+          "max_candidate_velocity_m_s": 3144.803011034783,
+          "max_candidate_J": 10444869886.967987,
+          "use": "diagnostic; final-state acceptance uses the selected solution and residuals",
+          "exceeded": {},
+          "passed": null
+        },
+        {
+          "case": "iod_glml",
+          "file": "glml_solution.txt",
+          "byte_equal": false,
+          "position_m": 15387.335212427453,
+          "velocity_m_s": 31.01981378620805,
+          "angle_residual_rad": 4.2578074203553984e-10,
+          "epoch_days": 0.0,
+          "J": 0.0004672870152262476,
+          "selected_candidate": [
+            "592",
+            "335"
+          ],
+          "source_flag": [
+            "-1",
+            "-1"
+          ],
+          "exceeded": {
+            "position_m": {
+              "difference": 15387.335212427453,
+              "limit": 0.001
+            },
+            "velocity_m_s": {
+              "difference": 31.01981378620805,
+              "limit": 1e-06
+            },
+            "angle_residual_rad": {
+              "difference": 4.2578074203553984e-10,
+              "limit": 1e-10
+            },
+            "J": {
+              "difference": 0.0004672870152262476,
+              "limit": 1e-06
+            }
+          },
+          "passed": false
+        },
+        {
+          "case": "odn_batch",
+          "file": "bodn_residuals.txt",
+          "byte_equal": false,
+          "angle_residual_rad": 2.886579864025407e-15,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "opn_cartesian",
+          "file": "propagation_ephemeris_nsg2.txt",
+          "byte_equal": false,
+          "epoch_days": 0.0,
+          "a_m": 6.366462912410498e-09,
+          "eccentricity": 4.753142324176451e-16,
+          "inclination_parameters": 2.220446049250313e-16,
+          "angle_deg": 4.973799150320701e-14,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "opn_cartesian",
+          "file": "propagation_ephemeris_cartesian.txt",
+          "byte_equal": false,
+          "epoch_days": 0.0,
+          "position_m": 1.8189894035458565e-09,
+          "velocity_m_s": 2.220446049250313e-12,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "opn_cartesian",
+          "file": "propagation_ephemeris_keplerian.txt",
+          "byte_equal": false,
+          "epoch_days": 0.0,
+          "a_m": 6.366462912410498e-09,
+          "eccentricity": 6.106226635438361e-16,
+          "angle_deg": 1.9202417433916708e-12,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "opn_nonsingular2",
+          "file": "propagation_ephemeris_nsg2.txt",
+          "byte_equal": false,
+          "epoch_days": 0.0,
+          "a_m": 0.0,
+          "eccentricity": 7.632783294297951e-17,
+          "inclination_parameters": 2.7755575615628914e-17,
+          "angle_deg": 1.4210854715202004e-14,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "opn_nonsingular2",
+          "file": "propagation_ephemeris_cartesian.txt",
+          "byte_equal": false,
+          "epoch_days": 0.0,
+          "position_m": 5.98126754901655e-09,
+          "velocity_m_s": 5.924889052322839e-12,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "opn_nonsingular2",
+          "file": "propagation_ephemeris_keplerian.txt",
+          "byte_equal": false,
+          "epoch_days": 0.0,
+          "a_m": 0.0,
+          "eccentricity": 1.734723475976807e-17,
+          "angle_deg": 6.110667527536862e-13,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "opn_cislunar",
+          "file": "propagation_ephemeris_cartesian.txt",
+          "byte_equal": true,
+          "epoch_days": 0.0,
+          "position_m": 0.0,
+          "velocity_m_s": 0.0,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "convert_osculating_to_mean",
+          "file": "o2m_ephemeris_mean_keplerian.txt",
+          "byte_equal": false,
+          "epoch_days": 0.0,
+          "a_m": 1.8189894035458565e-09,
+          "eccentricity": 8.012254054667878e-17,
+          "angle_deg": 9.350742402602918e-12,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "convert_keplerian_to_cartesian",
+          "file": "result.txt",
+          "byte_equal": false,
+          "epoch_days": 0.0,
+          "position_m": 2.6031257322754127e-10,
+          "velocity_m_s": 0.0,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "convert_cartesian_to_keplerian",
+          "file": "result.txt",
+          "byte_equal": false,
+          "epoch_days": 0.0,
+          "a_m": 0.0,
+          "eccentricity": 1.0842021724855044e-18,
+          "angle_deg": 3.410605131648481e-13,
+          "exceeded": {},
+          "passed": true
+        }
+      ]
+    },
+    "mac-vs-clang": {
+      "limits": {
+        "position_m": 0.001,
+        "velocity_m_s": 1e-06,
+        "a_m": 0.001,
+        "eccentricity": 1e-10,
+        "inclination_parameters": 1e-10,
+        "angle_deg": 1e-07,
+        "angle_residual_rad": 1e-10,
+        "J": 1e-06,
+        "epoch_days": 0.0
+      },
+      "reference": "/Users/chendingcun/CLionProjects/ASTER/tests",
+      "actual": "diagnostics/20261102/linux/clang-official",
+      "cases": {
+        "iod_gl": true,
+        "iod_glml": false,
+        "odn_batch": true,
+        "opn_cartesian": true,
+        "opn_nonsingular2": true,
+        "opn_cislunar": true,
+        "convert_osculating_to_mean": true,
+        "convert_keplerian_to_cartesian": true,
+        "convert_cartesian_to_keplerian": true
+      },
+      "files": [
+        {
+          "case": "iod_gl",
+          "file": "gl_residuals.txt",
+          "byte_equal": false,
+          "angle_residual_rad": 1.6209256159527285e-14,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "iod_gl",
+          "file": "gl_solution.txt",
+          "byte_equal": false,
+          "position_m": 1.6539637848519857e-05,
+          "velocity_m_s": 7.413935969420114e-08,
+          "angle_residual_rad": 1.8614396048860504e-15,
+          "epoch_days": 0.0,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "iod_glml",
+          "file": "glml_residuals.txt",
+          "byte_equal": false,
+          "angle_residual_rad": 4.621791965928692e-07,
+          "exceeded": {
+            "angle_residual_rad": {
+              "difference": 4.621791965928692e-07,
+              "limit": 1e-10
+            }
+          },
+          "passed": false
+        },
+        {
+          "case": "iod_glml",
+          "file": "glml_candidates.csv",
+          "byte_equal": false,
+          "candidate_rows": 10001,
+          "source_flags_differ": 9,
+          "max_candidate_position_m": 5442712.339018891,
+          "max_candidate_velocity_m_s": 3144.803011034783,
+          "max_candidate_J": 10444869886.967987,
+          "use": "diagnostic; final-state acceptance uses the selected solution and residuals",
+          "exceeded": {},
+          "passed": null
+        },
+        {
+          "case": "iod_glml",
+          "file": "glml_solution.txt",
+          "byte_equal": false,
+          "position_m": 15387.335212427453,
+          "velocity_m_s": 31.01981378620805,
+          "angle_residual_rad": 4.2578074203553984e-10,
+          "epoch_days": 0.0,
+          "J": 0.0004672870152262476,
+          "selected_candidate": [
+            "592",
+            "335"
+          ],
+          "source_flag": [
+            "-1",
+            "-1"
+          ],
+          "exceeded": {
+            "position_m": {
+              "difference": 15387.335212427453,
+              "limit": 0.001
+            },
+            "velocity_m_s": {
+              "difference": 31.01981378620805,
+              "limit": 1e-06
+            },
+            "angle_residual_rad": {
+              "difference": 4.2578074203553984e-10,
+              "limit": 1e-10
+            },
+            "J": {
+              "difference": 0.0004672870152262476,
+              "limit": 1e-06
+            }
+          },
+          "passed": false
+        },
+        {
+          "case": "odn_batch",
+          "file": "bodn_residuals.txt",
+          "byte_equal": false,
+          "angle_residual_rad": 2.886579864025407e-15,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "opn_cartesian",
+          "file": "propagation_ephemeris_nsg2.txt",
+          "byte_equal": false,
+          "epoch_days": 0.0,
+          "a_m": 6.366462912410498e-09,
+          "eccentricity": 4.753142324176451e-16,
+          "inclination_parameters": 2.220446049250313e-16,
+          "angle_deg": 4.973799150320701e-14,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "opn_cartesian",
+          "file": "propagation_ephemeris_cartesian.txt",
+          "byte_equal": false,
+          "epoch_days": 0.0,
+          "position_m": 1.8189894035458565e-09,
+          "velocity_m_s": 2.220446049250313e-12,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "opn_cartesian",
+          "file": "propagation_ephemeris_keplerian.txt",
+          "byte_equal": false,
+          "epoch_days": 0.0,
+          "a_m": 6.366462912410498e-09,
+          "eccentricity": 6.106226635438361e-16,
+          "angle_deg": 1.9202417433916708e-12,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "opn_nonsingular2",
+          "file": "propagation_ephemeris_nsg2.txt",
+          "byte_equal": false,
+          "epoch_days": 0.0,
+          "a_m": 0.0,
+          "eccentricity": 7.632783294297951e-17,
+          "inclination_parameters": 2.7755575615628914e-17,
+          "angle_deg": 1.4210854715202004e-14,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "opn_nonsingular2",
+          "file": "propagation_ephemeris_cartesian.txt",
+          "byte_equal": false,
+          "epoch_days": 0.0,
+          "position_m": 5.98126754901655e-09,
+          "velocity_m_s": 5.924889052322839e-12,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "opn_nonsingular2",
+          "file": "propagation_ephemeris_keplerian.txt",
+          "byte_equal": false,
+          "epoch_days": 0.0,
+          "a_m": 0.0,
+          "eccentricity": 1.734723475976807e-17,
+          "angle_deg": 6.110667527536862e-13,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "opn_cislunar",
+          "file": "propagation_ephemeris_cartesian.txt",
+          "byte_equal": true,
+          "epoch_days": 0.0,
+          "position_m": 0.0,
+          "velocity_m_s": 0.0,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "convert_osculating_to_mean",
+          "file": "o2m_ephemeris_mean_keplerian.txt",
+          "byte_equal": false,
+          "epoch_days": 0.0,
+          "a_m": 1.8189894035458565e-09,
+          "eccentricity": 8.012254054667878e-17,
+          "angle_deg": 9.350742402602918e-12,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "convert_keplerian_to_cartesian",
+          "file": "result.txt",
+          "byte_equal": false,
+          "epoch_days": 0.0,
+          "position_m": 2.6031257322754127e-10,
+          "velocity_m_s": 0.0,
+          "exceeded": {},
+          "passed": true
+        },
+        {
+          "case": "convert_cartesian_to_keplerian",
+          "file": "result.txt",
+          "byte_equal": false,
+          "epoch_days": 0.0,
+          "a_m": 0.0,
+          "eccentricity": 1.0842021724855044e-18,
+          "angle_deg": 3.410605131648481e-13,
+          "exceeded": {},
+          "passed": true
+        }
+      ]
+    }
+  },
+  "glml_diagnostics": {
+    "earth_radius_m": 6378137.0,
+    "velocity_unit_m_s": 7905.365719014348,
+    "directories": {
+      "mac": "diagnostics/20261102/mac-probe-t2/iod_glml/run-xb6xdyfi",
+      "mac_t1": "diagnostics/20261102/mac-probe-t1/iod_glml/run-6gu_ft66",
+      "gcc": "diagnostics/20261102/linux/gcc-probe-t2/iod_glml/run-51ptura_",
+      "gcc_t1": "diagnostics/20261102/linux/gcc-probe-t1/iod_glml/run-uts0bi39",
+      "clang": "diagnostics/20261102/linux/clang-probe-t2/iod_glml/run-il0ej_nn",
+      "clang_t1": "diagnostics/20261102/linux/clang-probe-t1/iod_glml/run-y2l9a4i8",
+      "gcc_mac_initial": "diagnostics/20261102/linux/gcc-mac-initial/iod_glml/run-aecpl6ay",
+      "gcc_one_ulp": "diagnostics/20261102/linux/gcc-one-ulp/iod_glml/run-ys7frt7p",
+      "gcc_same_initial": "diagnostics/20261102/linux/gcc-same-initial/iod_glml/run-gi8eme6l"
+    },
+    "scientific_sha256": {
+      "mac": {
+        "glml_solution.txt": "28d4862571963c462f2ef84174bcbc43eebc22bc2d30957659d4bb60d97f4a48",
+        "glml_candidates.csv": "2985cd2d4157dc29d8087ec11665f4642d42c766a6f3817916778077efbf7e30",
+        "glml_residuals.txt": "1c50324504d6900e26ae8a7d62c74ec867a331fca3faeeef8f958bba42437a1b"
+      },
+      "mac_t1": {
+        "glml_solution.txt": "28d4862571963c462f2ef84174bcbc43eebc22bc2d30957659d4bb60d97f4a48",
+        "glml_candidates.csv": "2985cd2d4157dc29d8087ec11665f4642d42c766a6f3817916778077efbf7e30",
+        "glml_residuals.txt": "1c50324504d6900e26ae8a7d62c74ec867a331fca3faeeef8f958bba42437a1b"
+      },
+      "gcc": {
+        "glml_solution.txt": "9a120d96d1154e2c8c4d55cf72aa380366d4838826799f6aea752f92c3046d29",
+        "glml_candidates.csv": "cc0e620ce7c7b91fdbc96cea0f3c9165d59b3e8cc6a2c197dd39bf8723324821",
+        "glml_residuals.txt": "3f6b166f40a3fc524ca08feb8d8124500f0eb91749ea8af00c69c78a59549e82"
+      },
+      "gcc_t1": {
+        "glml_solution.txt": "9a120d96d1154e2c8c4d55cf72aa380366d4838826799f6aea752f92c3046d29",
+        "glml_candidates.csv": "cc0e620ce7c7b91fdbc96cea0f3c9165d59b3e8cc6a2c197dd39bf8723324821",
+        "glml_residuals.txt": "3f6b166f40a3fc524ca08feb8d8124500f0eb91749ea8af00c69c78a59549e82"
+      },
+      "clang": {
+        "glml_solution.txt": "9a120d96d1154e2c8c4d55cf72aa380366d4838826799f6aea752f92c3046d29",
+        "glml_candidates.csv": "cc0e620ce7c7b91fdbc96cea0f3c9165d59b3e8cc6a2c197dd39bf8723324821",
+        "glml_residuals.txt": "3f6b166f40a3fc524ca08feb8d8124500f0eb91749ea8af00c69c78a59549e82"
+      },
+      "clang_t1": {
+        "glml_solution.txt": "9a120d96d1154e2c8c4d55cf72aa380366d4838826799f6aea752f92c3046d29",
+        "glml_candidates.csv": "cc0e620ce7c7b91fdbc96cea0f3c9165d59b3e8cc6a2c197dd39bf8723324821",
+        "glml_residuals.txt": "3f6b166f40a3fc524ca08feb8d8124500f0eb91749ea8af00c69c78a59549e82"
+      },
+      "gcc_mac_initial": {
+        "glml_solution.txt": "203733df8fd76c908f892a32e194c5467ab68a647633dd027a641f96c54bbc4d",
+        "glml_candidates.csv": "ed14e0f2fcef82758dd42142dc62499ee70179957d9b15eac0b7b367484ac090",
+        "glml_residuals.txt": "f61d95722f9a53ec6789efc75f4ceb2ebe54f909947d00a1b3a8633d2f7f8611"
+      },
+      "gcc_one_ulp": {
+        "glml_solution.txt": "dccee9750d3eb21dd78119bed34a0e9c7160166c64b09d387fb019212909f88b",
+        "glml_candidates.csv": "9bd06550c348b1a31c3da412e9acc5927e8a191eb36c60cefd12a1fa4862180a",
+        "glml_residuals.txt": "69921d4ab4390662a3fa82115053b997d06057891c58bc51ca1be5c66b191535"
+      },
+      "gcc_same_initial": {
+        "glml_solution.txt": "9a120d96d1154e2c8c4d55cf72aa380366d4838826799f6aea752f92c3046d29",
+        "glml_candidates.csv": "cc0e620ce7c7b91fdbc96cea0f3c9165d59b3e8cc6a2c197dd39bf8723324821",
+        "glml_residuals.txt": "3f6b166f40a3fc524ca08feb8d8124500f0eb91749ea8af00c69c78a59549e82"
+      }
+    },
+    "thread_and_compiler_checks": {
+      "mac_t1_t2_byte_equal": true,
+      "gcc_t1_t2_byte_equal": true,
+      "clang_t1_t2_byte_equal": true,
+      "gcc_clang_t2_byte_equal": true,
+      "gcc_clang_raw_source_byte_equal": true,
+      "gcc_clang_iterations_byte_equal": true,
+      "same_initial_file_replay_byte_equal": true
+    },
+    "preparation": {
+      "max_mac_linux_difference": {
+        "mjd": 0.0,
+        "tau": 0.0,
+        "ra": 0.0,
+        "dec": 0.0,
+        "Rx": 1.9872992140790302e-14,
+        "Ry": 7.549516567451064e-15,
+        "Rz": 1.1102230246251565e-16
+      },
+      "initial_position_difference_m": 1.6539601778176913e-05,
+      "initial_velocity_difference_m_s": 7.413943906326214e-08
+    },
+    "runs": {
+      "mac": {
+        "flag_counts_including_baseline": {
+          "converged": 8593,
+          "iteration_limit": 1408,
+          "numerical_failure": 0
+        },
+        "boundary_random_draws": 0,
+        "selected_candidate": 592,
+        "J": -198.01771182018172,
+        "selected_source": {
+          "id": "592",
+          "target_e": "0.047280000000000003",
+          "flag": "-1",
+          "iterations": "40",
+          "max_correction": "0.065116120298395141",
+          "rms": "1.1607855179237823e-05",
+          "a": "1.2739979657261946",
+          "e": "0.11340113620069818",
+          "i": "1.71786743211868",
+          "node": "1.9647125030289039",
+          "argument": "5.4447030535643171",
+          "M": "1.5189034842590894",
+          "x": "-0.16679453730594676",
+          "y": "0.78698794655900961",
+          "z": "0.99926391263574366",
+          "vx": "0.32416427341162535",
+          "vy": "-0.54424290392321184",
+          "vz": "0.61058809012579451"
+        },
+        "converged_only_candidate": 1447,
+        "converged_only_J": -197.98575685807265
+      },
+      "mac_t1": {
+        "flag_counts_including_baseline": {
+          "converged": 8593,
+          "iteration_limit": 1408,
+          "numerical_failure": 0
+        },
+        "boundary_random_draws": 0,
+        "selected_candidate": 592,
+        "J": -198.01771182018172,
+        "selected_source": {
+          "id": "592",
+          "target_e": "0.047280000000000003",
+          "flag": "-1",
+          "iterations": "40",
+          "max_correction": "0.065116120298395141",
+          "rms": "1.1607855179237823e-05",
+          "a": "1.2739979657261946",
+          "e": "0.11340113620069818",
+          "i": "1.71786743211868",
+          "node": "1.9647125030289039",
+          "argument": "5.4447030535643171",
+          "M": "1.5189034842590894",
+          "x": "-0.16679453730594676",
+          "y": "0.78698794655900961",
+          "z": "0.99926391263574366",
+          "vx": "0.32416427341162535",
+          "vy": "-0.54424290392321184",
+          "vz": "0.61058809012579451"
+        },
+        "converged_only_candidate": 1447,
+        "converged_only_J": -197.98575685807265
+      },
+      "gcc": {
+        "flag_counts_including_baseline": {
+          "converged": 8593,
+          "iteration_limit": 1408,
+          "numerical_failure": 0
+        },
+        "boundary_random_draws": 0,
+        "selected_candidate": 335,
+        "J": -198.0172445331665,
+        "selected_source": {
+          "id": "335",
+          "target_e": "0.026719999999999997",
+          "flag": "-1",
+          "iterations": "40",
+          "max_correction": "0.072568186843740279",
+          "rms": "1.1608280960029464e-05",
+          "a": "1.2885829409008627",
+          "e": "0.11305754757018505",
+          "i": "1.7169152430850299",
+          "node": "1.9657627281807015",
+          "argument": "5.5339259354799646",
+          "M": "1.4295381730282537",
+          "x": "-0.16867333966437695",
+          "y": "0.78737013371615683",
+          "z": "1.0007282388348062",
+          "vx": "0.32568387855402819",
+          "vy": "-0.54670789559279875",
+          "vz": "0.61323602462292204"
+        },
+        "converged_only_candidate": 1447,
+        "converged_only_J": -197.98575685612437
+      },
+      "gcc_t1": {
+        "flag_counts_including_baseline": {
+          "converged": 8593,
+          "iteration_limit": 1408,
+          "numerical_failure": 0
+        },
+        "boundary_random_draws": 0,
+        "selected_candidate": 335,
+        "J": -198.0172445331665,
+        "selected_source": {
+          "id": "335",
+          "target_e": "0.026719999999999997",
+          "flag": "-1",
+          "iterations": "40",
+          "max_correction": "0.072568186843740279",
+          "rms": "1.1608280960029464e-05",
+          "a": "1.2885829409008627",
+          "e": "0.11305754757018505",
+          "i": "1.7169152430850299",
+          "node": "1.9657627281807015",
+          "argument": "5.5339259354799646",
+          "M": "1.4295381730282537",
+          "x": "-0.16867333966437695",
+          "y": "0.78737013371615683",
+          "z": "1.0007282388348062",
+          "vx": "0.32568387855402819",
+          "vy": "-0.54670789559279875",
+          "vz": "0.61323602462292204"
+        },
+        "converged_only_candidate": 1447,
+        "converged_only_J": -197.98575685612437
+      },
+      "clang": {
+        "flag_counts_including_baseline": {
+          "converged": 8593,
+          "iteration_limit": 1408,
+          "numerical_failure": 0
+        },
+        "boundary_random_draws": 0,
+        "selected_candidate": 335,
+        "J": -198.0172445331665,
+        "selected_source": {
+          "id": "335",
+          "target_e": "0.026719999999999997",
+          "flag": "-1",
+          "iterations": "40",
+          "max_correction": "0.072568186843740279",
+          "rms": "1.1608280960029464e-05",
+          "a": "1.2885829409008627",
+          "e": "0.11305754757018505",
+          "i": "1.7169152430850299",
+          "node": "1.9657627281807015",
+          "argument": "5.5339259354799646",
+          "M": "1.4295381730282537",
+          "x": "-0.16867333966437695",
+          "y": "0.78737013371615683",
+          "z": "1.0007282388348062",
+          "vx": "0.32568387855402819",
+          "vy": "-0.54670789559279875",
+          "vz": "0.61323602462292204"
+        },
+        "converged_only_candidate": 1447,
+        "converged_only_J": -197.98575685612437
+      },
+      "clang_t1": {
+        "flag_counts_including_baseline": {
+          "converged": 8593,
+          "iteration_limit": 1408,
+          "numerical_failure": 0
+        },
+        "boundary_random_draws": 0,
+        "selected_candidate": 335,
+        "J": -198.0172445331665,
+        "selected_source": {
+          "id": "335",
+          "target_e": "0.026719999999999997",
+          "flag": "-1",
+          "iterations": "40",
+          "max_correction": "0.072568186843740279",
+          "rms": "1.1608280960029464e-05",
+          "a": "1.2885829409008627",
+          "e": "0.11305754757018505",
+          "i": "1.7169152430850299",
+          "node": "1.9657627281807015",
+          "argument": "5.5339259354799646",
+          "M": "1.4295381730282537",
+          "x": "-0.16867333966437695",
+          "y": "0.78737013371615683",
+          "z": "1.0007282388348062",
+          "vx": "0.32568387855402819",
+          "vy": "-0.54670789559279875",
+          "vz": "0.61323602462292204"
+        },
+        "converged_only_candidate": 1447,
+        "converged_only_J": -197.98575685612437
+      },
+      "gcc_mac_initial": {
+        "flag_counts_including_baseline": {
+          "converged": 8593,
+          "iteration_limit": 1408,
+          "numerical_failure": 0
+        },
+        "boundary_random_draws": 0,
+        "selected_candidate": 596,
+        "J": -198.01802208097374,
+        "selected_source": {
+          "id": "596",
+          "target_e": "0.047600000000000003",
+          "flag": "-1",
+          "iterations": "40",
+          "max_correction": "0.065323823840165607",
+          "rms": "1.1607572468423656e-05",
+          "a": "1.2781696446311914",
+          "e": "0.11319287649443181",
+          "i": "1.7176038057652578",
+          "node": "1.9650317782024991",
+          "argument": "5.4703471284160932",
+          "M": "1.4932546251330994",
+          "x": "-0.16733769762946202",
+          "y": "0.78709843379850053",
+          "z": "0.99968725487570309",
+          "vx": "0.3246208319679737",
+          "vy": "-0.54495838895258286",
+          "vz": "0.61133892429639913"
+        },
+        "converged_only_candidate": 1447,
+        "converged_only_J": -197.98575685613335
+      },
+      "gcc_one_ulp": {
+        "flag_counts_including_baseline": {
+          "converged": 8593,
+          "iteration_limit": 1408,
+          "numerical_failure": 0
+        },
+        "boundary_random_draws": 0,
+        "selected_candidate": 335,
+        "J": -198.017576134782,
+        "selected_source": {
+          "id": "335",
+          "target_e": "0.026719999999999997",
+          "flag": "-1",
+          "iterations": "40",
+          "max_correction": "0.072618458044907686",
+          "rms": "1.1607978814183213e-05",
+          "a": "1.2868658637475565",
+          "e": "0.11305817826862968",
+          "i": "1.7170215144251093",
+          "node": "1.9656345565170292",
+          "argument": "5.5234872170914286",
+          "M": "1.4399784768564727",
+          "x": "-0.16845437122331328",
+          "y": "0.78732559181227513",
+          "z": "1.0005575733414802",
+          "vx": "0.32550002360380498",
+          "vy": "-0.54641944414982513",
+          "vz": "0.61293321491725905"
+        },
+        "converged_only_candidate": 1447,
+        "converged_only_J": -197.98575685607878
+      },
+      "gcc_same_initial": {
+        "flag_counts_including_baseline": {
+          "converged": 8593,
+          "iteration_limit": 1408,
+          "numerical_failure": 0
+        },
+        "boundary_random_draws": 0,
+        "selected_candidate": 335,
+        "J": -198.0172445331665,
+        "selected_source": {
+          "id": "335",
+          "target_e": "0.026719999999999997",
+          "flag": "-1",
+          "iterations": "40",
+          "max_correction": "0.072568186843740279",
+          "rms": "1.1608280960029464e-05",
+          "a": "1.2885829409008627",
+          "e": "0.11305754757018505",
+          "i": "1.7169152430850299",
+          "node": "1.9657627281807015",
+          "argument": "5.5339259354799646",
+          "M": "1.4295381730282537",
+          "x": "-0.16867333966437695",
+          "y": "0.78737013371615683",
+          "z": "1.0007282388348062",
+          "vx": "0.32568387855402819",
+          "vy": "-0.54670789559279875",
+          "vz": "0.61323602462292204"
+        },
+        "converged_only_candidate": 1447,
+        "converged_only_J": -197.98575685612437
+      }
+    },
+    "candidate_trajectories": {
+      "335": [
+        {
+          "iteration": 0,
+          "position_difference_m": 1.6539601778176913e-05,
+          "mac_max_correction": null,
+          "linux_max_correction": null
+        },
+        {
+          "iteration": 1,
+          "position_difference_m": 4.242380281938989e-06,
+          "mac_max_correction": 0.030443921110145662,
+          "linux_max_correction": 0.030443921107894515
+        },
+        {
+          "iteration": 5,
+          "position_difference_m": 1.7887699481092836e-05,
+          "mac_max_correction": 0.06852207832431642,
+          "linux_max_correction": 0.06852207832069211
+        },
+        {
+          "iteration": 10,
+          "position_difference_m": 4.268338702042689e-06,
+          "mac_max_correction": 0.031171098064137162,
+          "linux_max_correction": 0.031171098061948233
+        },
+        {
+          "iteration": 15,
+          "position_difference_m": 0.0005034588440841261,
+          "mac_max_correction": 0.08210857665516355,
+          "linux_max_correction": 0.08210857659310813
+        },
+        {
+          "iteration": 20,
+          "position_difference_m": 0.14685775942709536,
+          "mac_max_correction": 0.07225955447188336,
+          "linux_max_correction": 0.07225955477220954
+        },
+        {
+          "iteration": 25,
+          "position_difference_m": 0.1890063662698494,
+          "mac_max_correction": 0.08518498222064477,
+          "linux_max_correction": 0.08518631039113891
+        },
+        {
+          "iteration": 30,
+          "position_difference_m": 1.415043987402657,
+          "mac_max_correction": 0.12376013905187315,
+          "linux_max_correction": 0.12375929004437543
+        },
+        {
+          "iteration": 35,
+          "position_difference_m": 1.3922003613384795,
+          "mac_max_correction": 0.027314233243261668,
+          "linux_max_correction": 0.027314231750918044
+        },
+        {
+          "iteration": 38,
+          "position_difference_m": 6.028838258760466,
+          "mac_max_correction": 0.03077028655799974,
+          "linux_max_correction": 0.030770477368583227
+        },
+        {
+          "iteration": 39,
+          "position_difference_m": 400.2989254938883,
+          "mac_max_correction": 0.07204321530883405,
+          "linux_max_correction": 0.07197562109513979
+        },
+        {
+          "iteration": 40,
+          "position_difference_m": 339.7543484769207,
+          "mac_max_correction": 0.07257742339838001,
+          "linux_max_correction": 0.07256818684374028
+        }
+      ],
+      "592": [
+        {
+          "iteration": 0,
+          "position_difference_m": 1.6539601778176913e-05,
+          "mac_max_correction": null,
+          "linux_max_correction": null
+        },
+        {
+          "iteration": 1,
+          "position_difference_m": 3.373492652496657e-06,
+          "mac_max_correction": 0.028442369440735905,
+          "linux_max_correction": 0.02844236943835257
+        },
+        {
+          "iteration": 5,
+          "position_difference_m": 0.0001228066314453435,
+          "mac_max_correction": 0.02830706807992948,
+          "linux_max_correction": 0.028307068087663118
+        },
+        {
+          "iteration": 10,
+          "position_difference_m": 0.004763624353925335,
+          "mac_max_correction": 0.03840494953348003,
+          "linux_max_correction": 0.038404950165350504
+        },
+        {
+          "iteration": 15,
+          "position_difference_m": 0.012096602359746968,
+          "mac_max_correction": 0.061484870779178476,
+          "linux_max_correction": 0.06148486877332011
+        },
+        {
+          "iteration": 20,
+          "position_difference_m": 0.2604498837404759,
+          "mac_max_correction": 0.02855584919977948,
+          "linux_max_correction": 0.028555856971087985
+        },
+        {
+          "iteration": 25,
+          "position_difference_m": 3.4648375719134914,
+          "mac_max_correction": 0.025663039504369406,
+          "linux_max_correction": 0.025663070936739484
+        },
+        {
+          "iteration": 30,
+          "position_difference_m": 444.19752289516265,
+          "mac_max_correction": 0.02789966878749133,
+          "linux_max_correction": 0.027908605471192477
+        },
+        {
+          "iteration": 35,
+          "position_difference_m": 6907.429927203738,
+          "mac_max_correction": 0.026341050082633728,
+          "linux_max_correction": 0.026108710398244018
+        },
+        {
+          "iteration": 38,
+          "position_difference_m": 4778.516660005142,
+          "mac_max_correction": 0.02576993734807283,
+          "linux_max_correction": 0.025777544023100268
+        },
+        {
+          "iteration": 39,
+          "position_difference_m": 260270.32957282875,
+          "mac_max_correction": 0.0685499947486413,
+          "linux_max_correction": 0.05596043536487583
+        },
+        {
+          "iteration": 40,
+          "position_difference_m": 43293.76775605542,
+          "mac_max_correction": 0.06511612029839514,
+          "linux_max_correction": 0.06044688896454813
+        }
+      ]
+    },
+    "initial_perturbations": {
+      "gcc_mac_initial": {
+        "input_position_difference_m": 1.6539601778176913e-05,
+        "input_velocity_difference_m_s": 7.413943906326214e-08,
+        "selected_candidate": [
+          335,
+          596
+        ],
+        "output_position_difference_m": 10938.845415392132,
+        "output_velocity_difference_m_s": 22.064088405354134
+      },
+      "gcc_one_ulp": {
+        "input_position_difference_m": 1.7702886379034055e-10,
+        "input_velocity_difference_m_s": 0.0,
+        "selected_candidate": [
+          335,
+          335
+        ],
+        "output_position_difference_m": 1793.355537430772,
+        "output_velocity_difference_m_s": 3.6114683259486533
+      }
+    },
+    "converged_only_comparison": {
+      "scope": "offline selection from the same saved candidate tables; no production selection rule changed",
+      "candidate": 1447,
+      "source_flags": [
+        "15",
+        "15"
+      ],
+      "position_difference_m": 2.608919672627074e-05,
+      "velocity_difference_m_s": 7.639094293464539e-08,
+      "J_difference": 1.9482797597447643e-09,
+      "rms_difference_rad": 1.7708545133748865e-15,
+      "policy_status": "保留为历史诊断对照；作者未采用仅接受来源收敛候选的筛选。"
+    }
+  },
+  "changes": {
+    "production_scientific_source_changed": false,
+    "selection_rule_changed": false,
+    "numeric_limits_changed": false,
+    "system_packages_installed": false,
+    "openmp_user_directory": "/home/cdc/projects/aster-clang-20261102/dependencies/openmp18",
+    "new_clang_build": "/home/cdc/projects/ASTER/build/linux-clang-release",
+    "documentation": [
+      "doc/server.md",
+      "doc/build.md",
+      "doc/glml-cross-platform.md",
+      "doc/clang-glml-validation.json"
+    ]
+  },
+  "remaining_work": "Mac/Linux GLML 短弧的数值敏感性仍未解决，一致性检查未通过；候选接受规则已由作者确认。",
+  "experiment_directories": {
+    "mac": "/Users/chendingcun/Documents/Codex/2026-11-02/task-2/diagnostics/20261102",
+    "linux": "/home/cdc/projects/aster-clang-20261102"
+  },
+  "author_decision": {
+    "date": "2026-11-02",
+    "status": "作者已确认",
+    "allow_iteration_limit_orbits": true,
+    "require_source_convergence": false,
+    "selection": "在现有其他有效性要求不变的前提下，按最终 J 选优。",
+    "source_flag_role": "记录候选来源的求解状态，作为诊断信息。",
+    "production_selection_rule_changed": false
+  }
+}

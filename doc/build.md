@@ -19,7 +19,7 @@ Mac 配置会先尝试 CMake 的 OpenMP 查找，再查询已安装 Homebrew 的
 将源码与 `data/` 一起传到服务器，在服务器上重新配置、编译。提前准备 CMake、C/C++ 编译器、Boost 头文件和对应的 OpenMP 运行库；Python 3 用于检查算例。校园网内可通过 SSH 访问 Git 仓库，也可以在 Mac 上生成 bundle 后传输：
 
 ```sh
-git bundle create ASTER-1.0.0.bundle --all
+git bundle create ASTER-1.0.0.bundle main v1.0.0
 # 将 bundle 文件传到服务器后执行：
 git clone ASTER-1.0.0.bundle ASTER
 cd ASTER
@@ -29,7 +29,7 @@ cmake --build build/release --parallel 3
 ctest --test-dir build/release --output-on-failure
 ```
 
-数据校验清单在 `data/manifest.json`。正式批量实验前，应完成 Linux 短算例检查，记录编译器、提交、配置、数据校验值和线程数。首次服务器构建是下一阶段的工作。
+数据校验清单在 `data/manifest.json`。正式批量实验前，应完成 Linux 短算例检查，记录编译器、提交、配置、数据校验值和线程数。服务器 Linux GCC / Clang 同机对照已通过，Mac/Linux 的 GLML 短弧数值一致性仍未通过，详情见 [服务器记录](server.md)与 [GLML 差异定位](glml-cross-platform.md)。
 
 ## 版本管理
 
