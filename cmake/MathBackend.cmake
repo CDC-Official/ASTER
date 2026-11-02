@@ -44,6 +44,10 @@ if(ASTER_MATH_OPENLIBM)
 endif()
 add_library(aster_math_backend INTERFACE)
 add_library(ASTER::math_backend ALIAS aster_math_backend)
+# OpenLibm 由运行时加载，公共接口显式传播其构建依赖；Ninja 单目标构建也需生成共享库。
+if(ASTER_MATH_OPENLIBM)
+    add_dependencies(aster_math_backend openlibm)
+endif()
 target_include_directories(aster_math_backend INTERFACE "${PROJECT_SOURCE_DIR}/include" "${PROJECT_BINARY_DIR}/generated")
 # 显式传播对象，避免静态归档按需提取遗漏标准数学入口。
 target_link_libraries(aster_math_backend INTERFACE aster_math_backend_rules
