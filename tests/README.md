@@ -1,5 +1,9 @@
 # 最小算例与检查
 
+## 1.2.0 观测生成功能
+
+`generate_observations/` 保存原 CDC_lib LEO 配置、8,641 条星历与测站；`source.json` 记录实际来源及 SHA-256。复用的 `observation_runtime.py`、`observation_geometry.py`、`angular_noise_runtime.py` 检查观测和真值对齐、可见性与单位、输入错误、误差模型和固定种子复现。`check_observation_handoff.py` 将理论及带噪观测交给 GL/GLML 的实际入口。命令、输出位置和随机流区别见 [观测生成](../doc/observations.md)。
+
 ## 1.1.0 后端验收
 
 默认 OPENLIBM 使用 `math_backend_cases/run_checks.py` 的四个单 GL、两个完整 GLML 及其既有输入/科学输出哈希。七个普通程序使用原 `cases.json` 输入，由 `check_math_backend_apps.py` 按既有物理量门限比较；原始字节 fixture 保留。

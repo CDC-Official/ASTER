@@ -58,3 +58,21 @@ add_test(NAME math_backend_iod COMMAND "${Python3_EXECUTABLE}"
 set_tests_properties(math_backend_iod PROPERTIES TIMEOUT 1200)
 endif()
 add_test(NAME math_backend_sofa COMMAND aster_sofa_validation)
+
+# 复用原观测生成验收输入与几何、加噪检查。
+add_executable(aster_test_observation_geometry_probe core/observation_geometry_probe.cpp)
+target_link_libraries(aster_test_observation_geometry_probe PRIVATE ASTER::core)
+add_test(NAME observation_runtime COMMAND "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/observation_runtime.py"
+    --binary $<TARGET_FILE:aster_generate_observations> --project "${PROJECT_SOURCE_DIR}"
+    --jpl "${PROJECT_SOURCE_DIR}/data/ephemeris/JPLEPH_C.430")
+add_test(NAME observation_geometry COMMAND "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/observation_geometry.py"
+    --binary $<TARGET_FILE:aster_generate_observations>
+    --probe $<TARGET_FILE:aster_test_observation_geometry_probe> --project "${PROJECT_SOURCE_DIR}"
+    --jpl "${PROJECT_SOURCE_DIR}/data/ephemeris/JPLEPH_C.430")
+add_test(NAME observation_angular_noise COMMAND "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/angular_noise_runtime.py"
+    --script "${PROJECT_SOURCE_DIR}/tools/add_angular_noise.py")
+set_tests_properties(observation_runtime observation_geometry PROPERTIES TIMEOUT 120)
+set_tests_properties(observation_angular_noise PROPERTIES TIMEOUT 60)

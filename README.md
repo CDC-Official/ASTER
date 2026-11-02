@@ -1,10 +1,10 @@
-# ASTER 1.1.0
+# ASTER 1.2.0（开发中）
 
-ASTER 是用于轨道研究的个人 C++ 程序库。本版包含 GL、GLML 初轨确定，三套轨道预报、批处理定轨，以及三项轨道状态转换程序。科学计算采用现有工程中已整理的实现，最小算例集中在 `tests/`，配套科学数据保存在 `data/`。
+ASTER 是用于轨道研究的个人 C++ 程序库。本版包含 GL、GLML 初轨确定，三套轨道预报、批处理定轨，三项轨道状态转换程序，以及地基光学观测生成和配套加噪工具。科学计算采用现有工程中已整理的实现，最小算例集中在 `tests/`，配套科学数据保存在 `data/`。
 
 ## 构建和检查
 
-需要 CMake 3.26 或更新版本、支持 C++17 的 C/C++ 编译器、Boost 头文件和 OpenMP。Eigen 3.4.0、SOFA 2018-01-30 和官方 OpenLibm 0.8.8 源码及许可已随库保存。默认数学后端为 OPENLIBM，覆盖九程序与公共/SOFA 路径；已验证平台为 Mac arm64 / AppleClang 21 与 Linux x86_64 / GCC 13.3。
+需要 CMake 3.26 或更新版本、支持 C++17 的 C/C++ 编译器、Boost 头文件和 OpenMP。Eigen 3.4.0、SOFA 2018-01-30 和官方 OpenLibm 0.8.8 源码及许可已随库保存。默认数学后端为 OPENLIBM，覆盖各 C++ 程序与公共/SOFA 路径；已验证平台为 Mac arm64 / AppleClang 21 与 Linux x86_64 / GCC 13.3。
 
 ```sh
 cmake --preset release
@@ -29,6 +29,7 @@ python3 tests/math_backend_cases/run_checks.py --bin-dir build/release/bin --out
 
 | 可执行程序 | 主程序 |
 | --- | --- |
+| `aster_generate_observations` | `apps/observation/main_generate_observations.cpp` |
 | `aster_iod_gl` | `apps/iod/main_iod_gl.cpp` |
 | `aster_iod_glml` | `apps/iod/main_iod_glml.cpp` |
 | `aster_opn_cartesian` | `apps/opn/earth/main_opn_cartesian.cpp` |
@@ -39,12 +40,13 @@ python3 tests/math_backend_cases/run_checks.py --bin-dir build/release/bin --out
 | `aster_convert_cartesian_to_keplerian` | `apps/conversion/main_convert_cartesian_to_keplerian.cpp` |
 | `aster_convert_osculating_to_mean` | `apps/conversion/main_convert_osculating_to_mean.cpp` |
 
-每个程序支持 `--version`。配置型程序使用 `-I setting.txt`；两项 Keplerian/Cartesian 转换直接接收输入和输出文件路径，详见 [程序使用](doc/programs.md)。
+每个程序支持 `--version`。配置型程序使用 `-I setting.txt`；观测生成配置位于 `tests/generate_observations/setting.txt`，用法见 [观测生成](doc/observations.md)。两项 Keplerian/Cartesian 转换直接接收输入和输出文件路径，详见 [程序使用](doc/programs.md)。
 
 ## 目录
 
-`apps/` 保存九个主程序；`include/`、`src/` 保存公共接口与实现；`cmake/` 接入依赖；`third_party/` 保存固定版本源码及许可。`tests/` 包含小算例、科学结果参考和检查程序；`data/` 保存 EOP、JPL、重力场及大气数据；`doc/` 记录使用方式和版本来源。
+`apps/` 保存十个主程序；`include/`、`src/` 保存公共接口与实现；`cmake/` 接入依赖；`third_party/` 保存固定版本源码及许可。`tests/` 包含小算例、科学结果参考和检查程序；`data/` 保存 EOP、JPL、重力场及大气数据；`doc/` 记录使用方式和版本来源。
 
+- [观测生成、加噪和最小验证](doc/observations.md)
 - [科学数据及校验](data/README.md)
 - [测试和验证范围](tests/README.md)
 - [迁移来源与验收](doc/migration.md)

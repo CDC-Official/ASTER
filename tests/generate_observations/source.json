@@ -1,0 +1,19 @@
+{
+  "source_repository": "/Users/chendingcun/CLionProjects/CDC_lib",
+  "source_branch": "codex/cdc-build-cleanup",
+  "source_commit": "96dbe9d",
+  "source_state": "实际工作区；包含已核对的未提交修改",
+  "sha256": {
+    "apps/og/main_arcs.cpp": "3b1508e15a3eb1adf42baa568adb20e8cf8455f3e841d61adee163ef499148c0",
+    "include/model_observation.hpp": "11f7f565160a905afe410024af2a89b1f6213cc99de64c49d5e8bd3128ce5db6",
+    "src/model_observation.cpp": "7e707ba546923c488aeb05078734658255ef910d3f8fb9208065c72040fb0828",
+    "tools/add_angular_noise.py": "9c5e813939d9d883c0bd6e7aa9f99fe5cd057715ca828fdc5d07c78bc6c12b96",
+    "tests/observation_runtime.py": "e2e1689bb9c5526245801c3a372099153a9748ae354820a8a27691027dd63f44",
+    "tests/observation_geometry.py": "e55f22adec95d1572e2a18eb5a33d1103c9873242eca75077ebffd192ed32b24",
+    "tests/observation_geometry_probe.cpp": "e2a140242d253c9198e12c7d49ddabbb3580bd8abb692a7a94071c14fd90c233",
+    "tests/angular_noise_runtime.py": "d7c2b637c678dc51fbbb39215244d8b0321b83dc283ff19548f27522c1773120",
+    "cases/observation/ground-optical/setting.txt": "a9e6bc29f1ea82ec4116fc030117adab6c54cdc64b881c3db07b674c1fc2e402",
+    "cases/observation/ground-optical/data/orbit_keplerian.txt": "7636edb1e7717f9f67834dcebc207c73077fefa810da61db27c1b7feee7482a0",
+    "cases/observation/ground-optical/data/observers.txt": "f7d1f6c7f462178820c1bfc5fc9be443b7ed4bdb7d5599c3b7cddfe0fdef40e5"
+  }
+}

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.26)
-project(ASTER VERSION 1.1.0 LANGUAGES C CXX)
+project(ASTER VERSION 1.2.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -29,6 +29,7 @@ add_library(aster_core STATIC
     src/integrator_adams.cpp
     src/integrator_rkf78.cpp
     src/io_common.cpp
+    src/io_observation_arc.cpp
     src/io_settings.cpp
     src/math_basic.cpp
     src/math_statistics.cpp

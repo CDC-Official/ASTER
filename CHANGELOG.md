@@ -1,5 +1,12 @@
 # 版本记录
 
+## 1.2.0 — 开发中
+
+- 从 CDC_lib 当前实际入口迁入 `aster_generate_observations`：读取 Cartesian/Keplerian 星历和测站，逐历元使用 EOP，执行高度角、可选黑夜/地影筛选，生成理论 RA/Dec 弧段、同历元真值及可选完整观测。输入单位、ID 分弧和输出格式保持原定义。
+- 迁入 `tools/add_angular_noise.py`，保留东西/南北等标准差小角度模型、标准库随机流、原种子派生与来源记录。原 NumPy 论文批次使用另一随机流，seed 不作样本对应。
+- 新入口接入公共 OPENLIBM/SYSTEM 数学后端及版本查询；CMake 开发版本为 1.2.0。沿用 ASTER 的显式 `-I` 配置入口，替代旧程序的本机默认路径；弧段写出进入公共 `include/`、`src/`。
+- 复用原 LEO 算例与运行、几何、加噪验收，补充理论/带噪观测至 GL、GLML 的实际交接检查；用法见 [观测生成](doc/observations.md)。
+
 ## 1.1.0 — 2026-11-02
 
 - **公共数学后端**：九程序、公共 core 与 SOFA 共用 `math_backend`，通过 `ASTER_MATH_BACKEND=OPENLIBM/SYSTEM` 选择，默认官方 OpenLibm 0.8.8；`--version` 显示版本、后端和构建条件。

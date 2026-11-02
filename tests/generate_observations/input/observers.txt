@@ -1,0 +1,2 @@
+# id coordinate_type latitude_deg longitude_deg height_m
+1 1 41.725892 86.174633 943.0
