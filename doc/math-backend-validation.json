@@ -1,0 +1,2534 @@
+{
+  "date": "2026-11-02",
+  "branch": "dev/1.1.0",
+  "implementation_commits": [
+    "5b440b0",
+    "0cae26b"
+  ],
+  "cross_platform_goal_passed": true,
+  "native_closeness": "7 ordinary programs passed; e070 GL and GLML exceed unchanged physical limits on both platforms",
+  "true_orbit_accuracy": "no new full-simulation truth accuracy comparison; no claim that OpenLibm is scientifically more accurate",
+  "build_conditions": {
+    "common": {
+      "build": "Release",
+      "optimization": "-O3 -DNDEBUG",
+      "Eigen": "3.4.0",
+      "SOFA": "2018-01-30",
+      "OpenLibm": "official 0.8.8",
+      "Boost": "1.87.0",
+      "timing": "three interleaved wall-time runs, process startup/load/compute/output included",
+      "threads": {
+        "iod_gl": 1,
+        "iod_glml": 4,
+        "odn_batch": 2,
+        "opn_cartesian": 2,
+        "opn_nonsingular2": 2,
+        "opn_cislunar": 2,
+        "convert_osculating_to_mean": 2,
+        "convert_keplerian_to_cartesian": 2,
+        "convert_cartesian_to_keplerian": 2
+      },
+      "OMP_DYNAMIC": "FALSE",
+      "GLML_sample": "e070_s3_n020_m0002, seed=50781032, 10001 candidates",
+      "GL_sample": "existing e070 single-candidate fixture",
+      "other_samples": "existing tests/cases.json fixtures",
+      "openlibm_controls": [
+        "-fno-builtin-sin",
+        "-fno-builtin-cos",
+        "-fno-fast-math",
+        "-ffp-contract=off",
+        "EIGEN_DONT_VECTORIZE for C++"
+      ],
+      "system_controls": "toolchain-default builtin/FMA/Eigen; no OpenLibm entry implementation",
+      "source_sync": "43 selected source/input files byte-identical; math_backend.cpp differs only by a final blank line; final source alignment changes no compiled token"
+    },
+    "mac": {
+      "os": "macOS 26.6.2 (25G83)",
+      "architecture": "arm64",
+      "compiler": "AppleClang 21.0.0 (clang-2100.1.1.101)",
+      "cmake": "3.31.0",
+      "python": "3.9.6",
+      "repo": "/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0",
+      "compile_samples": {
+        "system": {
+          "core": "/Library/Developer/CommandLineTools/usr/bin/c++  -I/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/include -I/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/system/generated -isystem /usr/local/include/boost_1_87_0 -isystem /Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/third_party/eigen -isystem /Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/third_party/sofa/src -O3 -DNDEBUG -std=gnu++17 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -ffile-prefix-map=/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0=. -o CMakeFiles/aster_core.dir/src/core_iod_solver.cpp.o -c /Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/src/core_iod_solver.cpp",
+          "SOFA": "/Library/Developer/CommandLineTools/usr/bin/cc  -I/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/include -I/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/system/generated -isystem /Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/third_party/sofa/src -O3 -DNDEBUG -std=c99 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -ffile-prefix-map=/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0=. -o CMakeFiles/aster_sofa.dir/third_party/sofa/src/epv00.c.o -c /Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/third_party/sofa/src/epv00.c",
+          "app": "/Library/Developer/CommandLineTools/usr/bin/c++ -DASTER_PROGRAM_VERSION=\\\"1.1.0\\\" -I/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/include -I/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/system/generated -isystem /usr/local/include/boost_1_87_0 -isystem /Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/third_party/eigen -isystem /Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/third_party/sofa/src -O3 -DNDEBUG -std=gnu++17 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -ffile-prefix-map=/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0=. -o CMakeFiles/aster_opn_cartesian.dir/opn/earth/main_opn_cartesian.cpp.o -c /Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/apps/opn/earth/main_opn_cartesian.cpp",
+          "backend": "/Library/Developer/CommandLineTools/usr/bin/c++ -DASTER_MATH_BUILD_TYPE=\\\"Release\\\" -I/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/include -I/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/system/generated -O3 -DNDEBUG -std=gnu++17 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -ffile-prefix-map=/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0=. -o CMakeFiles/aster_math_backend_impl.dir/src/math_backend.cpp.o -c /Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/src/math_backend.cpp"
+        },
+        "openlibm": {
+          "core": "/Library/Developer/CommandLineTools/usr/bin/c++ -DEIGEN_DONT_VECTORIZE -I/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/include -I/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/openlibm/generated -isystem /usr/local/include/boost_1_87_0 -isystem /Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/third_party/eigen -isystem /Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/third_party/sofa/src -O3 -DNDEBUG -std=gnu++17 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -fno-builtin-sin -fno-builtin-cos -fno-fast-math -ffp-contract=off -ffile-prefix-map=/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0=. -o CMakeFiles/aster_core.dir/src/core_iod_solver.cpp.o -c /Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/src/core_iod_solver.cpp",
+          "SOFA": "/Library/Developer/CommandLineTools/usr/bin/cc  -I/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/include -I/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/openlibm/generated -isystem /Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/third_party/sofa/src -O3 -DNDEBUG -std=c99 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -fno-builtin-sin -fno-builtin-cos -fno-fast-math -ffp-contract=off -ffile-prefix-map=/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0=. -o CMakeFiles/aster_sofa.dir/third_party/sofa/src/epv00.c.o -c /Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/third_party/sofa/src/epv00.c",
+          "app": "/Library/Developer/CommandLineTools/usr/bin/c++ -DASTER_PROGRAM_VERSION=\\\"1.1.0\\\" -DEIGEN_DONT_VECTORIZE -I/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/include -I/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/openlibm/generated -isystem /usr/local/include/boost_1_87_0 -isystem /Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/third_party/eigen -isystem /Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/third_party/sofa/src -O3 -DNDEBUG -std=gnu++17 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -fno-builtin-sin -fno-builtin-cos -fno-fast-math -ffp-contract=off -ffile-prefix-map=/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0=. -o CMakeFiles/aster_opn_cartesian.dir/opn/earth/main_opn_cartesian.cpp.o -c /Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/apps/opn/earth/main_opn_cartesian.cpp",
+          "backend": "/Library/Developer/CommandLineTools/usr/bin/c++ -DASTER_MATH_BUILD_TYPE=\\\"Release\\\" -DASTER_OPENLIBM_NAME=\\\"libopenlibm.dylib\\\" -DEIGEN_DONT_VECTORIZE -I/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/include -I/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/openlibm/generated -O3 -DNDEBUG -std=gnu++17 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -fno-builtin-sin -fno-builtin-cos -fno-fast-math -ffp-contract=off -ffile-prefix-map=/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0=. -o CMakeFiles/aster_math_backend_impl.dir/src/math_backend.cpp.o -c /Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/src/math_backend.cpp"
+        }
+      },
+      "audit": {
+        "math_undefined": {
+          "aster_convert_cartesian_to_keplerian": [],
+          "aster_convert_keplerian_to_cartesian": [],
+          "aster_convert_osculating_to_mean": [],
+          "aster_iod_gl": [],
+          "aster_iod_glml": [],
+          "aster_odn_batch": [],
+          "aster_opn_cartesian": [],
+          "aster_opn_cislunar": [],
+          "aster_opn_nonsingular2": [],
+          "aster_sofa_validation": [],
+          "aster_test_adams_safety": [],
+          "aster_test_batch_determination": [],
+          "aster_test_batch_parameters": [],
+          "aster_test_frame_coordinates": [],
+          "aster_test_iod_eccentricity": [],
+          "aster_test_orbit_averaging": [],
+          "aster_test_rkf78_safety": []
+        },
+        "single_gl": {
+          "e070": {
+            "same_trace": true,
+            "exit": 0,
+            "Qp": -1,
+            "flag": "-1"
+          },
+          "BDS": {
+            "same_trace": true,
+            "exit": 0,
+            "Qp": -1,
+            "flag": "-1"
+          },
+          "converged": {
+            "same_trace": true,
+            "exit": 0,
+            "Qp": -1,
+            "flag": "10"
+          },
+          "rejected": {
+            "same_trace": true,
+            "exit": 1,
+            "Qp": -1,
+            "flag": "-1"
+          }
+        },
+        "provider": "/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/openlibm/bin/libopenlibm.dylib"
+      },
+      "cpu": "Apple M1",
+      "memory_bytes": 17179869184,
+      "link_commands": {
+        "build/openlibm/apps/CMakeFiles/aster_iod_glml.dir/link.txt": "/Library/Developer/CommandLineTools/usr/bin/c++ -O3 -DNDEBUG -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/aster_iod_glml.dir/iod/main_iod_glml.cpp.o -o ../bin/aster_iod_glml  ../CMakeFiles/aster_math_backend_impl.dir/src/math_backend.cpp.o ../libaster_core.a ../libaster_sofa.a -lm /opt/homebrew/opt/libomp/lib/libomp.dylib",
+        "build/openlibm/third_party/openlibm/CMakeFiles/openlibm.dir/link.txt": "/Library/Developer/CommandLineTools/usr/bin/cc -O3 -DNDEBUG -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -dynamiclib -Wl,-headerpad_max_install_names -o ../../bin/libopenlibm.dylib -install_name @rpath/libopenlibm.dylib CMakeFiles/openlibm.dir/src/common.c.o CMakeFiles/openlibm.dir/src/e_acos.c.o CMakeFiles/openlibm.dir/src/e_acosf.c.o CMakeFiles/openlibm.dir/src/e_acosh.c.o CMakeFiles/openlibm.dir/src/e_acoshf.c.o CMakeFiles/openlibm.dir/src/e_asin.c.o CMakeFiles/openlibm.dir/src/e_asinf.c.o CMakeFiles/openlibm.dir/src/e_atan2.c.o CMakeFiles/openlibm.dir/src/e_atan2f.c.o CMakeFiles/openlibm.dir/src/e_atanh.c.o CMakeFiles/openlibm.dir/src/e_atanhf.c.o CMakeFiles/openlibm.dir/src/e_cosh.c.o CMakeFiles/openlibm.dir/src/e_coshf.c.o CMakeFiles/openlibm.dir/src/e_exp.c.o CMakeFiles/openlibm.dir/src/e_expf.c.o CMakeFiles/openlibm.dir/src/e_fmod.c.o CMakeFiles/openlibm.dir/src/e_fmodf.c.o CMakeFiles/openlibm.dir/src/e_hypot.c.o CMakeFiles/openlibm.dir/src/e_hypotf.c.o CMakeFiles/openlibm.dir/src/e_j0.c.o CMakeFiles/openlibm.dir/src/e_j0f.c.o CMakeFiles/openlibm.dir/src/e_j1.c.o CMakeFiles/openlibm.dir/src/e_j1f.c.o CMakeFiles/openlibm.dir/src/e_jn.c.o CMakeFiles/openlibm.dir/src/e_jnf.c.o CMakeFiles/openlibm.dir/src/e_lgamma.c.o CMakeFiles/openlibm.dir/src/e_lgamma_r.c.o CMakeFiles/openlibm.dir/src/e_lgammaf.c.o CMakeFiles/openlibm.dir/src/e_lgammaf_r.c.o CMakeFiles/openlibm.dir/src/e_log.c.o CMakeFiles/openlibm.dir/src/e_log10.c.o CMakeFiles/openlibm.dir/src/e_log10f.c.o CMakeFiles/openlibm.dir/src/e_log2.c.o CMakeFiles/openlibm.dir/src/e_log2f.c.o CMakeFiles/openlibm.dir/src/e_logf.c.o CMakeFiles/openlibm.dir/src/e_pow.c.o CMakeFiles/openlibm.dir/src/e_powf.c.o CMakeFiles/openlibm.dir/src/e_remainder.c.o CMakeFiles/openlibm.dir/src/e_remainderf.c.o CMakeFiles/openlibm.dir/src/e_rem_pio2.c.o CMakeFiles/openlibm.dir/src/e_rem_pio2f.c.o CMakeFiles/openlibm.dir/src/e_sinh.c.o CMakeFiles/openlibm.dir/src/e_sinhf.c.o CMakeFiles/openlibm.dir/src/e_sqrt.c.o CMakeFiles/openlibm.dir/src/e_sqrtf.c.o CMakeFiles/openlibm.dir/src/k_cos.c.o CMakeFiles/openlibm.dir/src/k_exp.c.o CMakeFiles/openlibm.dir/src/k_expf.c.o CMakeFiles/openlibm.dir/src/k_rem_pio2.c.o CMakeFiles/openlibm.dir/src/k_sin.c.o CMakeFiles/openlibm.dir/src/k_tan.c.o CMakeFiles/openlibm.dir/src/k_cosf.c.o CMakeFiles/openlibm.dir/src/k_sinf.c.o CMakeFiles/openlibm.dir/src/k_tanf.c.o CMakeFiles/openlibm.dir/src/s_asinh.c.o CMakeFiles/openlibm.dir/src/s_asinhf.c.o CMakeFiles/openlibm.dir/src/s_atan.c.o CMakeFiles/openlibm.dir/src/s_atanf.c.o CMakeFiles/openlibm.dir/src/s_carg.c.o CMakeFiles/openlibm.dir/src/s_cargf.c.o CMakeFiles/openlibm.dir/src/s_cbrt.c.o CMakeFiles/openlibm.dir/src/s_cbrtf.c.o CMakeFiles/openlibm.dir/src/s_ceil.c.o CMakeFiles/openlibm.dir/src/s_ceilf.c.o CMakeFiles/openlibm.dir/src/s_copysign.c.o CMakeFiles/openlibm.dir/src/s_copysignf.c.o CMakeFiles/openlibm.dir/src/s_cos.c.o CMakeFiles/openlibm.dir/src/s_cosf.c.o CMakeFiles/openlibm.dir/src/s_csqrt.c.o CMakeFiles/openlibm.dir/src/s_csqrtf.c.o CMakeFiles/openlibm.dir/src/s_erf.c.o CMakeFiles/openlibm.dir/src/s_erff.c.o CMakeFiles/openlibm.dir/src/s_exp2.c.o CMakeFiles/openlibm.dir/src/s_exp2f.c.o CMakeFiles/openlibm.dir/src/s_expm1.c.o CMakeFiles/openlibm.dir/src/s_expm1f.c.o CMakeFiles/openlibm.dir/src/s_fabs.c.o CMakeFiles/openlibm.dir/src/s_fabsf.c.o CMakeFiles/openlibm.dir/src/s_fdim.c.o CMakeFiles/openlibm.dir/src/s_floor.c.o CMakeFiles/openlibm.dir/src/s_floorf.c.o CMakeFiles/openlibm.dir/src/s_fmax.c.o CMakeFiles/openlibm.dir/src/s_fmaxf.c.o CMakeFiles/openlibm.dir/src/s_fmin.c.o CMakeFiles/openlibm.dir/src/s_fminf.c.o CMakeFiles/openlibm.dir/src/s_fpclassify.c.o CMakeFiles/openlibm.dir/src/s_frexp.c.o CMakeFiles/openlibm.dir/src/s_frexpf.c.o CMakeFiles/openlibm.dir/src/s_ilogb.c.o CMakeFiles/openlibm.dir/src/s_ilogbf.c.o CMakeFiles/openlibm.dir/src/s_isinf.c.o CMakeFiles/openlibm.dir/src/s_isfinite.c.o CMakeFiles/openlibm.dir/src/s_isnormal.c.o CMakeFiles/openlibm.dir/src/s_isnan.c.o CMakeFiles/openlibm.dir/src/s_log1p.c.o CMakeFiles/openlibm.dir/src/s_log1pf.c.o CMakeFiles/openlibm.dir/src/s_logb.c.o CMakeFiles/openlibm.dir/src/s_logbf.c.o CMakeFiles/openlibm.dir/src/s_modf.c.o CMakeFiles/openlibm.dir/src/s_modff.c.o CMakeFiles/openlibm.dir/src/s_nextafter.c.o CMakeFiles/openlibm.dir/src/s_nextafterf.c.o CMakeFiles/openlibm.dir/src/s_nexttowardf.c.o CMakeFiles/openlibm.dir/src/s_remquo.c.o CMakeFiles/openlibm.dir/src/s_remquof.c.o CMakeFiles/openlibm.dir/src/s_rint.c.o CMakeFiles/openlibm.dir/src/s_rintf.c.o CMakeFiles/openlibm.dir/src/s_round.c.o CMakeFiles/openlibm.dir/src/s_roundf.c.o CMakeFiles/openlibm.dir/src/s_scalbln.c.o CMakeFiles/openlibm.dir/src/s_scalbn.c.o CMakeFiles/openlibm.dir/src/s_scalbnf.c.o CMakeFiles/openlibm.dir/src/s_signbit.c.o CMakeFiles/openlibm.dir/src/s_signgam.c.o CMakeFiles/openlibm.dir/src/s_sin.c.o CMakeFiles/openlibm.dir/src/s_sincos.c.o CMakeFiles/openlibm.dir/src/s_sinf.c.o CMakeFiles/openlibm.dir/src/s_sincosf.c.o CMakeFiles/openlibm.dir/src/s_tan.c.o CMakeFiles/openlibm.dir/src/s_tanf.c.o CMakeFiles/openlibm.dir/src/s_tanh.c.o CMakeFiles/openlibm.dir/src/s_tanhf.c.o CMakeFiles/openlibm.dir/src/s_tgammaf.c.o CMakeFiles/openlibm.dir/src/s_trunc.c.o CMakeFiles/openlibm.dir/src/s_truncf.c.o CMakeFiles/openlibm.dir/src/s_cpow.c.o CMakeFiles/openlibm.dir/src/s_cpowf.c.o CMakeFiles/openlibm.dir/src/w_cabs.c.o CMakeFiles/openlibm.dir/src/w_cabsf.c.o CMakeFiles/openlibm.dir/src/s_fma.c.o CMakeFiles/openlibm.dir/src/s_fmaf.c.o CMakeFiles/openlibm.dir/src/s_lrint.c.o CMakeFiles/openlibm.dir/src/s_lrintf.c.o CMakeFiles/openlibm.dir/src/s_lround.c.o CMakeFiles/openlibm.dir/src/s_lroundf.c.o CMakeFiles/openlibm.dir/src/s_llrint.c.o CMakeFiles/openlibm.dir/src/s_llrintf.c.o CMakeFiles/openlibm.dir/src/s_llround.c.o CMakeFiles/openlibm.dir/src/s_llroundf.c.o CMakeFiles/openlibm.dir/src/s_nearbyint.c.o CMakeFiles/openlibm.dir/src/s_ccosh.c.o CMakeFiles/openlibm.dir/src/s_ccoshf.c.o CMakeFiles/openlibm.dir/src/s_cexp.c.o CMakeFiles/openlibm.dir/src/s_cexpf.c.o CMakeFiles/openlibm.dir/src/s_cimag.c.o CMakeFiles/openlibm.dir/src/s_cimagf.c.o CMakeFiles/openlibm.dir/src/s_conj.c.o CMakeFiles/openlibm.dir/src/s_conjf.c.o CMakeFiles/openlibm.dir/src/s_cproj.c.o CMakeFiles/openlibm.dir/src/s_cprojf.c.o CMakeFiles/openlibm.dir/src/s_creal.c.o CMakeFiles/openlibm.dir/src/s_crealf.c.o CMakeFiles/openlibm.dir/src/s_csinh.c.o CMakeFiles/openlibm.dir/src/s_csinhf.c.o CMakeFiles/openlibm.dir/src/s_ctanh.c.o CMakeFiles/openlibm.dir/src/s_ctanhf.c.o CMakeFiles/openlibm.dir/src/s_cacos.c.o CMakeFiles/openlibm.dir/src/s_cacosf.c.o CMakeFiles/openlibm.dir/src/s_cacosh.c.o CMakeFiles/openlibm.dir/src/s_cacoshf.c.o CMakeFiles/openlibm.dir/src/s_casin.c.o CMakeFiles/openlibm.dir/src/s_casinf.c.o CMakeFiles/openlibm.dir/src/s_casinh.c.o CMakeFiles/openlibm.dir/src/s_casinhf.c.o CMakeFiles/openlibm.dir/src/s_catan.c.o CMakeFiles/openlibm.dir/src/s_catanf.c.o CMakeFiles/openlibm.dir/src/s_catanh.c.o CMakeFiles/openlibm.dir/src/s_catanhf.c.o CMakeFiles/openlibm.dir/src/s_clog.c.o CMakeFiles/openlibm.dir/src/s_clogf.c.o CMakeFiles/openlibm.dir/bsdsrc/b_exp.c.o CMakeFiles/openlibm.dir/bsdsrc/b_log.c.o CMakeFiles/openlibm.dir/bsdsrc/b_tgamma.c.o CMakeFiles/openlibm.dir/src/s_nan.c.o CMakeFiles/openlibm.dir/aarch64/fenv.c.o"
+      },
+      "library_sha256": "20e8a7b4c58cd16d5adc5bae66037ecf3d6e257c8a63ab88c3de60101c17e175"
+    },
+    "linux": {
+      "os": "Linux 6.17.0-1017-oem",
+      "architecture": "x86_64",
+      "cpu": "Intel Xeon Gold 6430",
+      "compiler": "GNU 13.3.0",
+      "cmake": "3.28.3",
+      "python": "3.12.3",
+      "repo": "/home/cdc/projects/ASTER-dev-1.1.0",
+      "compile_samples": {
+        "system": {
+          "core": "/usr/bin/c++  -I/home/cdc/projects/ASTER-dev-1.1.0/include -I/home/cdc/projects/ASTER-dev-1.1.0/build/system/generated -isystem /home/cdc/projects/aster-deployment-20261101/dependencies/boost_1_87_0 -isystem /home/cdc/projects/ASTER-dev-1.1.0/third_party/eigen -isystem /home/cdc/projects/ASTER-dev-1.1.0/third_party/sofa/src -O3 -DNDEBUG -std=gnu++17 -ffile-prefix-map=/home/cdc/projects/ASTER-dev-1.1.0=. -o CMakeFiles/aster_core.dir/src/core_iod_solver.cpp.o -c /home/cdc/projects/ASTER-dev-1.1.0/src/core_iod_solver.cpp",
+          "SOFA": "/usr/bin/cc  -I/home/cdc/projects/ASTER-dev-1.1.0/include -I/home/cdc/projects/ASTER-dev-1.1.0/build/system/generated -isystem /home/cdc/projects/ASTER-dev-1.1.0/third_party/sofa/src -O3 -DNDEBUG -std=c99 -ffile-prefix-map=/home/cdc/projects/ASTER-dev-1.1.0=. -o CMakeFiles/aster_sofa.dir/third_party/sofa/src/epv00.c.o -c /home/cdc/projects/ASTER-dev-1.1.0/third_party/sofa/src/epv00.c",
+          "app": "/usr/bin/c++ -DASTER_PROGRAM_VERSION=\\\"1.1.0\\\" -I/home/cdc/projects/ASTER-dev-1.1.0/include -I/home/cdc/projects/ASTER-dev-1.1.0/build/system/generated -isystem /home/cdc/projects/aster-deployment-20261101/dependencies/boost_1_87_0 -isystem /home/cdc/projects/ASTER-dev-1.1.0/third_party/eigen -isystem /home/cdc/projects/ASTER-dev-1.1.0/third_party/sofa/src -O3 -DNDEBUG -std=gnu++17 -ffile-prefix-map=/home/cdc/projects/ASTER-dev-1.1.0=. -o CMakeFiles/aster_opn_cartesian.dir/opn/earth/main_opn_cartesian.cpp.o -c /home/cdc/projects/ASTER-dev-1.1.0/apps/opn/earth/main_opn_cartesian.cpp",
+          "backend": "/usr/bin/c++ -DASTER_MATH_BUILD_TYPE=\\\"Release\\\" -I/home/cdc/projects/ASTER-dev-1.1.0/include -I/home/cdc/projects/ASTER-dev-1.1.0/build/system/generated -O3 -DNDEBUG -std=gnu++17 -ffile-prefix-map=/home/cdc/projects/ASTER-dev-1.1.0=. -o CMakeFiles/aster_math_backend_impl.dir/src/math_backend.cpp.o -c /home/cdc/projects/ASTER-dev-1.1.0/src/math_backend.cpp"
+        },
+        "openlibm": {
+          "core": "/usr/bin/c++ -DEIGEN_DONT_VECTORIZE -I/home/cdc/projects/ASTER-dev-1.1.0/include -I/home/cdc/projects/ASTER-dev-1.1.0/build/openlibm/generated -isystem /home/cdc/projects/aster-deployment-20261101/dependencies/boost_1_87_0 -isystem /home/cdc/projects/ASTER-dev-1.1.0/third_party/eigen -isystem /home/cdc/projects/ASTER-dev-1.1.0/third_party/sofa/src -O3 -DNDEBUG -std=gnu++17 -fno-builtin-sin -fno-builtin-cos -fno-fast-math -ffp-contract=off -ffile-prefix-map=/home/cdc/projects/ASTER-dev-1.1.0=. -o CMakeFiles/aster_core.dir/src/core_iod_solver.cpp.o -c /home/cdc/projects/ASTER-dev-1.1.0/src/core_iod_solver.cpp",
+          "SOFA": "/usr/bin/cc  -I/home/cdc/projects/ASTER-dev-1.1.0/include -I/home/cdc/projects/ASTER-dev-1.1.0/build/openlibm/generated -isystem /home/cdc/projects/ASTER-dev-1.1.0/third_party/sofa/src -O3 -DNDEBUG -std=c99 -fno-builtin-sin -fno-builtin-cos -fno-fast-math -ffp-contract=off -ffile-prefix-map=/home/cdc/projects/ASTER-dev-1.1.0=. -o CMakeFiles/aster_sofa.dir/third_party/sofa/src/epv00.c.o -c /home/cdc/projects/ASTER-dev-1.1.0/third_party/sofa/src/epv00.c",
+          "app": "/usr/bin/c++ -DASTER_PROGRAM_VERSION=\\\"1.1.0\\\" -DEIGEN_DONT_VECTORIZE -I/home/cdc/projects/ASTER-dev-1.1.0/include -I/home/cdc/projects/ASTER-dev-1.1.0/build/openlibm/generated -isystem /home/cdc/projects/aster-deployment-20261101/dependencies/boost_1_87_0 -isystem /home/cdc/projects/ASTER-dev-1.1.0/third_party/eigen -isystem /home/cdc/projects/ASTER-dev-1.1.0/third_party/sofa/src -O3 -DNDEBUG -std=gnu++17 -fno-builtin-sin -fno-builtin-cos -fno-fast-math -ffp-contract=off -ffile-prefix-map=/home/cdc/projects/ASTER-dev-1.1.0=. -o CMakeFiles/aster_opn_cartesian.dir/opn/earth/main_opn_cartesian.cpp.o -c /home/cdc/projects/ASTER-dev-1.1.0/apps/opn/earth/main_opn_cartesian.cpp",
+          "backend": "/usr/bin/c++ -DASTER_MATH_BUILD_TYPE=\\\"Release\\\" -DASTER_OPENLIBM_NAME=\\\"libopenlibm.so\\\" -DEIGEN_DONT_VECTORIZE -I/home/cdc/projects/ASTER-dev-1.1.0/include -I/home/cdc/projects/ASTER-dev-1.1.0/build/openlibm/generated -O3 -DNDEBUG -std=gnu++17 -fno-builtin-sin -fno-builtin-cos -fno-fast-math -ffp-contract=off -ffile-prefix-map=/home/cdc/projects/ASTER-dev-1.1.0=. -o CMakeFiles/aster_math_backend_impl.dir/src/math_backend.cpp.o -c /home/cdc/projects/ASTER-dev-1.1.0/src/math_backend.cpp"
+        }
+      },
+      "audit": {
+        "math_undefined": {
+          "aster_convert_cartesian_to_keplerian": [],
+          "aster_convert_keplerian_to_cartesian": [],
+          "aster_convert_osculating_to_mean": [],
+          "aster_iod_gl": [],
+          "aster_iod_glml": [],
+          "aster_odn_batch": [],
+          "aster_opn_cartesian": [],
+          "aster_opn_cislunar": [],
+          "aster_opn_nonsingular2": [],
+          "aster_sofa_validation": [],
+          "aster_test_adams_safety": [],
+          "aster_test_batch_determination": [],
+          "aster_test_batch_parameters": [],
+          "aster_test_frame_coordinates": [],
+          "aster_test_iod_eccentricity": [],
+          "aster_test_orbit_averaging": [],
+          "aster_test_rkf78_safety": []
+        },
+        "single_gl": {
+          "e070": {
+            "same_trace": true,
+            "exit": 0,
+            "Qp": -1,
+            "flag": "-1"
+          },
+          "BDS": {
+            "same_trace": true,
+            "exit": 0,
+            "Qp": -1,
+            "flag": "-1"
+          },
+          "converged": {
+            "same_trace": true,
+            "exit": 0,
+            "Qp": -1,
+            "flag": "10"
+          },
+          "rejected": {
+            "same_trace": true,
+            "exit": 1,
+            "Qp": -1,
+            "flag": "-1"
+          }
+        },
+        "provider": "/home/cdc/projects/ASTER-dev-1.1.0/build/openlibm/bin/libopenlibm.so"
+      },
+      "link_commands": {
+        "build/openlibm/apps/CMakeFiles/aster_iod_glml.dir/link.txt": "/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/aster_iod_glml.dir/iod/main_iod_glml.cpp.o -o ../bin/aster_iod_glml  ../CMakeFiles/aster_math_backend_impl.dir/src/math_backend.cpp.o ../libaster_core.a ../libaster_sofa.a -lm -ldl /usr/lib/gcc/x86_64-linux-gnu/13/libgomp.so /usr/lib/x86_64-linux-gnu/libpthread.a",
+        "build/openlibm/third_party/openlibm/CMakeFiles/openlibm.dir/link.txt": "/usr/bin/cc -fPIC -O3 -DNDEBUG -Wl,-Bsymbolic-functions -shared -Wl,-soname,libopenlibm.so -o ../../bin/libopenlibm.so CMakeFiles/openlibm.dir/src/common.c.o CMakeFiles/openlibm.dir/src/e_acos.c.o CMakeFiles/openlibm.dir/src/e_acosf.c.o CMakeFiles/openlibm.dir/src/e_acosh.c.o CMakeFiles/openlibm.dir/src/e_acoshf.c.o CMakeFiles/openlibm.dir/src/e_asin.c.o CMakeFiles/openlibm.dir/src/e_asinf.c.o CMakeFiles/openlibm.dir/src/e_atan2.c.o CMakeFiles/openlibm.dir/src/e_atan2f.c.o CMakeFiles/openlibm.dir/src/e_atanh.c.o CMakeFiles/openlibm.dir/src/e_atanhf.c.o CMakeFiles/openlibm.dir/src/e_cosh.c.o CMakeFiles/openlibm.dir/src/e_coshf.c.o CMakeFiles/openlibm.dir/src/e_exp.c.o CMakeFiles/openlibm.dir/src/e_expf.c.o CMakeFiles/openlibm.dir/src/e_hypot.c.o CMakeFiles/openlibm.dir/src/e_hypotf.c.o CMakeFiles/openlibm.dir/src/e_j0.c.o CMakeFiles/openlibm.dir/src/e_j0f.c.o CMakeFiles/openlibm.dir/src/e_j1.c.o CMakeFiles/openlibm.dir/src/e_j1f.c.o CMakeFiles/openlibm.dir/src/e_jn.c.o CMakeFiles/openlibm.dir/src/e_jnf.c.o CMakeFiles/openlibm.dir/src/e_lgamma.c.o CMakeFiles/openlibm.dir/src/e_lgamma_r.c.o CMakeFiles/openlibm.dir/src/e_lgammaf.c.o CMakeFiles/openlibm.dir/src/e_lgammaf_r.c.o CMakeFiles/openlibm.dir/src/e_log.c.o CMakeFiles/openlibm.dir/src/e_log10.c.o CMakeFiles/openlibm.dir/src/e_log10f.c.o CMakeFiles/openlibm.dir/src/e_log2.c.o CMakeFiles/openlibm.dir/src/e_log2f.c.o CMakeFiles/openlibm.dir/src/e_logf.c.o CMakeFiles/openlibm.dir/src/e_pow.c.o CMakeFiles/openlibm.dir/src/e_powf.c.o CMakeFiles/openlibm.dir/src/e_rem_pio2.c.o CMakeFiles/openlibm.dir/src/e_rem_pio2f.c.o CMakeFiles/openlibm.dir/src/e_sinh.c.o CMakeFiles/openlibm.dir/src/e_sinhf.c.o CMakeFiles/openlibm.dir/src/k_cos.c.o CMakeFiles/openlibm.dir/src/k_exp.c.o CMakeFiles/openlibm.dir/src/k_expf.c.o CMakeFiles/openlibm.dir/src/k_rem_pio2.c.o CMakeFiles/openlibm.dir/src/k_sin.c.o CMakeFiles/openlibm.dir/src/k_tan.c.o CMakeFiles/openlibm.dir/src/k_cosf.c.o CMakeFiles/openlibm.dir/src/k_sinf.c.o CMakeFiles/openlibm.dir/src/k_tanf.c.o CMakeFiles/openlibm.dir/src/s_asinh.c.o CMakeFiles/openlibm.dir/src/s_asinhf.c.o CMakeFiles/openlibm.dir/src/s_atan.c.o CMakeFiles/openlibm.dir/src/s_atanf.c.o CMakeFiles/openlibm.dir/src/s_carg.c.o CMakeFiles/openlibm.dir/src/s_cargf.c.o CMakeFiles/openlibm.dir/src/s_cbrt.c.o CMakeFiles/openlibm.dir/src/s_cbrtf.c.o CMakeFiles/openlibm.dir/src/s_ceil.c.o CMakeFiles/openlibm.dir/src/s_ceilf.c.o CMakeFiles/openlibm.dir/src/s_copysign.c.o CMakeFiles/openlibm.dir/src/s_copysignf.c.o CMakeFiles/openlibm.dir/src/s_cos.c.o CMakeFiles/openlibm.dir/src/s_cosf.c.o CMakeFiles/openlibm.dir/src/s_csqrt.c.o CMakeFiles/openlibm.dir/src/s_csqrtf.c.o CMakeFiles/openlibm.dir/src/s_erf.c.o CMakeFiles/openlibm.dir/src/s_erff.c.o CMakeFiles/openlibm.dir/src/s_exp2.c.o CMakeFiles/openlibm.dir/src/s_exp2f.c.o CMakeFiles/openlibm.dir/src/s_expm1.c.o CMakeFiles/openlibm.dir/src/s_expm1f.c.o CMakeFiles/openlibm.dir/src/s_fabs.c.o CMakeFiles/openlibm.dir/src/s_fabsf.c.o CMakeFiles/openlibm.dir/src/s_fdim.c.o CMakeFiles/openlibm.dir/src/s_floor.c.o CMakeFiles/openlibm.dir/src/s_floorf.c.o CMakeFiles/openlibm.dir/src/s_fmax.c.o CMakeFiles/openlibm.dir/src/s_fmaxf.c.o CMakeFiles/openlibm.dir/src/s_fmin.c.o CMakeFiles/openlibm.dir/src/s_fminf.c.o CMakeFiles/openlibm.dir/src/s_fpclassify.c.o CMakeFiles/openlibm.dir/src/s_frexp.c.o CMakeFiles/openlibm.dir/src/s_frexpf.c.o CMakeFiles/openlibm.dir/src/s_ilogb.c.o CMakeFiles/openlibm.dir/src/s_ilogbf.c.o CMakeFiles/openlibm.dir/src/s_isinf.c.o CMakeFiles/openlibm.dir/src/s_isfinite.c.o CMakeFiles/openlibm.dir/src/s_isnormal.c.o CMakeFiles/openlibm.dir/src/s_isnan.c.o CMakeFiles/openlibm.dir/src/s_log1p.c.o CMakeFiles/openlibm.dir/src/s_log1pf.c.o CMakeFiles/openlibm.dir/src/s_logb.c.o CMakeFiles/openlibm.dir/src/s_logbf.c.o CMakeFiles/openlibm.dir/src/s_modf.c.o CMakeFiles/openlibm.dir/src/s_modff.c.o CMakeFiles/openlibm.dir/src/s_nextafter.c.o CMakeFiles/openlibm.dir/src/s_nextafterf.c.o CMakeFiles/openlibm.dir/src/s_nexttowardf.c.o CMakeFiles/openlibm.dir/src/s_rint.c.o CMakeFiles/openlibm.dir/src/s_rintf.c.o CMakeFiles/openlibm.dir/src/s_round.c.o CMakeFiles/openlibm.dir/src/s_roundf.c.o CMakeFiles/openlibm.dir/src/s_scalbln.c.o CMakeFiles/openlibm.dir/src/s_signbit.c.o CMakeFiles/openlibm.dir/src/s_signgam.c.o CMakeFiles/openlibm.dir/src/s_sin.c.o CMakeFiles/openlibm.dir/src/s_sincos.c.o CMakeFiles/openlibm.dir/src/s_sinf.c.o CMakeFiles/openlibm.dir/src/s_sincosf.c.o CMakeFiles/openlibm.dir/src/s_tan.c.o CMakeFiles/openlibm.dir/src/s_tanf.c.o CMakeFiles/openlibm.dir/src/s_tanh.c.o CMakeFiles/openlibm.dir/src/s_tanhf.c.o CMakeFiles/openlibm.dir/src/s_tgammaf.c.o CMakeFiles/openlibm.dir/src/s_trunc.c.o CMakeFiles/openlibm.dir/src/s_truncf.c.o CMakeFiles/openlibm.dir/src/s_cpow.c.o CMakeFiles/openlibm.dir/src/s_cpowf.c.o CMakeFiles/openlibm.dir/src/w_cabs.c.o CMakeFiles/openlibm.dir/src/w_cabsf.c.o CMakeFiles/openlibm.dir/src/s_fma.c.o CMakeFiles/openlibm.dir/src/s_fmaf.c.o CMakeFiles/openlibm.dir/src/s_lround.c.o CMakeFiles/openlibm.dir/src/s_lroundf.c.o CMakeFiles/openlibm.dir/src/s_llround.c.o CMakeFiles/openlibm.dir/src/s_llroundf.c.o CMakeFiles/openlibm.dir/src/s_nearbyint.c.o CMakeFiles/openlibm.dir/src/s_ccosh.c.o CMakeFiles/openlibm.dir/src/s_ccoshf.c.o CMakeFiles/openlibm.dir/src/s_cexp.c.o CMakeFiles/openlibm.dir/src/s_cexpf.c.o CMakeFiles/openlibm.dir/src/s_cimag.c.o CMakeFiles/openlibm.dir/src/s_cimagf.c.o CMakeFiles/openlibm.dir/src/s_conj.c.o CMakeFiles/openlibm.dir/src/s_conjf.c.o CMakeFiles/openlibm.dir/src/s_cproj.c.o CMakeFiles/openlibm.dir/src/s_cprojf.c.o CMakeFiles/openlibm.dir/src/s_creal.c.o CMakeFiles/openlibm.dir/src/s_crealf.c.o CMakeFiles/openlibm.dir/src/s_csinh.c.o CMakeFiles/openlibm.dir/src/s_csinhf.c.o CMakeFiles/openlibm.dir/src/s_ctanh.c.o CMakeFiles/openlibm.dir/src/s_ctanhf.c.o CMakeFiles/openlibm.dir/src/s_cacos.c.o CMakeFiles/openlibm.dir/src/s_cacosf.c.o CMakeFiles/openlibm.dir/src/s_cacosh.c.o CMakeFiles/openlibm.dir/src/s_cacoshf.c.o CMakeFiles/openlibm.dir/src/s_casin.c.o CMakeFiles/openlibm.dir/src/s_casinf.c.o CMakeFiles/openlibm.dir/src/s_casinh.c.o CMakeFiles/openlibm.dir/src/s_casinhf.c.o CMakeFiles/openlibm.dir/src/s_catan.c.o CMakeFiles/openlibm.dir/src/s_catanf.c.o CMakeFiles/openlibm.dir/src/s_catanh.c.o CMakeFiles/openlibm.dir/src/s_catanhf.c.o CMakeFiles/openlibm.dir/src/s_clog.c.o CMakeFiles/openlibm.dir/src/s_clogf.c.o CMakeFiles/openlibm.dir/bsdsrc/b_exp.c.o CMakeFiles/openlibm.dir/bsdsrc/b_log.c.o CMakeFiles/openlibm.dir/bsdsrc/b_tgamma.c.o CMakeFiles/openlibm.dir/src/s_nan.c.o CMakeFiles/openlibm.dir/src/s_copysignl.c.o CMakeFiles/openlibm.dir/src/s_fabsl.c.o CMakeFiles/openlibm.dir/src/s_modfl.c.o CMakeFiles/openlibm.dir/src/e_acosl.c.o CMakeFiles/openlibm.dir/src/e_asinl.c.o CMakeFiles/openlibm.dir/src/e_atan2l.c.o CMakeFiles/openlibm.dir/src/s_fmaxl.c.o CMakeFiles/openlibm.dir/src/s_fminl.c.o CMakeFiles/openlibm.dir/src/s_ilogbl.c.o CMakeFiles/openlibm.dir/src/e_hypotl.c.o CMakeFiles/openlibm.dir/src/e_lgammal.c.o CMakeFiles/openlibm.dir/src/s_atanl.c.o CMakeFiles/openlibm.dir/src/s_ceill.c.o CMakeFiles/openlibm.dir/src/s_cosl.c.o CMakeFiles/openlibm.dir/src/s_cprojl.c.o CMakeFiles/openlibm.dir/src/s_csqrtl.c.o CMakeFiles/openlibm.dir/src/s_floorl.c.o CMakeFiles/openlibm.dir/src/s_fmal.c.o CMakeFiles/openlibm.dir/src/s_frexpl.c.o CMakeFiles/openlibm.dir/src/s_nexttoward.c.o CMakeFiles/openlibm.dir/src/s_roundl.c.o CMakeFiles/openlibm.dir/src/s_lroundl.c.o CMakeFiles/openlibm.dir/src/s_llroundl.c.o CMakeFiles/openlibm.dir/src/s_cpowl.c.o CMakeFiles/openlibm.dir/src/s_cargl.c.o CMakeFiles/openlibm.dir/src/s_sinl.c.o CMakeFiles/openlibm.dir/src/s_sincosl.c.o CMakeFiles/openlibm.dir/src/s_tanl.c.o CMakeFiles/openlibm.dir/src/s_truncl.c.o CMakeFiles/openlibm.dir/src/w_cabsl.c.o CMakeFiles/openlibm.dir/src/s_nextafterl.c.o CMakeFiles/openlibm.dir/src/polevll.c.o CMakeFiles/openlibm.dir/src/s_casinl.c.o CMakeFiles/openlibm.dir/src/s_ctanl.c.o CMakeFiles/openlibm.dir/src/s_cimagl.c.o CMakeFiles/openlibm.dir/src/s_conjl.c.o CMakeFiles/openlibm.dir/src/s_creall.c.o CMakeFiles/openlibm.dir/src/s_cacoshl.c.o CMakeFiles/openlibm.dir/src/s_catanhl.c.o CMakeFiles/openlibm.dir/src/s_casinhl.c.o CMakeFiles/openlibm.dir/src/s_catanl.c.o CMakeFiles/openlibm.dir/src/s_csinl.c.o CMakeFiles/openlibm.dir/src/s_cacosl.c.o CMakeFiles/openlibm.dir/src/s_cexpl.c.o CMakeFiles/openlibm.dir/src/s_csinhl.c.o CMakeFiles/openlibm.dir/src/s_ccoshl.c.o CMakeFiles/openlibm.dir/src/s_clogl.c.o CMakeFiles/openlibm.dir/src/s_ctanhl.c.o CMakeFiles/openlibm.dir/src/s_ccosl.c.o CMakeFiles/openlibm.dir/src/s_cbrtl.c.o CMakeFiles/openlibm.dir/ld80/invtrig.c.o CMakeFiles/openlibm.dir/ld80/e_acoshl.c.o CMakeFiles/openlibm.dir/ld80/e_powl.c.o CMakeFiles/openlibm.dir/ld80/k_tanl.c.o CMakeFiles/openlibm.dir/ld80/s_exp2l.c.o CMakeFiles/openlibm.dir/ld80/e_atanhl.c.o CMakeFiles/openlibm.dir/ld80/e_lgammal_r.c.o CMakeFiles/openlibm.dir/ld80/e_sinhl.c.o CMakeFiles/openlibm.dir/ld80/s_asinhl.c.o CMakeFiles/openlibm.dir/ld80/s_expm1l.c.o CMakeFiles/openlibm.dir/ld80/e_coshl.c.o CMakeFiles/openlibm.dir/ld80/e_log10l.c.o CMakeFiles/openlibm.dir/ld80/e_tgammal.c.o CMakeFiles/openlibm.dir/ld80/e_expl.c.o CMakeFiles/openlibm.dir/ld80/e_log2l.c.o CMakeFiles/openlibm.dir/ld80/k_cosl.c.o CMakeFiles/openlibm.dir/ld80/s_log1pl.c.o CMakeFiles/openlibm.dir/ld80/s_tanhl.c.o CMakeFiles/openlibm.dir/ld80/e_logl.c.o CMakeFiles/openlibm.dir/ld80/k_sinl.c.o CMakeFiles/openlibm.dir/ld80/s_erfl.c.o CMakeFiles/openlibm.dir/ld80/s_nanl.c.o CMakeFiles/openlibm.dir/amd64/fenv.c.o CMakeFiles/openlibm.dir/amd64/e_remainder.S.o CMakeFiles/openlibm.dir/amd64/e_remainderf.S.o CMakeFiles/openlibm.dir/amd64/e_remainderl.S.o CMakeFiles/openlibm.dir/amd64/e_sqrt.S.o CMakeFiles/openlibm.dir/amd64/e_sqrtf.S.o CMakeFiles/openlibm.dir/amd64/e_sqrtl.S.o CMakeFiles/openlibm.dir/amd64/s_llrint.S.o CMakeFiles/openlibm.dir/amd64/s_llrintf.S.o CMakeFiles/openlibm.dir/amd64/s_llrintl.S.o CMakeFiles/openlibm.dir/amd64/s_logbl.S.o CMakeFiles/openlibm.dir/amd64/s_lrint.S.o CMakeFiles/openlibm.dir/amd64/s_lrintf.S.o CMakeFiles/openlibm.dir/amd64/s_lrintl.S.o CMakeFiles/openlibm.dir/amd64/s_remquo.S.o CMakeFiles/openlibm.dir/amd64/s_remquof.S.o CMakeFiles/openlibm.dir/amd64/s_remquol.S.o CMakeFiles/openlibm.dir/amd64/s_rintl.S.o CMakeFiles/openlibm.dir/amd64/s_scalbn.S.o CMakeFiles/openlibm.dir/amd64/s_scalbnf.S.o CMakeFiles/openlibm.dir/amd64/s_scalbnl.S.o CMakeFiles/openlibm.dir/amd64/e_fmod.S.o CMakeFiles/openlibm.dir/amd64/e_fmodf.S.o CMakeFiles/openlibm.dir/amd64/e_fmodl.S.o"
+      },
+      "library_sha256": "d691f5843f2f42ac8a9846b44c19fed9fbde0571a10922afef9b0fcfb15c0c4b"
+    }
+  },
+  "tests": {
+    "mac": {
+      "openlibm_core_and_SOFA": "8/8",
+      "system_coordinates_and_SOFA": "2/2",
+      "single_GL_trace_cases": "4/4",
+      "full_GLML_cases": "2/2, each 10001 candidates",
+      "ordinary_apps_against_native_physical_limits": "7/7"
+    },
+    "linux": {
+      "openlibm_core_and_SOFA": "8/8",
+      "system_coordinates_and_SOFA": "2/2",
+      "single_GL_trace_cases": "4/4",
+      "full_GLML_cases": "2/2, each 10001 candidates",
+      "ordinary_apps_against_native_physical_limits": "7/7"
+    },
+    "new_timing_output_checks": "54/54 per platform matched existing scientific output hashes",
+    "whole_legacy_CTest": "not used as pass criterion; original SYSTEM GL/GLML byte fixtures retained"
+  },
+  "comparisons": {
+    "limits": {
+      "position_m": 0.001,
+      "velocity_m_s": 1e-06,
+      "a_m": 0.001,
+      "eccentricity": 1e-10,
+      "inclination_parameters": 1e-10,
+      "angle_deg": 1e-07,
+      "angle_residual_rad": 1e-10,
+      "J": 1e-06
+    },
+    "metric": "maximum absolute component unless explicitly named norm; epochs, IDs and text exact",
+    "cross_platform_openlibm": {
+      "iod_gl": {
+        "byte_equal": true,
+        "input_parameter_fingerprints_equal": true,
+        "maximum_errors": {
+          "position_m": 0.0,
+          "velocity_m_s": 0.0,
+          "position_norm_m": 0.0,
+          "velocity_norm_m_s": 0.0,
+          "rms_angle_rad": 0.0,
+          "exact": 0.0,
+          "angle_residual_rad": 0.0
+        },
+        "residuals": {
+          "passed": true,
+          "byte_equal": true,
+          "maximum_errors": {
+            "exact": 0.0,
+            "angle_residual_rad": 0.0
+          },
+          "failures": []
+        },
+        "source_flag": [
+          -1,
+          -1
+        ],
+        "exceeded_native_closeness_limits": {},
+        "within_native_closeness_limits": true
+      },
+      "odn_batch": {
+        "byte_equal": true,
+        "input_parameter_fingerprints_equal": true,
+        "files": {
+          "bodn_residuals.txt": {
+            "passed": true,
+            "byte_equal": true,
+            "maximum_errors": {
+              "exact": 0.0,
+              "angle_residual_rad": 0.0
+            },
+            "failures": []
+          }
+        },
+        "maximum_errors": {
+          "exact": 0,
+          "angle_residual_rad": 0
+        },
+        "within_native_closeness_limits": true
+      },
+      "opn_cartesian": {
+        "byte_equal": true,
+        "input_parameter_fingerprints_equal": true,
+        "files": {
+          "propagation_ephemeris_nsg2.txt": {
+            "passed": true,
+            "byte_equal": true,
+            "maximum_errors": {
+              "exact": 0.0,
+              "a_m": 0.0,
+              "eccentricity": 0.0,
+              "inclination_parameters": 0.0,
+              "angle_deg": 0.0
+            },
+            "failures": []
+          },
+          "propagation_ephemeris_cartesian.txt": {
+            "passed": true,
+            "byte_equal": true,
+            "maximum_errors": {
+              "exact": 0.0,
+              "position_m": 0.0,
+              "velocity_m_s": 0.0
+            },
+            "failures": []
+          },
+          "propagation_ephemeris_keplerian.txt": {
+            "passed": true,
+            "byte_equal": true,
+            "maximum_errors": {
+              "exact": 0.0,
+              "a_m": 0.0,
+              "eccentricity": 0.0,
+              "angle_deg": 0.0
+            },
+            "failures": []
+          }
+        },
+        "maximum_errors": {
+          "exact": 0,
+          "a_m": 0,
+          "eccentricity": 0,
+          "inclination_parameters": 0,
+          "angle_deg": 0,
+          "position_m": 0,
+          "velocity_m_s": 0
+        },
+        "within_native_closeness_limits": true
+      },
+      "opn_nonsingular2": {
+        "byte_equal": true,
+        "input_parameter_fingerprints_equal": true,
+        "files": {
+          "propagation_ephemeris_nsg2.txt": {
+            "passed": true,
+            "byte_equal": true,
+            "maximum_errors": {
+              "exact": 0.0,
+              "a_m": 0.0,
+              "eccentricity": 0.0,
+              "inclination_parameters": 0.0,
+              "angle_deg": 0.0
+            },
+            "failures": []
+          },
+          "propagation_ephemeris_cartesian.txt": {
+            "passed": true,
+            "byte_equal": true,
+            "maximum_errors": {
+              "exact": 0.0,
+              "position_m": 0.0,
+              "velocity_m_s": 0.0
+            },
+            "failures": []
+          },
+          "propagation_ephemeris_keplerian.txt": {
+            "passed": true,
+            "byte_equal": true,
+            "maximum_errors": {
+              "exact": 0.0,
+              "a_m": 0.0,
+              "eccentricity": 0.0,
+              "angle_deg": 0.0
+            },
+            "failures": []
+          }
+        },
+        "maximum_errors": {
+          "exact": 0,
+          "a_m": 0,
+          "eccentricity": 0,
+          "inclination_parameters": 0,
+          "angle_deg": 0,
+          "position_m": 0,
+          "velocity_m_s": 0
+        },
+        "within_native_closeness_limits": true
+      },
+      "opn_cislunar": {
+        "byte_equal": true,
+        "input_parameter_fingerprints_equal": true,
+        "files": {
+          "propagation_ephemeris_cartesian.txt": {
+            "passed": true,
+            "byte_equal": true,
+            "maximum_errors": {
+              "exact": 0.0,
+              "position_m": 0.0,
+              "velocity_m_s": 0.0
+            },
+            "failures": []
+          }
+        },
+        "maximum_errors": {
+          "exact": 0,
+          "position_m": 0,
+          "velocity_m_s": 0
+        },
+        "within_native_closeness_limits": true
+      },
+      "convert_osculating_to_mean": {
+        "byte_equal": true,
+        "input_parameter_fingerprints_equal": true,
+        "files": {
+          "o2m_ephemeris_mean_keplerian.txt": {
+            "passed": true,
+            "byte_equal": true,
+            "maximum_errors": {
+              "exact": 0.0,
+              "a_m": 0.0,
+              "eccentricity": 0.0,
+              "angle_deg": 0.0
+            },
+            "failures": []
+          }
+        },
+        "maximum_errors": {
+          "exact": 0,
+          "a_m": 0,
+          "eccentricity": 0,
+          "angle_deg": 0
+        },
+        "within_native_closeness_limits": true
+      },
+      "convert_keplerian_to_cartesian": {
+        "byte_equal": true,
+        "input_parameter_fingerprints_equal": true,
+        "files": {
+          "result.txt": {
+            "passed": true,
+            "byte_equal": true,
+            "maximum_errors": {
+              "exact": 0.0,
+              "position_m": 0.0,
+              "velocity_m_s": 0.0
+            },
+            "failures": []
+          }
+        },
+        "maximum_errors": {
+          "exact": 0,
+          "position_m": 0,
+          "velocity_m_s": 0
+        },
+        "within_native_closeness_limits": true
+      },
+      "convert_cartesian_to_keplerian": {
+        "byte_equal": true,
+        "input_parameter_fingerprints_equal": true,
+        "files": {
+          "result.txt": {
+            "passed": true,
+            "byte_equal": true,
+            "maximum_errors": {
+              "exact": 0.0,
+              "a_m": 0.0,
+              "eccentricity": 0.0,
+              "angle_deg": 0.0
+            },
+            "failures": []
+          }
+        },
+        "maximum_errors": {
+          "exact": 0,
+          "a_m": 0,
+          "eccentricity": 0,
+          "angle_deg": 0
+        },
+        "within_native_closeness_limits": true
+      },
+      "iod_glml": {
+        "byte_equal": true,
+        "input_parameter_fingerprints_equal": true,
+        "maximum_errors": {
+          "position_m": 0.0,
+          "velocity_m_s": 0.0,
+          "position_norm_m": 0.0,
+          "velocity_norm_m_s": 0.0,
+          "rms_angle_rad": 0.0,
+          "exact": 0.0,
+          "angle_residual_rad": 0.0,
+          "J": 0.0
+        },
+        "residuals": {
+          "passed": true,
+          "byte_equal": true,
+          "maximum_errors": {
+            "exact": 0.0,
+            "angle_residual_rad": 0.0
+          },
+          "failures": []
+        },
+        "selected_candidate": [
+          5190,
+          5190
+        ],
+        "source_flag": [
+          -1,
+          -1
+        ],
+        "candidate_table": {
+          "rows": 10001,
+          "maximum_errors": {
+            "position_m": 0,
+            "velocity_m_s": 0,
+            "J": 0,
+            "rms_angle_rad": 0
+          },
+          "nonfinite_field_differences": 0,
+          "nonfinite_row_differences": 0,
+          "source_flag_differences": 0,
+          "minimum_J_verified": [
+            {
+              "id": 5190,
+              "J": -396.3806636075044
+            },
+            {
+              "id": 5190,
+              "J": -396.3806636075044
+            }
+          ]
+        },
+        "exceeded_native_closeness_limits": {},
+        "within_native_closeness_limits": true
+      }
+    },
+    "mac_system_vs_openlibm": {
+      "iod_gl": {
+        "byte_equal": false,
+        "input_parameter_fingerprints_equal": true,
+        "maximum_errors": {
+          "position_m": 21208.561733825132,
+          "velocity_m_s": 10.684856278506231,
+          "position_norm_m": 25200.697315967544,
+          "velocity_norm_m_s": 13.427352899906161,
+          "rms_angle_rad": 3.4409212160352656e-11,
+          "exact": 0.0,
+          "angle_residual_rad": 2.247965702473209e-08
+        },
+        "residuals": {
+          "passed": false,
+          "byte_equal": false,
+          "maximum_errors": {
+            "exact": 0.0,
+            "angle_residual_rad": 2.247965702473209e-08
+          },
+          "failures": [
+            [
+              1,
+              4,
+              2.6378226654256585e-10,
+              "angle_residual_rad"
+            ],
+            [
+              1,
+              5,
+              1.9947972496048294e-08,
+              "angle_residual_rad"
+            ],
+            [
+              2,
+              5,
+              1.3525177644524433e-08,
+              "angle_residual_rad"
+            ],
+            [
+              3,
+              4,
+              2.8190878336321365e-10,
+              "angle_residual_rad"
+            ],
+            [
+              3,
+              5,
+              7.864480122687922e-09,
+              "angle_residual_rad"
+            ],
+            [
+              4,
+              4,
+              3.882021259218318e-10,
+              "angle_residual_rad"
+            ],
+            [
+              4,
+              5,
+              2.9596757267214002e-09,
+              "angle_residual_rad"
+            ],
+            [
+              5,
+              4,
+              4.0151692573503717e-10,
+              "angle_residual_rad"
+            ],
+            [
+              5,
+              5,
+              1.1954083833920492e-09,
+              "angle_residual_rad"
+            ],
+            [
+              6,
+              4,
+              3.351699557833091e-10,
+              "angle_residual_rad"
+            ]
+          ]
+        },
+        "source_flag": [
+          -1,
+          -1
+        ],
+        "exceeded_native_closeness_limits": {
+          "position_m": 21208.561733825132,
+          "velocity_m_s": 10.684856278506231,
+          "angle_residual_rad": 2.247965702473209e-08
+        },
+        "within_native_closeness_limits": false
+      },
+      "odn_batch": {
+        "byte_equal": false,
+        "input_parameter_fingerprints_equal": true,
+        "files": {
+          "bodn_residuals.txt": {
+            "passed": true,
+            "byte_equal": false,
+            "maximum_errors": {
+              "exact": 0.0,
+              "angle_residual_rad": 3.4829919154735594e-15
+            },
+            "failures": []
+          }
+        },
+        "maximum_errors": {
+          "exact": 0,
+          "angle_residual_rad": 3.4829919154735594e-15
+        },
+        "within_native_closeness_limits": true
+      },
+      "opn_cartesian": {
+        "byte_equal": false,
+        "input_parameter_fingerprints_equal": true,
+        "files": {
+          "propagation_ephemeris_nsg2.txt": {
+            "passed": true,
+            "byte_equal": false,
+            "maximum_errors": {
+              "exact": 0.0,
+              "a_m": 6.366462912410498e-09,
+              "eccentricity": 4.753142324176451e-16,
+              "inclination_parameters": 2.220446049250313e-16,
+              "angle_deg": 4.973799150320701e-14
+            },
+            "failures": []
+          },
+          "propagation_ephemeris_cartesian.txt": {
+            "passed": true,
+            "byte_equal": false,
+            "maximum_errors": {
+              "exact": 0.0,
+              "position_m": 1.8189894035458565e-09,
+              "velocity_m_s": 2.220446049250313e-12
+            },
+            "failures": []
+          },
+          "propagation_ephemeris_keplerian.txt": {
+            "passed": true,
+            "byte_equal": false,
+            "maximum_errors": {
+              "exact": 0.0,
+              "a_m": 6.366462912410498e-09,
+              "eccentricity": 6.106226635438361e-16,
+              "angle_deg": 1.9202417433916708e-12
+            },
+            "failures": []
+          }
+        },
+        "maximum_errors": {
+          "exact": 0,
+          "a_m": 6.366462912410498e-09,
+          "eccentricity": 6.106226635438361e-16,
+          "inclination_parameters": 2.220446049250313e-16,
+          "angle_deg": 1.9202417433916708e-12,
+          "position_m": 1.8189894035458565e-09,
+          "velocity_m_s": 2.220446049250313e-12
+        },
+        "within_native_closeness_limits": true
+      },
+      "opn_nonsingular2": {
+        "byte_equal": false,
+        "input_parameter_fingerprints_equal": true,
+        "files": {
+          "propagation_ephemeris_nsg2.txt": {
+            "passed": true,
+            "byte_equal": false,
+            "maximum_errors": {
+              "exact": 0.0,
+              "a_m": 0.0,
+              "eccentricity": 7.632783294297951e-17,
+              "inclination_parameters": 1.1102230246251565e-16,
+              "angle_deg": 1.4210854715202004e-14
+            },
+            "failures": []
+          },
+          "propagation_ephemeris_cartesian.txt": {
+            "passed": true,
+            "byte_equal": false,
+            "maximum_errors": {
+              "exact": 0.0,
+              "position_m": 5.002220859751105e-09,
+              "velocity_m_s": 4.884981308350689e-12
+            },
+            "failures": []
+          },
+          "propagation_ephemeris_keplerian.txt": {
+            "passed": true,
+            "byte_equal": false,
+            "maximum_errors": {
+              "exact": 0.0,
+              "a_m": 0.0,
+              "eccentricity": 1.734723475976807e-17,
+              "angle_deg": 6.110667527536862e-13
+            },
+            "failures": []
+          }
+        },
+        "maximum_errors": {
+          "exact": 0,
+          "a_m": 0,
+          "eccentricity": 7.632783294297951e-17,
+          "inclination_parameters": 1.1102230246251565e-16,
+          "angle_deg": 6.110667527536862e-13,
+          "position_m": 5.002220859751105e-09,
+          "velocity_m_s": 4.884981308350689e-12
+        },
+        "within_native_closeness_limits": true
+      },
+      "opn_cislunar": {
+        "byte_equal": true,
+        "input_parameter_fingerprints_equal": true,
+        "files": {
+          "propagation_ephemeris_cartesian.txt": {
+            "passed": true,
+            "byte_equal": true,
+            "maximum_errors": {
+              "exact": 0.0,
+              "position_m": 0.0,
+              "velocity_m_s": 0.0
+            },
+            "failures": []
+          }
+        },
+        "maximum_errors": {
+          "exact": 0,
+          "position_m": 0,
+          "velocity_m_s": 0
+        },
+        "within_native_closeness_limits": true
+      },
+      "convert_osculating_to_mean": {
+        "byte_equal": false,
+        "input_parameter_fingerprints_equal": true,
+        "files": {
+          "o2m_ephemeris_mean_keplerian.txt": {
+            "passed": true,
+            "byte_equal": false,
+            "maximum_errors": {
+              "exact": 0.0,
+              "a_m": 1.8189894035458565e-09,
+              "eccentricity": 7.979727989493313e-17,
+              "angle_deg": 9.350742402602918e-12
+            },
+            "failures": []
+          }
+        },
+        "maximum_errors": {
+          "exact": 0,
+          "a_m": 1.8189894035458565e-09,
+          "eccentricity": 7.979727989493313e-17,
+          "angle_deg": 9.350742402602918e-12
+        },
+        "within_native_closeness_limits": true
+      },
+      "convert_keplerian_to_cartesian": {
+        "byte_equal": false,
+        "input_parameter_fingerprints_equal": true,
+        "files": {
+          "result.txt": {
+            "passed": true,
+            "byte_equal": false,
+            "maximum_errors": {
+              "exact": 0.0,
+              "position_m": 2.3283064365386963e-10,
+              "velocity_m_s": 0.0
+            },
+            "failures": []
+          }
+        },
+        "maximum_errors": {
+          "exact": 0,
+          "position_m": 2.3283064365386963e-10,
+          "velocity_m_s": 0
+        },
+        "within_native_closeness_limits": true
+      },
+      "convert_cartesian_to_keplerian": {
+        "byte_equal": false,
+        "input_parameter_fingerprints_equal": true,
+        "files": {
+          "result.txt": {
+            "passed": true,
+            "byte_equal": false,
+            "maximum_errors": {
+              "exact": 0.0,
+              "a_m": 0.0,
+              "eccentricity": 1.0842021724855044e-18,
+              "angle_deg": 3.410605131648481e-13
+            },
+            "failures": []
+          }
+        },
+        "maximum_errors": {
+          "exact": 0,
+          "a_m": 0,
+          "eccentricity": 1.0842021724855044e-18,
+          "angle_deg": 3.410605131648481e-13
+        },
+        "within_native_closeness_limits": true
+      },
+      "iod_glml": {
+        "byte_equal": false,
+        "input_parameter_fingerprints_equal": true,
+        "maximum_errors": {
+          "position_m": 81887.47858178802,
+          "velocity_m_s": 41.27501050489445,
+          "position_norm_m": 97301.34632292426,
+          "velocity_norm_m_s": 51.85984779063055,
+          "rms_angle_rad": 1.606910761391974e-10,
+          "exact": 0.0,
+          "angle_residual_rad": 8.770722170758916e-08,
+          "J": 0.0003478903662994526
+        },
+        "residuals": {
+          "passed": false,
+          "byte_equal": false,
+          "maximum_errors": {
+            "exact": 0.0,
+            "angle_residual_rad": 8.770722170758916e-08
+          },
+          "failures": [
+            [
+              1,
+              4,
+              1.0091913500072063e-09,
+              "angle_residual_rad"
+            ],
+            [
+              1,
+              5,
+              7.795846962421749e-08,
+              "angle_residual_rad"
+            ],
+            [
+              2,
+              4,
+              2.828996259053953e-10,
+              "angle_residual_rad"
+            ],
+            [
+              2,
+              5,
+              5.285926485409931e-08,
+              "angle_residual_rad"
+            ],
+            [
+              3,
+              4,
+              1.1078809601947231e-09,
+              "angle_residual_rad"
+            ],
+            [
+              3,
+              5,
+              3.0737102307831776e-08,
+              "angle_residual_rad"
+            ],
+            [
+              4,
+              4,
+              1.5188815409331274e-09,
+              "angle_residual_rad"
+            ],
+            [
+              4,
+              5,
+              1.15677988854479e-08,
+              "angle_residual_rad"
+            ],
+            [
+              5,
+              4,
+              1.5685456841678307e-09,
+              "angle_residual_rad"
+            ],
+            [
+              5,
+              5,
+              4.672724041032694e-09,
+              "angle_residual_rad"
+            ]
+          ]
+        },
+        "selected_candidate": [
+          5190,
+          5190
+        ],
+        "source_flag": [
+          -1,
+          -1
+        ],
+        "candidate_table": {
+          "rows": 10001,
+          "maximum_errors": {
+            "position_m": 25533712.38352215,
+            "velocity_m_s": 4242.41233970539,
+            "J": 20950454059.338516,
+            "rms_angle_rad": 0.24002001553374847
+          },
+          "nonfinite_field_differences": 2376,
+          "nonfinite_row_differences": 297,
+          "source_flag_differences": 2,
+          "minimum_J_verified": [
+            {
+              "id": 5190,
+              "J": -396.3810114978707
+            },
+            {
+              "id": 5190,
+              "J": -396.3806636075044
+            }
+          ]
+        },
+        "exceeded_native_closeness_limits": {
+          "position_m": 81887.47858178802,
+          "velocity_m_s": 41.27501050489445,
+          "angle_residual_rad": 8.770722170758916e-08,
+          "J": 0.0003478903662994526
+        },
+        "within_native_closeness_limits": false
+      }
+    },
+    "linux_system_vs_openlibm": {
+      "iod_gl": {
+        "byte_equal": false,
+        "input_parameter_fingerprints_equal": true,
+        "maximum_errors": {
+          "position_m": 3198.917700620368,
+          "velocity_m_s": 1.6119259953975416,
+          "position_norm_m": 3801.057256037762,
+          "velocity_norm_m_s": 2.0255168210752665,
+          "rms_angle_rad": 5.61848179810834e-12,
+          "exact": 0.0,
+          "angle_residual_rad": 3.4048557862043083e-09
+        },
+        "residuals": {
+          "passed": false,
+          "byte_equal": false,
+          "maximum_errors": {
+            "exact": 0.0,
+            "angle_residual_rad": 3.4048557862043083e-09
+          },
+          "failures": [
+            [
+              1,
+              5,
+              3.023389538725496e-09,
+              "angle_residual_rad"
+            ],
+            [
+              2,
+              5,
+              2.0499521524719455e-09,
+              "angle_residual_rad"
+            ],
+            [
+              3,
+              5,
+              1.1920007758625673e-09,
+              "angle_residual_rad"
+            ],
+            [
+              4,
+              5,
+              4.4859621572967967e-10,
+              "angle_residual_rad"
+            ],
+            [
+              5,
+              5,
+              1.8119600264654423e-10,
+              "angle_residual_rad"
+            ],
+            [
+              6,
+              5,
+              6.982973088653921e-10,
+              "angle_residual_rad"
+            ],
+            [
+              7,
+              5,
+              1.1036190294966275e-09,
+              "angle_residual_rad"
+            ],
+            [
+              8,
+              5,
+              1.3980573365657278e-09,
+              "angle_residual_rad"
+            ],
+            [
+              9,
+              5,
+              1.5825012411596617e-09,
+              "angle_residual_rad"
+            ],
+            [
+              10,
+              5,
+              1.6578287076463027e-09,
+              "angle_residual_rad"
+            ]
+          ]
+        },
+        "source_flag": [
+          -1,
+          -1
+        ],
+        "exceeded_native_closeness_limits": {
+          "position_m": 3198.917700620368,
+          "velocity_m_s": 1.6119259953975416,
+          "angle_residual_rad": 3.4048557862043083e-09
+        },
+        "within_native_closeness_limits": false
+      },
+      "odn_batch": {
+        "byte_equal": false,
+        "input_parameter_fingerprints_equal": true,
+        "files": {
+          "bodn_residuals.txt": {
+            "passed": true,
+            "byte_equal": false,
+            "maximum_errors": {
+              "exact": 0.0,
+              "angle_residual_rad": 5.6912257961726985e-15
+            },
+            "failures": []
+          }
+        },
+        "maximum_errors": {
+          "exact": 0,
+          "angle_residual_rad": 5.6912257961726985e-15
+        },
+        "within_native_closeness_limits": true
+      },
+      "opn_cartesian": {
+        "byte_equal": false,
+        "input_parameter_fingerprints_equal": true,
+        "files": {
+          "propagation_ephemeris_nsg2.txt": {
+            "passed": true,
+            "byte_equal": false,
+            "maximum_errors": {
+              "exact": 0.0,
+              "a_m": 0.0,
+              "eccentricity": 2.168404344971009e-18,
+              "inclination_parameters": 1.1102230246251565e-16,
+              "angle_deg": 4.973799150320701e-14
+            },
+            "failures": []
+          },
+          "propagation_ephemeris_cartesian.txt": {
+            "passed": true,
+            "byte_equal": true,
+            "maximum_errors": {
+              "exact": 0.0,
+              "position_m": 0.0,
+              "velocity_m_s": 0.0
+            },
+            "failures": []
+          },
+          "propagation_ephemeris_keplerian.txt": {
+            "passed": true,
+            "byte_equal": false,
+            "maximum_errors": {
+              "exact": 0.0,
+              "a_m": 0.0,
+              "eccentricity": 0.0,
+              "angle_deg": 1.4210854715202004e-14
+            },
+            "failures": []
+          }
+        },
+        "maximum_errors": {
+          "exact": 0,
+          "a_m": 0,
+          "eccentricity": 2.168404344971009e-18,
+          "inclination_parameters": 1.1102230246251565e-16,
+          "angle_deg": 4.973799150320701e-14,
+          "position_m": 0,
+          "velocity_m_s": 0
+        },
+        "within_native_closeness_limits": true
+      },
+      "opn_nonsingular2": {
+        "byte_equal": false,
+        "input_parameter_fingerprints_equal": true,
+        "files": {
+          "propagation_ephemeris_nsg2.txt": {
+            "passed": true,
+            "byte_equal": false,
+            "maximum_errors": {
+              "exact": 0.0,
+              "a_m": 0.0,
+              "eccentricity": 0.0,
+              "inclination_parameters": 1.1102230246251565e-16,
+              "angle_deg": 0.0
+            },
+            "failures": []
+          },
+          "propagation_ephemeris_cartesian.txt": {
+            "passed": true,
+            "byte_equal": false,
+            "maximum_errors": {
+              "exact": 0.0,
+              "position_m": 1.8189894035458565e-09,
+              "velocity_m_s": 2.6645352591003757e-12
+            },
+            "failures": []
+          },
+          "propagation_ephemeris_keplerian.txt": {
+            "passed": true,
+            "byte_equal": false,
+            "maximum_errors": {
+              "exact": 0.0,
+              "a_m": 0.0,
+              "eccentricity": 0.0,
+              "angle_deg": 5.1514348342607263e-14
+            },
+            "failures": []
+          }
+        },
+        "maximum_errors": {
+          "exact": 0,
+          "a_m": 0,
+          "eccentricity": 0,
+          "inclination_parameters": 1.1102230246251565e-16,
+          "angle_deg": 5.1514348342607263e-14,
+          "position_m": 1.8189894035458565e-09,
+          "velocity_m_s": 2.6645352591003757e-12
+        },
+        "within_native_closeness_limits": true
+      },
+      "opn_cislunar": {
+        "byte_equal": true,
+        "input_parameter_fingerprints_equal": true,
+        "files": {
+          "propagation_ephemeris_cartesian.txt": {
+            "passed": true,
+            "byte_equal": true,
+            "maximum_errors": {
+              "exact": 0.0,
+              "position_m": 0.0,
+              "velocity_m_s": 0.0
+            },
+            "failures": []
+          }
+        },
+        "maximum_errors": {
+          "exact": 0,
+          "position_m": 0,
+          "velocity_m_s": 0
+        },
+        "within_native_closeness_limits": true
+      },
+      "convert_osculating_to_mean": {
+        "byte_equal": false,
+        "input_parameter_fingerprints_equal": true,
+        "files": {
+          "o2m_ephemeris_mean_keplerian.txt": {
+            "passed": true,
+            "byte_equal": false,
+            "maximum_errors": {
+              "exact": 0.0,
+              "a_m": 0.0,
+              "eccentricity": 2.168404344971009e-18,
+              "angle_deg": 1.021405182655144e-13
+            },
+            "failures": []
+          }
+        },
+        "maximum_errors": {
+          "exact": 0,
+          "a_m": 0,
+          "eccentricity": 2.168404344971009e-18,
+          "angle_deg": 1.021405182655144e-13
+        },
+        "within_native_closeness_limits": true
+      },
+      "convert_keplerian_to_cartesian": {
+        "byte_equal": true,
+        "input_parameter_fingerprints_equal": true,
+        "files": {
+          "result.txt": {
+            "passed": true,
+            "byte_equal": true,
+            "maximum_errors": {
+              "exact": 0.0,
+              "position_m": 0.0,
+              "velocity_m_s": 0.0
+            },
+            "failures": []
+          }
+        },
+        "maximum_errors": {
+          "exact": 0,
+          "position_m": 0,
+          "velocity_m_s": 0
+        },
+        "within_native_closeness_limits": true
+      },
+      "convert_cartesian_to_keplerian": {
+        "byte_equal": true,
+        "input_parameter_fingerprints_equal": true,
+        "files": {
+          "result.txt": {
+            "passed": true,
+            "byte_equal": true,
+            "maximum_errors": {
+              "exact": 0.0,
+              "a_m": 0.0,
+              "eccentricity": 0.0,
+              "angle_deg": 0.0
+            },
+            "failures": []
+          }
+        },
+        "maximum_errors": {
+          "exact": 0,
+          "a_m": 0,
+          "eccentricity": 0,
+          "angle_deg": 0
+        },
+        "within_native_closeness_limits": true
+      },
+      "iod_glml": {
+        "byte_equal": false,
+        "input_parameter_fingerprints_equal": true,
+        "maximum_errors": {
+          "position_m": 28030.68876780942,
+          "velocity_m_s": 14.141432256674307,
+          "position_norm_m": 33306.97098704799,
+          "velocity_norm_m_s": 17.76212631585513,
+          "rms_angle_rad": 7.281985169415163e-11,
+          "exact": 0.0,
+          "angle_residual_rad": 3.059534159355337e-08,
+          "J": 0.0001576539521011
+        },
+        "residuals": {
+          "passed": false,
+          "byte_equal": false,
+          "maximum_errors": {
+            "exact": 0.0,
+            "angle_residual_rad": 3.059534159355337e-08
+          },
+          "failures": [
+            [
+              1,
+              4,
+              3.384517510662924e-10,
+              "angle_residual_rad"
+            ],
+            [
+              1,
+              5,
+              2.7275720404507098e-08,
+              "angle_residual_rad"
+            ],
+            [
+              2,
+              4,
+              1.0767672542242126e-10,
+              "angle_residual_rad"
+            ],
+            [
+              2,
+              5,
+              1.849517544671997e-08,
+              "angle_residual_rad"
+            ],
+            [
+              3,
+              4,
+              3.9188423222892927e-10,
+              "angle_residual_rad"
+            ],
+            [
+              3,
+              5,
+              1.0755409618479206e-08,
+              "angle_residual_rad"
+            ],
+            [
+              4,
+              4,
+              5.326630041892569e-10,
+              "angle_residual_rad"
+            ],
+            [
+              4,
+              5,
+              4.0479933294257364e-09,
+              "angle_residual_rad"
+            ],
+            [
+              5,
+              4,
+              5.483514132639756e-10,
+              "angle_residual_rad"
+            ],
+            [
+              5,
+              5,
+              1.6354684273522935e-09,
+              "angle_residual_rad"
+            ]
+          ]
+        },
+        "selected_candidate": [
+          5190,
+          5190
+        ],
+        "source_flag": [
+          -1,
+          -1
+        ],
+        "candidate_table": {
+          "rows": 10001,
+          "maximum_errors": {
+            "position_m": 20890360.469212525,
+            "velocity_m_s": 7208.645625417318,
+            "J": 28058931910.252792,
+            "rms_angle_rad": 0.32798868046837304
+          },
+          "nonfinite_field_differences": 1600,
+          "nonfinite_row_differences": 200,
+          "source_flag_differences": 1,
+          "minimum_J_verified": [
+            {
+              "id": 5190,
+              "J": -396.3805059535523
+            },
+            {
+              "id": 5190,
+              "J": -396.3806636075044
+            }
+          ]
+        },
+        "exceeded_native_closeness_limits": {
+          "position_m": 28030.68876780942,
+          "velocity_m_s": 14.141432256674307,
+          "angle_residual_rad": 3.059534159355337e-08,
+          "J": 0.0001576539521011
+        },
+        "within_native_closeness_limits": false
+      }
+    }
+  },
+  "timing": {
+    "mac": {
+      "platform": "macOS-26.6.2-arm64-arm-64bit",
+      "source_commit": "0cae26bb88d634fa7d69264c5732809280fa005d",
+      "timer": "perf_counter around subprocess.run with stdout PIPE and communicate(timeout); no wait polling",
+      "repetitions": 3,
+      "programs": {
+        "iod_gl": {
+          "threads": 1,
+          "OMP_DYNAMIC": "FALSE",
+          "runs": [
+            {
+              "backend": "system",
+              "iteration": 0,
+              "seconds": 0.06606050000000001,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/iod_gl-system-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 0,
+              "seconds": 0.064098917,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/iod_gl-openlibm-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 1,
+              "seconds": 0.06423241599999999,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/iod_gl-openlibm-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 1,
+              "seconds": 0.0612895,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/iod_gl-system-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 2,
+              "seconds": 0.05561470800000001,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/iod_gl-system-2",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 2,
+              "seconds": 0.067457292,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/iod_gl-openlibm-2",
+              "scientific_outputs_unchanged": true
+            }
+          ],
+          "binaries": {
+            "system": {
+              "path": "/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/system/bin/aster_iod_gl",
+              "sha256": "66bb37d7fbaedf772edb2c3b929a749ac98e2581231fecbeeafec19340cc4e4a"
+            },
+            "openlibm": {
+              "path": "/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/openlibm/bin/aster_iod_gl",
+              "sha256": "a7d8feb51ed098069f74c9a716cbad0be0ff1490ffe725e0d22af9fc4d00b651"
+            }
+          },
+          "median_seconds": {
+            "system": 0.0612895,
+            "openlibm": 0.06423241599999999
+          },
+          "change_percent": 4.801664232862057
+        },
+        "odn_batch": {
+          "threads": 2,
+          "OMP_DYNAMIC": "FALSE",
+          "runs": [
+            {
+              "backend": "system",
+              "iteration": 0,
+              "seconds": 0.41584908299999995,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/odn_batch-system-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 0,
+              "seconds": 0.460386333,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/odn_batch-openlibm-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 1,
+              "seconds": 0.46033749999999984,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/odn_batch-openlibm-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 1,
+              "seconds": 0.409946417,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/odn_batch-system-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 2,
+              "seconds": 0.41026125,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/odn_batch-system-2",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 2,
+              "seconds": 0.47826645899999987,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/odn_batch-openlibm-2",
+              "scientific_outputs_unchanged": true
+            }
+          ],
+          "binaries": {
+            "system": {
+              "path": "/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/system/bin/aster_odn_batch",
+              "sha256": "bf52c94366c72f8149c23f9ce7326ae2bffe224ad45758b917ab098ae3a868d5"
+            },
+            "openlibm": {
+              "path": "/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/openlibm/bin/aster_odn_batch",
+              "sha256": "8e95d60fc6b87ee51ba48d9e33c329a3fba30aab0f9dc6045c682cff48537148"
+            }
+          },
+          "median_seconds": {
+            "system": 0.41026125,
+            "openlibm": 0.460386333
+          },
+          "change_percent": 12.217844848861548
+        },
+        "opn_cartesian": {
+          "threads": 2,
+          "OMP_DYNAMIC": "FALSE",
+          "runs": [
+            {
+              "backend": "system",
+              "iteration": 0,
+              "seconds": 0.09462662500000008,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/opn_cartesian-system-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 0,
+              "seconds": 0.12133120800000041,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/opn_cartesian-openlibm-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 1,
+              "seconds": 0.11072099999999985,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/opn_cartesian-openlibm-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 1,
+              "seconds": 0.09340758299999985,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/opn_cartesian-system-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 2,
+              "seconds": 0.09369862500000004,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/opn_cartesian-system-2",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 2,
+              "seconds": 0.10850812499999973,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/opn_cartesian-openlibm-2",
+              "scientific_outputs_unchanged": true
+            }
+          ],
+          "binaries": {
+            "system": {
+              "path": "/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/system/bin/aster_opn_cartesian",
+              "sha256": "c86cfe446c3b5fac62d6e7507ade404ab568307cbdba39d434a8cea09df3952d"
+            },
+            "openlibm": {
+              "path": "/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/openlibm/bin/aster_opn_cartesian",
+              "sha256": "54dcbf5e9fcefe3c18d8d88906bd56911cde6b730803fa746404f321821fc0e0"
+            }
+          },
+          "median_seconds": {
+            "system": 0.09369862500000004,
+            "openlibm": 0.11072099999999985
+          },
+          "change_percent": 18.167155601269293
+        },
+        "opn_nonsingular2": {
+          "threads": 2,
+          "OMP_DYNAMIC": "FALSE",
+          "runs": [
+            {
+              "backend": "system",
+              "iteration": 0,
+              "seconds": 0.09368387499999997,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/opn_nonsingular2-system-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 0,
+              "seconds": 0.10855766600000027,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/opn_nonsingular2-openlibm-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 1,
+              "seconds": 0.10835125000000012,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/opn_nonsingular2-openlibm-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 1,
+              "seconds": 0.0964682089999993,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/opn_nonsingular2-system-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 2,
+              "seconds": 0.09575883299999965,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/opn_nonsingular2-system-2",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 2,
+              "seconds": 0.11678412499999968,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/opn_nonsingular2-openlibm-2",
+              "scientific_outputs_unchanged": true
+            }
+          ],
+          "binaries": {
+            "system": {
+              "path": "/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/system/bin/aster_opn_nonsingular2",
+              "sha256": "488b62d9cb1b75a0d549378079296b9a6bb8dab9173afc94099455d494484572"
+            },
+            "openlibm": {
+              "path": "/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/openlibm/bin/aster_opn_nonsingular2",
+              "sha256": "63e45e614656cf48073f26f27ab47182783f85a6c7f7f9a5ac3dd76b1134fe3f"
+            }
+          },
+          "median_seconds": {
+            "system": 0.09575883299999965,
+            "openlibm": 0.10855766600000027
+          },
+          "change_percent": 13.365694421109598
+        },
+        "opn_cislunar": {
+          "threads": 2,
+          "OMP_DYNAMIC": "FALSE",
+          "runs": [
+            {
+              "backend": "system",
+              "iteration": 0,
+              "seconds": 0.060246959000000544,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/opn_cislunar-system-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 0,
+              "seconds": 0.06168091699999945,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/opn_cislunar-openlibm-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 1,
+              "seconds": 0.06093475000000037,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/opn_cislunar-openlibm-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 1,
+              "seconds": 0.05817899999999998,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/opn_cislunar-system-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 2,
+              "seconds": 0.05854179200000065,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/opn_cislunar-system-2",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 2,
+              "seconds": 0.06206291600000036,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/opn_cislunar-openlibm-2",
+              "scientific_outputs_unchanged": true
+            }
+          ],
+          "binaries": {
+            "system": {
+              "path": "/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/system/bin/aster_opn_cislunar",
+              "sha256": "de97e1745882d47dc4f0169d847568a91400237cb76b68422f4c3e13ead6b532"
+            },
+            "openlibm": {
+              "path": "/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/openlibm/bin/aster_opn_cislunar",
+              "sha256": "220d39204fed43cef2dc17b2151181815f918557e4011ed1912efd7b883d9ae4"
+            }
+          },
+          "median_seconds": {
+            "system": 0.05854179200000065,
+            "openlibm": 0.06168091699999945
+          },
+          "change_percent": 5.362194925633235
+        },
+        "convert_osculating_to_mean": {
+          "threads": 2,
+          "OMP_DYNAMIC": "FALSE",
+          "runs": [
+            {
+              "backend": "system",
+              "iteration": 0,
+              "seconds": 0.01891562499999999,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/convert_osculating_to_mean-system-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 0,
+              "seconds": 0.0493615829999996,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/convert_osculating_to_mean-openlibm-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 1,
+              "seconds": 0.04890883399999968,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/convert_osculating_to_mean-openlibm-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 1,
+              "seconds": 0.01811504099999972,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/convert_osculating_to_mean-system-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 2,
+              "seconds": 0.017899541999999435,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/convert_osculating_to_mean-system-2",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 2,
+              "seconds": 0.04854020800000036,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/convert_osculating_to_mean-openlibm-2",
+              "scientific_outputs_unchanged": true
+            }
+          ],
+          "binaries": {
+            "system": {
+              "path": "/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/system/bin/aster_convert_osculating_to_mean",
+              "sha256": "cc7d2101951cdd0a06bf0b49a17780246b0ae5299892d2fbfdc767a0548d2aca"
+            },
+            "openlibm": {
+              "path": "/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/openlibm/bin/aster_convert_osculating_to_mean",
+              "sha256": "af2c17b202877f20850296ac1183afdda42f5330d6937d3f9672d87434ddb760"
+            }
+          },
+          "median_seconds": {
+            "system": 0.01811504099999972,
+            "openlibm": 0.04890883399999968
+          },
+          "change_percent": 169.99019212819024
+        },
+        "convert_keplerian_to_cartesian": {
+          "threads": 2,
+          "OMP_DYNAMIC": "FALSE",
+          "runs": [
+            {
+              "backend": "system",
+              "iteration": 0,
+              "seconds": 0.0031713749999999763,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/convert_keplerian_to_cartesian-system-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 0,
+              "seconds": 0.0031232499999998,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/convert_keplerian_to_cartesian-openlibm-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 1,
+              "seconds": 0.0029921250000004562,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/convert_keplerian_to_cartesian-openlibm-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 1,
+              "seconds": 0.002840041999999876,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/convert_keplerian_to_cartesian-system-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 2,
+              "seconds": 0.002756083000000409,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/convert_keplerian_to_cartesian-system-2",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 2,
+              "seconds": 0.003023665999999814,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/convert_keplerian_to_cartesian-openlibm-2",
+              "scientific_outputs_unchanged": true
+            }
+          ],
+          "binaries": {
+            "system": {
+              "path": "/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/system/bin/aster_convert_keplerian_to_cartesian",
+              "sha256": "2d269851b37d2abd3dc68e5d8021ca028e815d8cfa2d2a220bbd7959c4b16459"
+            },
+            "openlibm": {
+              "path": "/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/openlibm/bin/aster_convert_keplerian_to_cartesian",
+              "sha256": "ab3b0f5076286b12ae63133c4c686b2471e68ff71490d8502bfc1fd387d09744"
+            }
+          },
+          "median_seconds": {
+            "system": 0.002840041999999876,
+            "openlibm": 0.003023665999999814
+          },
+          "change_percent": 6.465538185700992
+        },
+        "convert_cartesian_to_keplerian": {
+          "threads": 2,
+          "OMP_DYNAMIC": "FALSE",
+          "runs": [
+            {
+              "backend": "system",
+              "iteration": 0,
+              "seconds": 0.00312224999999966,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/convert_cartesian_to_keplerian-system-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 0,
+              "seconds": 0.0031095829999996383,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/convert_cartesian_to_keplerian-openlibm-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 1,
+              "seconds": 0.0030812500000001464,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/convert_cartesian_to_keplerian-openlibm-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 1,
+              "seconds": 0.0027640409999998283,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/convert_cartesian_to_keplerian-system-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 2,
+              "seconds": 0.0028025409999994366,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/convert_cartesian_to_keplerian-system-2",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 2,
+              "seconds": 0.0030549589999999682,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/convert_cartesian_to_keplerian-openlibm-2",
+              "scientific_outputs_unchanged": true
+            }
+          ],
+          "binaries": {
+            "system": {
+              "path": "/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/system/bin/aster_convert_cartesian_to_keplerian",
+              "sha256": "5942a5dbf985ee7e8ea5454996cc7282f238f1f344052e5087ab17a407f5da74"
+            },
+            "openlibm": {
+              "path": "/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/openlibm/bin/aster_convert_cartesian_to_keplerian",
+              "sha256": "121102d8dcbec36756f73fd6ca5ae0ff9792a1cddf9080f624359872efbbeea1"
+            }
+          },
+          "median_seconds": {
+            "system": 0.0028025409999994366,
+            "openlibm": 0.0030812500000001464
+          },
+          "change_percent": 9.944867889560438
+        },
+        "iod_glml": {
+          "threads": 4,
+          "OMP_DYNAMIC": "FALSE",
+          "runs": [
+            {
+              "backend": "system",
+              "iteration": 0,
+              "seconds": 5.063106667,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/iod_glml-system-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 0,
+              "seconds": 6.1364674579999985,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/iod_glml-openlibm-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 1,
+              "seconds": 6.380689958000001,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/iod_glml-openlibm-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 1,
+              "seconds": 4.993609207999999,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/iod_glml-system-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 2,
+              "seconds": 5.1573258750000015,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/iod_glml-system-2",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 2,
+              "seconds": 6.371623540999998,
+              "directory": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8/timing/mac/iod_glml-openlibm-2",
+              "scientific_outputs_unchanged": true
+            }
+          ],
+          "binaries": {
+            "system": {
+              "path": "/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/system/bin/aster_iod_glml",
+              "sha256": "de31f777a0039055cc2078330fc7a02708114fe8c2a2a1500b2f1936b4014868"
+            },
+            "openlibm": {
+              "path": "/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build/openlibm/bin/aster_iod_glml",
+              "sha256": "d478651e66aabca00655948f869a188403393ae835c8af0d356915d7b8c2ac11"
+            }
+          },
+          "median_seconds": {
+            "system": 5.063106667,
+            "openlibm": 6.371623540999998
+          },
+          "change_percent": 25.844149848324705
+        }
+      }
+    },
+    "linux": {
+      "platform": "Linux-6.17.0-1017-oem-x86_64-with-glibc2.39",
+      "source_commit": "963e44c90fc3916d5a341c965435f42bce46c41d",
+      "timer": "perf_counter around subprocess.run with stdout PIPE and communicate(timeout); no wait polling",
+      "repetitions": 3,
+      "programs": {
+        "iod_gl": {
+          "threads": 1,
+          "OMP_DYNAMIC": "FALSE",
+          "runs": [
+            {
+              "backend": "system",
+              "iteration": 0,
+              "seconds": 0.046199334785342216,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/iod_gl-system-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 0,
+              "seconds": 0.050666555762290955,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/iod_gl-openlibm-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 1,
+              "seconds": 0.04762873612344265,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/iod_gl-openlibm-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 1,
+              "seconds": 0.04467343911528587,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/iod_gl-system-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 2,
+              "seconds": 0.04467662889510393,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/iod_gl-system-2",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 2,
+              "seconds": 0.05232402868568897,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/iod_gl-openlibm-2",
+              "scientific_outputs_unchanged": true
+            }
+          ],
+          "binaries": {
+            "system": {
+              "path": "/home/cdc/projects/ASTER-dev-1.1.0/build/system/bin/aster_iod_gl",
+              "sha256": "07cd7707bc440a8cb618808235dd4a503632fa1d50a167bdddb5e90b0f5c9482"
+            },
+            "openlibm": {
+              "path": "/home/cdc/projects/ASTER-dev-1.1.0/build/openlibm/bin/aster_iod_gl",
+              "sha256": "2d28642e8a00e3cc9795776164a679a429880533790eff8c485e5687dbd9da4f"
+            }
+          },
+          "median_seconds": {
+            "system": 0.04467662889510393,
+            "openlibm": 0.050666555762290955
+          },
+          "change_percent": 13.407293735726444
+        },
+        "odn_batch": {
+          "threads": 2,
+          "OMP_DYNAMIC": "FALSE",
+          "runs": [
+            {
+              "backend": "system",
+              "iteration": 0,
+              "seconds": 0.7661082847043872,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/odn_batch-system-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 0,
+              "seconds": 0.819819507189095,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/odn_batch-openlibm-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 1,
+              "seconds": 0.787521936930716,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/odn_batch-openlibm-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 1,
+              "seconds": 0.7541000563651323,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/odn_batch-system-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 2,
+              "seconds": 0.7574224574491382,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/odn_batch-system-2",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 2,
+              "seconds": 0.7912255320698023,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/odn_batch-openlibm-2",
+              "scientific_outputs_unchanged": true
+            }
+          ],
+          "binaries": {
+            "system": {
+              "path": "/home/cdc/projects/ASTER-dev-1.1.0/build/system/bin/aster_odn_batch",
+              "sha256": "1fd088de0c6e2b4506a8de5f8f663ad93a394e1cee005fbcbd612cff10a8878e"
+            },
+            "openlibm": {
+              "path": "/home/cdc/projects/ASTER-dev-1.1.0/build/openlibm/bin/aster_odn_batch",
+              "sha256": "c6bb88c6181953ddd1b339edf572d286a8cfbaa1fa0940a1d3a4e2ffc40032ee"
+            }
+          },
+          "median_seconds": {
+            "system": 0.7574224574491382,
+            "openlibm": 0.7912255320698023
+          },
+          "change_percent": 4.462908947076483
+        },
+        "opn_cartesian": {
+          "threads": 2,
+          "OMP_DYNAMIC": "FALSE",
+          "runs": [
+            {
+              "backend": "system",
+              "iteration": 0,
+              "seconds": 0.15645617246627808,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/opn_cartesian-system-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 0,
+              "seconds": 0.351708697155118,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/opn_cartesian-openlibm-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 1,
+              "seconds": 0.3521682070568204,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/opn_cartesian-openlibm-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 1,
+              "seconds": 0.1606403263285756,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/opn_cartesian-system-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 2,
+              "seconds": 0.15997231844812632,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/opn_cartesian-system-2",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 2,
+              "seconds": 0.348139395006001,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/opn_cartesian-openlibm-2",
+              "scientific_outputs_unchanged": true
+            }
+          ],
+          "binaries": {
+            "system": {
+              "path": "/home/cdc/projects/ASTER-dev-1.1.0/build/system/bin/aster_opn_cartesian",
+              "sha256": "eabdf86a78ce706eb7a7e4574b5c1768622f50554f21dda04f16298c6bd5dc88"
+            },
+            "openlibm": {
+              "path": "/home/cdc/projects/ASTER-dev-1.1.0/build/openlibm/bin/aster_opn_cartesian",
+              "sha256": "b8aedd4d677144394f8335618b31c1d396d71bcebdddb813ce2ce96dc0527666"
+            }
+          },
+          "median_seconds": {
+            "system": 0.15997231844812632,
+            "openlibm": 0.351708697155118
+          },
+          "change_percent": 119.85597293769632
+        },
+        "opn_nonsingular2": {
+          "threads": 2,
+          "OMP_DYNAMIC": "FALSE",
+          "runs": [
+            {
+              "backend": "system",
+              "iteration": 0,
+              "seconds": 0.16045918874442577,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/opn_nonsingular2-system-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 0,
+              "seconds": 0.36065112706273794,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/opn_nonsingular2-openlibm-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 1,
+              "seconds": 0.34880552627146244,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/opn_nonsingular2-openlibm-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 1,
+              "seconds": 0.16008838266134262,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/opn_nonsingular2-system-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 2,
+              "seconds": 0.16024549584835768,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/opn_nonsingular2-system-2",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 2,
+              "seconds": 0.3485714541748166,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/opn_nonsingular2-openlibm-2",
+              "scientific_outputs_unchanged": true
+            }
+          ],
+          "binaries": {
+            "system": {
+              "path": "/home/cdc/projects/ASTER-dev-1.1.0/build/system/bin/aster_opn_nonsingular2",
+              "sha256": "2514882b9dc69989f45543c5a6ea1452087597de07a43d5ad201ecacb63433d1"
+            },
+            "openlibm": {
+              "path": "/home/cdc/projects/ASTER-dev-1.1.0/build/openlibm/bin/aster_opn_nonsingular2",
+              "sha256": "90a7f2524ba5e03e071247f264ef074bf73f764f8458f3198bf7123e6144e575"
+            }
+          },
+          "median_seconds": {
+            "system": 0.16024549584835768,
+            "openlibm": 0.34880552627146244
+          },
+          "change_percent": 117.66947297011173
+        },
+        "opn_cislunar": {
+          "threads": 2,
+          "OMP_DYNAMIC": "FALSE",
+          "runs": [
+            {
+              "backend": "system",
+              "iteration": 0,
+              "seconds": 0.051181819289922714,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/opn_cislunar-system-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 0,
+              "seconds": 0.05511234328150749,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/opn_cislunar-openlibm-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 1,
+              "seconds": 0.057888890616595745,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/opn_cislunar-openlibm-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 1,
+              "seconds": 0.05429117567837238,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/opn_cislunar-system-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 2,
+              "seconds": 0.05128288175910711,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/opn_cislunar-system-2",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 2,
+              "seconds": 0.059975835494697094,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/opn_cislunar-openlibm-2",
+              "scientific_outputs_unchanged": true
+            }
+          ],
+          "binaries": {
+            "system": {
+              "path": "/home/cdc/projects/ASTER-dev-1.1.0/build/system/bin/aster_opn_cislunar",
+              "sha256": "94eb02d1283b64b1b1e5b57b381a72a06993a644f76366162a387a9850e9da5e"
+            },
+            "openlibm": {
+              "path": "/home/cdc/projects/ASTER-dev-1.1.0/build/openlibm/bin/aster_opn_cislunar",
+              "sha256": "e3749b652cc5f4cbd2b1d9dde92ac7a0d7f4971d38bf3341d92bbf27769335f2"
+            }
+          },
+          "median_seconds": {
+            "system": 0.05128288175910711,
+            "openlibm": 0.057888890616595745
+          },
+          "change_percent": 12.881508665053708
+        },
+        "convert_osculating_to_mean": {
+          "threads": 2,
+          "OMP_DYNAMIC": "FALSE",
+          "runs": [
+            {
+              "backend": "system",
+              "iteration": 0,
+              "seconds": 0.030200807377696037,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/convert_osculating_to_mean-system-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 0,
+              "seconds": 0.07731885183602571,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/convert_osculating_to_mean-openlibm-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 1,
+              "seconds": 0.07518011704087257,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/convert_osculating_to_mean-openlibm-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 1,
+              "seconds": 0.03313938342034817,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/convert_osculating_to_mean-system-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 2,
+              "seconds": 0.03241860866546631,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/convert_osculating_to_mean-system-2",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 2,
+              "seconds": 0.07526581920683384,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/convert_osculating_to_mean-openlibm-2",
+              "scientific_outputs_unchanged": true
+            }
+          ],
+          "binaries": {
+            "system": {
+              "path": "/home/cdc/projects/ASTER-dev-1.1.0/build/system/bin/aster_convert_osculating_to_mean",
+              "sha256": "1d7d32faedf87bc6ce8c562e7f1d277ec7da26ea1f9066c61ef5e907fa1249db"
+            },
+            "openlibm": {
+              "path": "/home/cdc/projects/ASTER-dev-1.1.0/build/openlibm/bin/aster_convert_osculating_to_mean",
+              "sha256": "2b941360fa7a35b8b14240efd5841dd6c6ed50903fc04e6a4fbaba3f35c750e2"
+            }
+          },
+          "median_seconds": {
+            "system": 0.03241860866546631,
+            "openlibm": 0.07526581920683384
+          },
+          "change_percent": 132.16856708292423
+        },
+        "convert_keplerian_to_cartesian": {
+          "threads": 2,
+          "OMP_DYNAMIC": "FALSE",
+          "runs": [
+            {
+              "backend": "system",
+              "iteration": 0,
+              "seconds": 0.0033509274944663048,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/convert_keplerian_to_cartesian-system-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 0,
+              "seconds": 0.002469763159751892,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/convert_keplerian_to_cartesian-openlibm-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 1,
+              "seconds": 0.005320166237652302,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/convert_keplerian_to_cartesian-openlibm-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 1,
+              "seconds": 0.0030235154554247856,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/convert_keplerian_to_cartesian-system-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 2,
+              "seconds": 0.0009779641404747963,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/convert_keplerian_to_cartesian-system-2",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 2,
+              "seconds": 0.00439572986215353,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/convert_keplerian_to_cartesian-openlibm-2",
+              "scientific_outputs_unchanged": true
+            }
+          ],
+          "binaries": {
+            "system": {
+              "path": "/home/cdc/projects/ASTER-dev-1.1.0/build/system/bin/aster_convert_keplerian_to_cartesian",
+              "sha256": "6516e7f521092be0418efcbc1dde17a054429d3fdf4f6a2ad9c7c28fa056e52c"
+            },
+            "openlibm": {
+              "path": "/home/cdc/projects/ASTER-dev-1.1.0/build/openlibm/bin/aster_convert_keplerian_to_cartesian",
+              "sha256": "e9d4e06e555dc6ed9e8ad48a71cfd7b57a1f51bb8059aba615286acd7f1bbeeb"
+            }
+          },
+          "median_seconds": {
+            "system": 0.0030235154554247856,
+            "openlibm": 0.00439572986215353
+          },
+          "change_percent": 45.38473267158996
+        },
+        "convert_cartesian_to_keplerian": {
+          "threads": 2,
+          "OMP_DYNAMIC": "FALSE",
+          "runs": [
+            {
+              "backend": "system",
+              "iteration": 0,
+              "seconds": 0.0010779742151498795,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/convert_cartesian_to_keplerian-system-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 0,
+              "seconds": 0.0031998837366700172,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/convert_cartesian_to_keplerian-openlibm-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 1,
+              "seconds": 0.0019261883571743965,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/convert_cartesian_to_keplerian-openlibm-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 1,
+              "seconds": 0.0011967401951551437,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/convert_cartesian_to_keplerian-system-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 2,
+              "seconds": 0.004567018710076809,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/convert_cartesian_to_keplerian-system-2",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 2,
+              "seconds": 0.0026720305904746056,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/convert_cartesian_to_keplerian-openlibm-2",
+              "scientific_outputs_unchanged": true
+            }
+          ],
+          "binaries": {
+            "system": {
+              "path": "/home/cdc/projects/ASTER-dev-1.1.0/build/system/bin/aster_convert_cartesian_to_keplerian",
+              "sha256": "0fc8c0b16f08dfbf7e00ed0d365c001b5d34eafee18902009ac3d8c4c4114d5c"
+            },
+            "openlibm": {
+              "path": "/home/cdc/projects/ASTER-dev-1.1.0/build/openlibm/bin/aster_convert_cartesian_to_keplerian",
+              "sha256": "0a8b7ec59efdacdb7ef0efc85eb82ef612d4df4e30b2c92a2a54bba33dcc119b"
+            }
+          },
+          "median_seconds": {
+            "system": 0.0011967401951551437,
+            "openlibm": 0.0026720305904746056
+          },
+          "change_percent": 123.27574533653957
+        },
+        "iod_glml": {
+          "threads": 4,
+          "OMP_DYNAMIC": "FALSE",
+          "runs": [
+            {
+              "backend": "system",
+              "iteration": 0,
+              "seconds": 4.111732587218285,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/iod_glml-system-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 0,
+              "seconds": 3.9950767010450363,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/iod_glml-openlibm-0",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 1,
+              "seconds": 3.9880633829161525,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/iod_glml-openlibm-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 1,
+              "seconds": 4.108581353910267,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/iod_glml-system-1",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "system",
+              "iteration": 2,
+              "seconds": 4.107184337452054,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/iod_glml-system-2",
+              "scientific_outputs_unchanged": true
+            },
+            {
+              "backend": "openlibm",
+              "iteration": 2,
+              "seconds": 4.000144285149872,
+              "directory": "/home/cdc/projects/ASTER-dev-1.1.0/build/math-backend-timing/iod_glml-openlibm-2",
+              "scientific_outputs_unchanged": true
+            }
+          ],
+          "binaries": {
+            "system": {
+              "path": "/home/cdc/projects/ASTER-dev-1.1.0/build/system/bin/aster_iod_glml",
+              "sha256": "2663fbcbce04203ac985cc5c5e637358ac14f76be0fa77bdfa4541a25a2f4eed"
+            },
+            "openlibm": {
+              "path": "/home/cdc/projects/ASTER-dev-1.1.0/build/openlibm/bin/aster_iod_glml",
+              "sha256": "c938d50854c9850532fd5d2df5d57f05262231b53910b6937118ccd6345ee71f"
+            }
+          },
+          "median_seconds": {
+            "system": 4.108581353910267,
+            "openlibm": 3.9950767010450363
+          },
+          "change_percent": -2.762623959172794
+        }
+      }
+    }
+  },
+  "evidence_roots": {
+    "previous_mac": "/Users/chendingcun/CLionProjects/ASTER-dev-1.1.0/build",
+    "previous_linux_copy": "/Users/chendingcun/Documents/Codex/2026-11-02/task-7/build",
+    "current": "/Users/chendingcun/Documents/Codex/2026-11-02/task-8"
+  }
+}
