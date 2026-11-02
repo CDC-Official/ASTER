@@ -69,3 +69,12 @@ python3 tests/check_observation_handoff.py --bin-dir build/v1.2.0/bin \
 ```
 
 交接检查的输出目录须为新目录。它复用原 LEO 配置，两次生成理论值、以 seed 42 生成两组 3″ 样本，并将理论及首组带噪观测分别交给现有 GL、GLML 的十条观测配置。完整科学输出、日志和 `summary.json` 保存到指定构建目录。几何、输入约束和加噪检查复用 CDC_lib 原验收脚本。
+
+## 本轮 Mac 核对结果
+
+- 原运行检查 239 项、独立几何检查 62 项和原加噪检查通过；OPENLIBM、SYSTEM 两种构建均通过。原算例的可见记录数在无筛选、黑夜、地影和联合筛选下分别为 364、106、306、48，解析和 JPL 太阳历表在该算例中一致。
+- SYSTEM 与 CDC_lib 原入口的 19 份观测、完整观测和真值文件逐字节一致。相同理论输入、3″、seed 42、两组样本下，原/新加噪脚本的 12 份文件逐字节一致。
+- 默认 OPENLIBM 与旧 SYSTEM 相比，全部历元最大角差为 3.98×10⁻¹¹ deg，Cartesian 真值位置分量差不超过 1.01×10⁻¹¹ km、速度分量差不超过 1.07×10⁻¹⁴ km/s；历元、ID、可见标记、分弧和 Keplerian 真值相同。独立站心矢量反算与生成角度的最大差为 5.69×10⁻¹⁴ deg。
+- 理论值及 seed 42 的带噪资料分别通过现有 GL、GLML 的十条观测入口，四次运行均写出有限轨道与十条残差；原算例单次生成约 0.1 s。结果用于功能和迁移核对。
+
+加噪派生种子包含源文件内容摘要。因此切换数学后端造成的理论文件末位变化，也会改变派生随机流；逐样本复现需要相同输入字节、脚本、Python 环境及 seed。详细本地结果位于 `build/v1.2.0/acceptance/observations-final/summary.json` 和 `build/v1.2.0/acceptance/migration-vs-cdc-lib/migration-summary.json`。
