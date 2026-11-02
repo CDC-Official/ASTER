@@ -78,3 +78,19 @@ python3 tests/check_observation_handoff.py --bin-dir build/v1.2.0/bin \
 - 理论值及 seed 42 的带噪资料分别通过现有 GL、GLML 的十条观测入口，四次运行均写出有限轨道与十条残差；原算例单次生成约 0.1 s。结果用于功能和迁移核对。
 
 加噪派生种子包含源文件内容摘要。因此切换数学后端造成的理论文件末位变化，也会改变派生随机流；逐样本复现需要相同输入字节、脚本、Python 环境及 seed。详细本地结果位于 `build/v1.2.0/acceptance/observations-final/summary.json` 和 `build/v1.2.0/acceptance/migration-vs-cdc-lib/migration-summary.json`。
+
+## Linux 与跨平台核对
+
+Linux x86_64 / GCC 13.3 的原观测运行、几何、加噪和坐标/SOFA 五项 CTest 全部通过，四次 GL/GLML 资料交接也通过。Mac arm64 / AppleClang 21 与 Linux 共用 OpenLibm 0.8.8、Eigen 3.4.0 和同一原 LEO 输入，输出比较如下：
+
+| 输出 | 文件数 | Mac/Linux 逐字节一致 |
+| --- | --- | --- |
+| 理论 OBS、完整观测及两类真值 | 19 | 19 |
+| 3″、seed 42、两组带噪样本 | 12 | 12 |
+| 理论/带噪资料的 GL、GLML 轨道解和残差 | 8 | 8 |
+
+本轮加噪实际使用 Mac Python 3.9.6、Linux Python 3.12.3；结论限于这组已比较的输入与环境。两端内部重复生成、反转加噪输入顺序均保持文件一致，四次求解的收敛标志相同；生成原算例的实际单次耗时约 0.12—0.15 s。
+
+Linux 还以字节不变的原 `main_arcs.cpp`，通过四行头文件适配链接当前 ASTER 公共 core/math_backend，进行同后端的旧新入口受控比较，19 份输出逐字节一致。该对照只在构建目录内编译原主程序。Mac 使用旧 CDC_lib 原二进制的独立 SYSTEM 对照见上一节。
+
+两端日常仓库均使用 `feature/observation-generation`，开发版本为 1.2.0；main 与 v1.1.0 仍在 `c18178a`。跨平台哈希、Linux 测试日志及旧入口摘要保存在 `build/v1.2.0/acceptance/cross-platform/`，其中 `comparison.json` 为逐类比较结果。

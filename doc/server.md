@@ -1,6 +1,10 @@
 # 实验室服务器
 
-## 1.1.0 当前使用
+## 1.2.0 开发分支
+
+Mac `/Users/chendingcun/CLionProjects/ASTER` 与服务器 `/home/cdc/projects/ASTER` 当前均在 `feature/observation-generation`，开发程序位于 `build/v1.2.0/bin/`。main、v1.1.0 和既有 `build/v1.1.0` 保留发布状态。观测生成的 Linux 检查及 Mac/Linux 输出比较见 [观测生成](observations.md)。
+
+## 1.1.0 发布使用
 
 日常源码统一使用原 `/home/cdc/projects/ASTER` 的 main，Mac 使用原 `/Users/chendingcun/CLionProjects/ASTER`；正式程序位于各自 `build/v1.1.0/bin/`。版本以标签回切，临时 dev worktree 在发布后收束，必要验证材料保存在原仓库的构建目录。当前数学后端、构建与验证范围见 [构建说明](build.md)、[后端验收](math-backend.md)和 [版本更新记录](../CHANGELOG.md)。
 

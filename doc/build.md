@@ -1,6 +1,20 @@
 # 构建与迁移
 
-## 当前版本构建
+## 1.2.0 开发构建
+
+当前开发分支为 `feature/observation-generation`，两端继续使用原 ASTER 目录；构建输出使用 `build/v1.2.0`：
+
+```sh
+cmake -S . -B build/v1.2.0 -DCMAKE_BUILD_TYPE=Release
+cmake --build build/v1.2.0 --parallel 3
+ctest --test-dir build/v1.2.0 -R '^observation_' --output-on-failure
+```
+
+服务器的现有 Boost 路径沿用下文配置。观测生成、加噪及两端有限验收见 [观测生成](observations.md)。
+
+## 1.1.0 发布构建
+
+以下命令用于先切换至 v1.1.0 标签后的源码。
 
 1.1.0 使用 C++17、CMake 3.26 及以上版本。已验证 Mac arm64 / AppleClang 21、Linux x86_64 / GCC 13.3，Boost 1.87.0 头文件及现有 OpenMP。Eigen 固定 3.4.0，SOFA 固定 2018-01-30，OpenLibm 固定官方 0.8.8，源码与许可均随库保存。
 

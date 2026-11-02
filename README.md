@@ -2,6 +2,8 @@
 
 ASTER 是用于轨道研究的个人 C++ 程序库。本版包含 GL、GLML 初轨确定，三套轨道预报、批处理定轨，三项轨道状态转换程序，以及地基光学观测生成和配套加噪工具。科学计算采用现有工程中已整理的实现，最小算例集中在 `tests/`，配套科学数据保存在 `data/`。
 
+当前开发分支为 `feature/observation-generation`，1.2.0 尚未发布；main 与 v1.1.0 保留已发布版本。
+
 ## 构建和检查
 
 需要 CMake 3.26 或更新版本、支持 C++17 的 C/C++ 编译器、Boost 头文件和 OpenMP。Eigen 3.4.0、SOFA 2018-01-30 和官方 OpenLibm 0.8.8 源码及许可已随库保存。默认数学后端为 OPENLIBM，覆盖各 C++ 程序与公共/SOFA 路径；已验证平台为 Mac arm64 / AppleClang 21 与 Linux x86_64 / GCC 13.3。
