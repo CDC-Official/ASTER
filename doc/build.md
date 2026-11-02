@@ -1,8 +1,8 @@
 # 构建与迁移
 
-## 1.2.0 开发构建
+## 1.2.0 发布构建
 
-当前开发分支为 `feature/observation-generation`，两端继续使用原 ASTER 目录；构建输出使用 `build/v1.2.0`：
+两端日常使用 main，继续保留各自原 ASTER 源码目录；1.2.0 的构建输出使用 `build/v1.2.0`：
 
 ```sh
 cmake -S . -B build/v1.2.0 -DCMAKE_BUILD_TYPE=Release
@@ -40,14 +40,18 @@ cmake --build build/v1.0.0 --parallel 3
 git switch main
 ```
 
-`CMakeLists.txt` 是程序三段版本号的唯一来源。`v1.0.0` 保持原提交，`v1.1.0` 指向本次正式发布。历史试验使用本地备份/stash 保留，不混入正式 main。
+`CMakeLists.txt` 是程序三段版本号的唯一来源。v1.2.0 对应本次已验收发布，v1.0.0、v1.1.0 保持原提交；历史试验保留在原备份/stash 中。
+
+main 是唯一长期分支。新增功能使用临时 `feature/功能名`，修复使用临时 `fix/问题名`；验收后合回 main，发布后删除已合并的临时分支。存在未合并独有修改时先保留该分支，旧版本由正式标签保存。
+
+GitHub 保存同一套跨平台源码。CMake 和少量平台条件处理编译器、OpenMP、共享库加载等差异，Mac 与 Linux 各自构建本机程序；构建目录和系统二进制分别保存在本机。
 
 ## 离线同步服务器
 
 继续使用现有 SSH 和 Git bundle，不需要更改网络或新增凭据：
 
 ```sh
-git bundle create /tmp/ASTER-main.bundle main v1.1.0
+git bundle create /tmp/ASTER-main.bundle main v1.2.0
 # 传输后，在服务器现有 ASTER 仓库内核对 bundle，再正常快进 main。
 git bundle verify /path/to/ASTER-main.bundle
 git fetch /path/to/ASTER-main.bundle main:refs/remotes/origin/main

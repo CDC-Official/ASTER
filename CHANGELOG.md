@@ -1,12 +1,13 @@
 # 版本记录
 
-## 1.2.0 — 开发中
+## 1.2.0 — 2026-11-02
 
 - 从 CDC_lib 当前实际入口迁入 `aster_generate_observations`：读取 Cartesian/Keplerian 星历和测站，逐历元使用 EOP，执行高度角、可选黑夜/地影筛选，生成理论 RA/Dec 弧段、同历元真值及可选完整观测。输入单位、ID 分弧和输出格式保持原定义。
 - 迁入 `tools/add_angular_noise.py`，保留东西/南北等标准差小角度模型、标准库随机流、原种子派生与来源记录。原 NumPy 论文批次使用另一随机流，seed 不作样本对应。
-- 新入口接入公共 OPENLIBM/SYSTEM 数学后端及版本查询；CMake 开发版本为 1.2.0。沿用 ASTER 的显式 `-I` 配置入口，替代旧程序的本机默认路径；弧段写出进入公共 `include/`、`src/`。
+- 新入口接入公共 OPENLIBM/SYSTEM 数学后端及版本查询；CMake 正式版本为 1.2.0。沿用 ASTER 的显式 `-I` 配置入口，替代旧程序的本机默认路径；弧段写出进入公共 `include/`、`src/`。
 - 复用原 LEO 算例与运行、几何、加噪验收，补充理论/带噪观测至 GL、GLML 的实际交接检查；用法见 [观测生成](doc/observations.md)。
 - Mac/Linux 原观测检查和 GL/GLML 资料交接通过；OPENLIBM 下 19 份理论/真值、12 份固定 seed 带噪文件及 8 份定轨科学输出逐字节一致。Mac SYSTEM 与旧库原二进制的 19 份输出一致，Linux 同后端旧/新入口受控比较的 19 份输出一致；范围和末位差异见 [观测生成](doc/observations.md)。
+- 发布与维护：两端 main 使用同一套源码和同一发布提交；v1.0.0、v1.1.0 标签原指向保留。main 为唯一长期分支，feature/、fix/ 分支在验收合并后清理；未合并的独有修改保留。
 
 ## 1.1.0 — 2026-11-02
 

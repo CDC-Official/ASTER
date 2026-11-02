@@ -93,4 +93,4 @@ Linux x86_64 / GCC 13.3 的原观测运行、几何、加噪和坐标/SOFA 五�
 
 Linux 还以字节不变的原 `main_arcs.cpp`，通过四行头文件适配链接当前 ASTER 公共 core/math_backend，进行同后端的旧新入口受控比较，19 份输出逐字节一致。该对照只在构建目录内编译原主程序。Mac 使用旧 CDC_lib 原二进制的独立 SYSTEM 对照见上一节。
 
-两端日常仓库均使用 `feature/observation-generation`，开发版本为 1.2.0；main 与 v1.1.0 仍在 `c18178a`。跨平台哈希、Linux 测试日志及旧入口摘要保存在 `build/v1.2.0/acceptance/cross-platform/`，其中 `comparison.json` 为逐类比较结果。
+两端日常仓库均使用 main，正式版本为 1.2.0；v1.1.0 标签保持在 `c18178a`。跨平台哈希、Linux 测试日志及旧入口摘要保存在 `build/v1.2.0/acceptance/cross-platform/`，其中 `comparison.json` 为逐类比较结果。

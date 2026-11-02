@@ -1,8 +1,8 @@
-# ASTER 1.2.0（开发中）
+# ASTER 1.2.0
 
 ASTER 是用于轨道研究的个人 C++ 程序库。本版包含 GL、GLML 初轨确定，三套轨道预报、批处理定轨，三项轨道状态转换程序，以及地基光学观测生成和配套加噪工具。科学计算采用现有工程中已整理的实现，最小算例集中在 `tests/`，配套科学数据保存在 `data/`。
 
-当前开发分支为 `feature/observation-generation`，1.2.0 尚未发布；main 与 v1.1.0 保留已发布版本。
+当前正式版本为 1.2.0，日常使用 main。Mac 与 Linux 共用同一套源码，在各自系统编译；分支和版本约定见 [构建与维护](doc/build.md)。
 
 ## 构建和检查
 
@@ -53,6 +53,6 @@ python3 tests/math_backend_cases/run_checks.py --bin-dir build/release/bin --out
 - [测试和验证范围](tests/README.md)
 - [迁移来源与验收](doc/migration.md)
 - [服务器使用与数值对照](doc/server.md)
-- [1.1.0 更新公告](https://github.com/CDC-Official/ASTER/releases/tag/v1.1.0)
+- [1.2.0 更新公告](https://github.com/CDC-Official/ASTER/releases/tag/v1.2.0)
 - [版本记录](CHANGELOG.md)
 - [后续维护规则](AGENTS.md)
