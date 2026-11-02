@@ -8,6 +8,7 @@
  * file_report 保存任务设置与结果，file_programlog 保存原始配置、运行事件及失败调用链，均可单独关闭。
  * 用法：aster_opn_nonsingular2 -I <配置>。动力学与积分设置由已有模型和设置类的 Display 显示。
  */
+#include "math_backend.hpp"
 #include "io_settings.hpp"
 #include <algorithm>
 #include <cmath>
@@ -47,6 +48,7 @@ int main(int argc, char* argv[])
     if (argc == 2 && std::string(argv[1]) == "--version")
     {
         std::cout << "aster_opn_nonsingular2 " << ASTER_PROGRAM_VERSION << '\n';
+        std::cout << aster::math_backend::BuildDescription() << '\n';
         return 0;
     }
 

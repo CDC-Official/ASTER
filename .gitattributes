@@ -1,3 +1,4 @@
 data/** -text
 third_party/** -text
 tests/**/reference/** -text
+tests/math_backend_cases/inputs/** -text

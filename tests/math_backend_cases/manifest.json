@@ -1,0 +1,37 @@
+{
+  "base_commit": "963e44c90fc3916d5a341c965435f42bce46c41d",
+  "openlibm": {
+    "source_url": "https://github.com/JuliaMath/openlibm/archive/refs/tags/v0.8.8.tar.gz",
+    "tag": "v0.8.8",
+    "commit": "5fe399749f9276eaa0b8403e507470da05cbbb3f",
+    "archive_sha256": "721bab18ff37160fd9e903eb211ff26fdee38c3d0041d556b07d76089c435d17",
+    "checksum_note": "Locally computed SHA-256 for provenance and transfer equality; not an independently publisher-signed checksum."
+  },
+  "input_sha256": {
+    "inputs/glml/e070_s3_n020_m0002/EOP.txt": "989c6dfa7ef343f249cfa91e60acc978af4591fd1c1efb39179152d33c1e3fc9",
+    "inputs/glml/e070_s3_n020_m0002/observers.txt": "3d5d0cb315846aeddb201ef489cb0af6233e566201f3f95baec7b99d7542d91a",
+    "inputs/glml/e070_s3_n020_m0002/0002.obs": "24f1d220e0d0c19eb9449dd2edb80fb3234d1bbf7f0784431b5075087e4bb161",
+    "inputs/glml/e010_s0.5_n100_m0001/EOP.txt": "989c6dfa7ef343f249cfa91e60acc978af4591fd1c1efb39179152d33c1e3fc9",
+    "inputs/glml/e010_s0.5_n100_m0001/observers.txt": "3d5d0cb315846aeddb201ef489cb0af6233e566201f3f95baec7b99d7542d91a",
+    "inputs/glml/e010_s0.5_n100_m0001/0001.obs": "80405602cd57e1c2ba026e97e35360e05577f61d6800e0363e9196ed8c5fcf35",
+    "inputs/gl/e070/EOP.txt": "989c6dfa7ef343f249cfa91e60acc978af4591fd1c1efb39179152d33c1e3fc9",
+    "inputs/gl/e070/observers.txt": "3d5d0cb315846aeddb201ef489cb0af6233e566201f3f95baec7b99d7542d91a",
+    "inputs/gl/e070/initial-common.txt": "670516df57e0bfd5b6bc117b668a7dde864ac114d8ba0a4c2a70e69058f5a4ea",
+    "inputs/gl/e070/observations.obs": "24f1d220e0d0c19eb9449dd2edb80fb3234d1bbf7f0784431b5075087e4bb161",
+    "inputs/gl/BDS/EOP.txt": "989c6dfa7ef343f249cfa91e60acc978af4591fd1c1efb39179152d33c1e3fc9",
+    "inputs/gl/BDS/observers.txt": "3d5d0cb315846aeddb201ef489cb0af6233e566201f3f95baec7b99d7542d91a",
+    "inputs/gl/BDS/initial-common.txt": "be4c2718a63c781d088eac4654bc6cbcb5d1a28ecda1c10268cb89cfe85124e1",
+    "inputs/gl/BDS/observations.obs": "3d478035f24a82f337123e9f4978e191be15b88f1be155eeefd06b68b5b934d6"
+  },
+  "source_files": [
+    "CMakeLists.txt",
+    "apps/CMakeLists.txt",
+    "cmake/IodArithmetic.cmake",
+    "src/core_iod_solver.cpp",
+    "src/iod_math.cpp",
+    "include/core_iod.hpp",
+    "tests/CMakeLists.txt",
+    "third_party/openlibm-source.json"
+  ],
+  "scope": "GL/GLML target math only; no system installation; archived Boost candidate not included"
+}

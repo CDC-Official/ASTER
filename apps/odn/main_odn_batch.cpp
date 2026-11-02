@@ -21,6 +21,7 @@
  * 报告、日志、逐条残差、三种后验星历及 SimpleInput 后验轨道解分别由设置指定路径。
  * 空路径关闭对应输出；输出父目录由使用者准备，同名已有文件会被拒绝。
  */
+#include "math_backend.hpp"
 #include "model_observation.hpp"
 #include "io_settings.hpp"
 #include "frame_definition.hpp"
@@ -53,6 +54,7 @@ int main(int argc, char **argv)
     if (argc == 2 && std::string(argv[1]) == "--version")
     {
         std::cout << "aster_odn_batch " << ASTER_PROGRAM_VERSION << '\n';
+        std::cout << aster::math_backend::BuildDescription() << '\n';
         return 0;
     }
 

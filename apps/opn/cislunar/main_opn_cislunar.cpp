@@ -9,6 +9,7 @@
  * file_report 保存任务设置与结果，file_programlog 保存原始设置、事件及失败调用链，均可单独关闭。
  * 用法：aster_opn_cislunar -I <配置>。地月引力、行星引力和后牛顿修正按现有配置计算。
  */
+#include "math_backend.hpp"
 #include "io_settings.hpp"
 #include <algorithm>
 #include <cmath>
@@ -44,6 +45,7 @@ int main(int argc, char* argv[])
     if (argc == 2 && std::string(argv[1]) == "--version")
     {
         std::cout << "aster_opn_cislunar " << ASTER_PROGRAM_VERSION << '\n';
+        std::cout << aster::math_backend::BuildDescription() << '\n';
         return 0;
     }
 

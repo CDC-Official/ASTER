@@ -247,8 +247,8 @@ target_include_directories(aster_sofa SYSTEM PUBLIC "${_aster_sofa_src}")
 if(UNIX)
     target_link_libraries(aster_sofa PUBLIC m)
 endif()
-# Official release validation executable, built only when explicitly requested.
-add_executable(aster_sofa_validation EXCLUDE_FROM_ALL "${_aster_sofa_src}/t_sofa_c.c")
+# Official release validation executable for the selected public math backend.
+add_executable(aster_sofa_validation "${_aster_sofa_src}/t_sofa_c.c")
 target_link_libraries(aster_sofa_validation PRIVATE aster_sofa)
 set_target_properties(aster_sofa_validation PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 message(STATUS "ASTER SOFA: 2018-01-30 bundled static source")

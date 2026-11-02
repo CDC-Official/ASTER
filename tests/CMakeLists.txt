@@ -50,3 +50,11 @@ set_tests_properties(invalid_inputs PROPERTIES TIMEOUT 120)
 add_test(NAME data_integrity COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_data.py")
 add_test(NAME iod_batch_handoff COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_handoff.py" --binary $<TARGET_FILE:aster_odn_batch> --output "${PROJECT_BINARY_DIR}/test-output/handoff")
 set_tests_properties(iod_batch_handoff PROPERTIES TIMEOUT 120)
+
+if(ASTER_MATH_OPENLIBM)
+add_test(NAME math_backend_iod COMMAND "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/math_backend_cases/run_checks.py"
+    --bin-dir "${PROJECT_BINARY_DIR}/bin" --output "${PROJECT_BINARY_DIR}/test-output/math_backend")
+set_tests_properties(math_backend_iod PROPERTIES TIMEOUT 1200)
+endif()
+add_test(NAME math_backend_sofa COMMAND aster_sofa_validation)

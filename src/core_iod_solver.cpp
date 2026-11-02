@@ -751,6 +751,10 @@ void iod_solver::Compute_Residuals(Overwatch &tracer, IodJob &job, const VectorX
  */
 void iod_solver::InitialOrbitDetermination(Overwatch &tracer, IodJob &job, std::ostream* iteration_output)
 {
+	// 旧残差检验停用后，每次任务都先标记为未计算，包括提前返回的任务。
+	job.solution.resRa_Q = job.solution.resRa_p = -1.0;
+	job.solution.resDec_Q = job.solution.resDec_p = -1.0;
+
 	tracer.CheckIn(__FILE__, __func__, __LINE__);
 
 	// =================================== 01 初始化结果与检查输入 ===================================
@@ -1066,19 +1070,16 @@ void iod_solver::InitialOrbitDetermination(Overwatch &tracer, IodJob &job, std::
 	job.solution.resDecCOD1d = job.solution.COD[3];
 	job.solution.resDecCOD2d = job.solution.COD[4];
 
-	// 至少有十条观测时，用 Ljung–Box 检验评价残差序列的自相关。
+	// Ljung–Box 是采用最大似然选优前保留的残差检验，当前 GLML 不使用其 Q/p。
+	// 调用代码留作追溯；四个旧字段在进入求解时已置为 -1。
+	/*
 	if (obs_count >= 10)
 	{
 		const int lag = std::min(obs_count / 5, 10);
 		ljungBoxTest(job.solution.resRa, lag, job.solution.resRa_Q, job.solution.resRa_p);
 		ljungBoxTest(job.solution.resDec, lag, job.solution.resDec_Q, job.solution.resDec_p);
 	}
-	else
-	{
-		// 资料不足时用 -1 标记未计算的统计量。
-		job.solution.resRa_Q = job.solution.resRa_p = -1.0;
-		job.solution.resDec_Q = job.solution.resDec_p = -1.0;
-	}
+	*/
 
 	// =================================== 09 计算似然评价与几何诊断 ===================================
 

@@ -1,0 +1,7 @@
+{
+  "source_url": "https://github.com/JuliaMath/openlibm/archive/refs/tags/v0.8.8.tar.gz",
+  "tag": "v0.8.8",
+  "commit": "5fe399749f9276eaa0b8403e507470da05cbbb3f",
+  "archive_sha256": "721bab18ff37160fd9e903eb211ff26fdee38c3d0041d556b07d76089c435d17",
+  "checksum_note": "Locally computed SHA-256 for provenance and transfer equality; not an independently publisher-signed checksum."
+}

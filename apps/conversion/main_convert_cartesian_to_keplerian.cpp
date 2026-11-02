@@ -15,6 +15,7 @@
  * 显式指定输入、输出路径，保留 m／km 与交互式单位选择；增加逐行格式及有限数值检查。
  * 已对比历史算例并验证双向转换，结果在浮点精度范围内吻合；详见 doc/cart_to_kep_restoration_20261020.md。
  */
+#include "math_backend.hpp"
 #include "utils_constants.hpp"
 #include "io_common.hpp"
 #include "orbit_statedef.hpp"
@@ -47,6 +48,7 @@ int main(int argc, const char* argv[]) {
     if (argc == 2 && std::string(argv[1]) == "--version")
     {
         std::cout << "aster_convert_cartesian_to_keplerian " << ASTER_PROGRAM_VERSION << '\n';
+        std::cout << aster::math_backend::BuildDescription() << '\n';
         return 0;
     }
 

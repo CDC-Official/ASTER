@@ -27,6 +27,7 @@
  * 残差文件每行依次为 MJD_UTC、观测类型、目标号、站号、东西方向残差和南北方向残差；
  * 两个残差均取 O-C，单位为 rad，文件不含表头。
  */
+#include "math_backend.hpp"
 #include "core_iod_solver.hpp"
 
 #include "io_settings.hpp"
@@ -83,6 +84,7 @@ int main(int argc, char* argv[])
     if (argc == 2 && std::string(argv[1]) == "--version")
     {
         std::cout << "aster_iod_glml " << ASTER_PROGRAM_VERSION << '\n';
+        std::cout << aster::math_backend::BuildDescription() << '\n';
         return 0;
     }
 

@@ -17,6 +17,7 @@
  * 按读取、归一化、根数转 Cartesian、恢复单位和写出的顺序展开 main；增加逐行输入检查及中文功能注释。
  * 原算例与多行样例的输出已与整理前逐字节对比一致；转换公式、输出列和单位未改变。
  */
+#include "math_backend.hpp"
 #include "utils_constants.hpp"
 #include "io_common.hpp"
 #include "orbit_statedef.hpp"
@@ -51,6 +52,7 @@ int main(int argc, const char* argv[]) {
     if (argc == 2 && std::string(argv[1]) == "--version")
     {
         std::cout << "aster_convert_keplerian_to_cartesian " << ASTER_PROGRAM_VERSION << '\n';
+        std::cout << aster::math_backend::BuildDescription() << '\n';
         return 0;
     }
 

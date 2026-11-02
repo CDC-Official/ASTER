@@ -5,6 +5,7 @@
  * 输入输出列为 [MJD_UTC,a,e,i,Omega,omega,M]，a 为 km，四个角为 deg；库内用 ae、UNITTIME 和 rad 归一化。
  * 配置采用严格 SimpleInput，所有相对路径以配置目录为基准。结果独占创建，全部计算成功后才写出。
  */
+#include "math_backend.hpp"
 #include "analyt_averaging.hpp"
 #include "io_common.hpp"
 #include "io_settings.hpp"
@@ -43,6 +44,7 @@ int main(int argc, char** argv)
     if (argc == 2 && std::string(argv[1]) == "--version")
     {
         std::cout << "aster_convert_osculating_to_mean " << ASTER_PROGRAM_VERSION << '\n';
+        std::cout << aster::math_backend::BuildDescription() << '\n';
         return 0;
     }
 

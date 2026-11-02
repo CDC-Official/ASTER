@@ -140,7 +140,7 @@ namespace iod
 		double resRaCOD1d, resRaCOD2d, resDecCOD1d, resDecCOD2d;//残差序列的一次、二次决定系数
 		double angle_norm;            // 定轨历元时，测站矢量和轨道面的夹角，归一化
 
-		double resRa_Q, resDec_Q, resRa_p, resDec_p;//ljungBox检验的Q p
+		double resRa_Q, resDec_Q, resRa_p, resDec_p;// Ljung–Box 遗留字段；当前未计算时为 -1。
 		double J_likelihood;
 
 		// 尝试性重构核心每次调用时清空，并依次保存起始状态及每轮更新结果。
