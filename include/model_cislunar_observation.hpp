@@ -103,6 +103,7 @@ Eigen::VectorXd EvaluateCislunarInterpolant(const CislunarInterpolant& interpola
  * @details 先反求接收 TDB，再迭代发射 TDB；单次时刻变化不超过 1e-12 s 时收敛。
  * 两端 E-BCRS 位置分别加各自事件的地球 BCRS 位置。引力天体取接收 TDB，跳过地球，
  * 太阳项的对数分子、分母均加 2GM/c²。伪距等于几何距离、引力时延距离和接收减发射钟差距离之和。
+ * 引力参数采用 Park 等（2021）表 2 的 DE440 GM。
  * 设备时延、天线偏移和测量噪声取零。十轮内未收敛时报告错误。
  */
 OneWayRange ComputeCislunarOneWayRange(const std::array<double, 2>& reference_mjd, double clock_tag_day,

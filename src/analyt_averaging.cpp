@@ -166,19 +166,8 @@ ThirdBodyArguments Prepare_ThirdBody(bastion::Overwatch& tracer, double mjd_ut1,
     ThirdBodyArguments body{};
     body.r = elements[0] * (1 - elements[1] * cos(E));
 
-    // 此处解析模型采用月球 GM=4902.7934e9、太阳 GM=1.32712438e20，单位 m³/s²。
-    // 先除以地球 GE，得到归一化第三体 GM，再依距离三次幂构成 beta2。
-    double normalized_gm;
-
-    if (moon)
-    {
-        normalized_gm = 4902.7934e9 / GE;
-    }
-    else
-    {
-        // 太阳使用参考解析模型自己的 GM，不替换数值传播模块的常数。
-        normalized_gm = 1.32712438e20 / GE;
-    }
+    // 日月 GM 与数值传播共用 DE440 参数，先除以地球 GM，再按距离构成摄动强度。
+    const double normalized_gm = moon ? MOON_EARTH_MASS_RATIO : SUN_EARTH_MASS_RATIO;
 
     // beta2 是归一化 GM 除以当前距离三次幂。
     body.beta2 = normalized_gm / pow(body.r, 3);

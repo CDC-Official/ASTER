@@ -15,7 +15,7 @@ struct AnalyticStmSetting
     // j2 是无量纲的地球 J2 系数，仅在启用 J2 长期项时使用。
     double j2 = 0.00108263;
     // 名称沿用来源公式；实际保存日月 GM 除以地球 GE 的比值，不是以 kg 表示的质量。
-    double lunar_mass = 4902.7934e9 / GE, solar_mass = 1.32712438e20 / GE;
+    double lunar_mass = MOON_EARTH_MASS_RATIO, solar_mass = SUN_EARTH_MASS_RATIO;
     // 平均距离除以地球半径 ae，成为归一化长度；与上面的 GM 比值组成 GM/r³ 强度。
     double lunar_distance = 384747981.0 / ae, solar_distance = 1.495980225898274e11 / ae;
     // 这里保存日月轨道倾角的正弦，不是角度；作为平均长期项的固定近似，不随历元更新。

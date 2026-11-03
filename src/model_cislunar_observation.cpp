@@ -1,7 +1,7 @@
 /**
  * @file model_cislunar_observation.cpp
  * @brief 用固定采样窗口插值轨道与钟差，迭代求解单程光时和伪距。
- * @details 内部几何长度以 6378136.3 m 归一化，时刻采用相对天数；公开结果使用 SI 单位。
+ * @details 内部几何长度以 6378136.3 m 归一化，时刻采用相对天数；引力参数取公共 DE440 GM，结果使用 SI 单位。
  */
 #include "model_cislunar_observation.hpp"
 #include "model_ephemeris_jpl.hpp"
@@ -157,6 +157,7 @@ static Eigen::Vector3d CislunarBodyPosition(const std::array<double, 2>& referen
  * @details 先反求接收 TDB，再迭代发射 TDB；单次时刻变化不超过 1e-12 s 时收敛。
  * 两端 E-BCRS 位置分别加各自事件的地球 BCRS 位置。引力天体取接收 TDB，跳过地球，
  * 太阳项的对数分子、分母均加 2GM/c²。伪距等于几何距离、引力时延距离和接收减发射钟差距离之和。
+ * 引力参数采用 Park 等（2021）表 2 的 DE440 GM。
  * 设备时延、天线偏移和测量噪声取零。十轮内未收敛时报告错误。
  */
 OneWayRange ComputeCislunarOneWayRange(const std::array<double, 2>& reference_mjd, double clock_tag_day,
@@ -165,9 +166,6 @@ OneWayRange ComputeCislunarOneWayRange(const std::array<double, 2>& reference_mj
 {
     const double c = SPEED_OF_LIGHT_MPS;
     const double length_scale = 6378136.3;
-    const double time_scale = 806.810991306733;
-    const double speed_scale = 7905.36614984607;
-    const double c_norm = c / speed_scale;
     OneWayRange result;
     result.receive_day = clock_tag_day;
     Eigen::VectorXd receive_bias;
@@ -191,7 +189,6 @@ OneWayRange ComputeCislunarOneWayRange(const std::array<double, 2>& reference_mj
         + CislunarBodyPosition(reference_mjd, result.receive_day, 3)) / length_scale;
 
     // =================================== 02 准备接收时刻的引力天体 ===================================
-    const double gm_earth = 3.986004415e14;
     std::array<Eigen::Vector3d, 11> body_positions;
 
     for (int body = 1; body <= 11; ++body)
@@ -221,7 +218,7 @@ OneWayRange ComputeCislunarOneWayRange(const std::array<double, 2>& reference_mj
 
             const double r1 = (transmit_bcrs - body_positions[body - 1]).norm() * length_scale;
             const double r2 = (receive_bcrs - body_positions[body - 1]).norm() * length_scale;
-            const double gm = gm_earth * MAJOR_BODY_EARTH_GM_RATIO[body - 1];
+            const double gm = MAJOR_BODY_GM[body - 1];
             const double solar_term = body == 11 ? 2.0 * gm / (c * c) : 0.0;
             const double denominator = r1 + r2 - result.geometric_m + solar_term;
 
@@ -231,7 +228,7 @@ OneWayRange ComputeCislunarOneWayRange(const std::array<double, 2>& reference_mj
                 * std::log((r1 + r2 + result.geometric_m + solar_term) / denominator);
         }
 
-        const double light_time_s = range_norm / c_norm * time_scale + delay_s;
+        const double light_time_s = result.geometric_m / c + delay_s;
         const double next = result.receive_day - light_time_s / DAYSEC;
         result.transmit_update_s = std::abs(next - result.transmit_day) * DAYSEC;
         result.transmit_day = next;

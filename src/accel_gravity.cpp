@@ -372,6 +372,7 @@ int Earth_Nonspherical_Gravitational_Acceleration(double* a_terrestrial, const d
 	 * 计算地固坐标系下，地球非球形引力摄动加速度，不考虑二体质点的引力以及坐标转换！！！
 	 * a_terrestrial[3] 地固系下的归一化的摄动加速度，不考虑二体质点的引力！！！
 	 * R_terrestrial[3] 地固系卫星的归一化位置 XYZ
+	 * 输入长度尺度为 ae，输出加速度尺度为 GE/ae²，GE 取公共 DE440 地球 GM。
 	 * zonal_order 带谐项阶次
 	 * tesseral_degree 田谐项阶次
 	 * 预留接口：field_id 引力场模型id 目前仅支持GGM03C

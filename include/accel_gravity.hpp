@@ -19,7 +19,7 @@ using namespace Eigen;
 // [补丁修改] 结构体改名为 LunarGravityField (月球引力场)
 struct LunarGravityField
 {
-	double GM;          // 月心引力常数 m3/s2
+	double GM;          // 系数文件的 GM 尺度，单位 m³/s²，用于二阶及以上球谐项；质点引力使用公共 DE440 GM。
 	double R_ref;       // 参考半径 m
 	int max_degree;     // 最大阶数
 	bool is_ready = false; // 是否加载

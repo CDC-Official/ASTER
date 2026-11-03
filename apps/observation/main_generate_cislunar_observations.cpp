@@ -152,6 +152,8 @@ int main(int argc, char* argv[])
                << "# reference_mjd_tdb_integer=" << reference_mjd[0] << '\n'
                << "# reference_mjd_tdb_fraction=" << reference_mjd[1] << '\n'
                << "# jpl_de=" << JPLEPH_R1.r1.numde << '\n'
+               << "# gravity_gm_model=DE440_Park2021_Table2\n"
+               << "# gravity_gm_earth_m3_s2=" << GE << '\n'
                << "# gravity_bodies=1,2,4,5,6,7,8,9,10,11; device_delay=0; antenna_offset=0; noise=0\n"
                << "record,type,tx,tx_antenna,rx,rx_antenna,clock_tag_s,tx_tdb_s,rx_tdb_s,geometric_m,gravity_s,gravity_m,"
                << "propagation_m,tx_physical_s,tx_relativistic_s,rx_physical_s,rx_relativistic_s,clock_m,pseudorange_m,"

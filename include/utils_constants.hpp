@@ -10,11 +10,28 @@
 
 #include <cmath>
 
-const double GE = 3.986004418E14;                                      // Geocentric gravitational constant(EGM96 value)
-const double
-	GEOCENTRIC_GRAVITATIONAL_CONSTANT = 3.986004418E14;      // Geocentric gravitational constant(EGM96 value) 跟老师一致
-const double
-	HELIOCENTRIC_GRAVITATIONAL_CONSTANT = 1.32712442076E20;  // HELIOCENTRIC gravitational constant(EGM96 value)
+// 天体 GM 采用 Park 等（2021，AJ 161:105）DE440/DE441 论文表 2，单位 m³/s²。
+// 顺序按 JPL 编号 1—11：水星、金星、地球、火星、木星、土星、天王星、海王星、冥王星、月球、太阳。
+// 火星至冥王星采用表中的行星系统 GM；这些参数也是李昊翰程序注释所引用的来源。
+constexpr double MAJOR_BODY_GM[11] = {
+    2.2031868551e13,
+    3.24858592000e14,
+    3.98600435507e14,
+    4.2828375816e13,
+    1.26712764100000e17,
+    3.7940584841800e16,
+    5.794556400000e15,
+    6.836527100580e15,
+    9.75500000e11,
+    4.902800118e12,
+    1.32712440041279419e20
+};
+
+// 地球、月球和太阳质点引力均从同一参数表取值；GE 同时用于地球归一化。
+constexpr double GEOCENTRIC_GRAVITATIONAL_CONSTANT = MAJOR_BODY_GM[2];
+constexpr double GE = GEOCENTRIC_GRAVITATIONAL_CONSTANT;
+constexpr double LUNAR_GRAVITATIONAL_CONSTANT = MAJOR_BODY_GM[9];
+constexpr double HELIOCENTRIC_GRAVITATIONAL_CONSTANT = MAJOR_BODY_GM[10];
 const double CONSTANT_OF_GRAVITATION = 6.672E-11;                      // Constant of gravitaion G m3kg-1s-2 跟老师一致
 const double MASS_OF_EARTH = GEOCENTRIC_GRAVITATIONAL_CONSTANT / CONSTANT_OF_GRAVITATION;//地球质量 kg
 //const double ae = 6378136.6;                                          // Equatorial radius of the Earth 之前的应该不自洽，纯二体的误差都比较大，达不到double的精度
@@ -32,25 +49,23 @@ const double START_OF_MJD = 2400000.5;
 // 真空光速，单位 m/s；归一化时除以各模型的速度尺度。
 constexpr double SPEED_OF_LIGHT_MPS = 299792458.0;
 
-// 主要天体的 GM / GM_Earth，按 JPL 编号 1—11 排列：
-// 水星、金星、地球、火星、木星、土星、天王星、海王星、冥王星、月球、太阳。
-// 地月预报和测距引力时延共用这组比值，各模型分别提供所用的地球 GM。
+// 各天体 GM 除以同一地球 GM，供归一化动力学使用。
 constexpr double MAJOR_BODY_EARTH_GM_RATIO[11] = {
-    0.0552730669322440,
-    0.8149980859574224,
-    1.0000000000000000,
-    0.1074468866586270,
-    317.8941938154875402,
-    95.1845042355296442,
-    14.5372555667923731,
-    17.1513287281893625,
-    0.0024473129307027,
-    0.0123000370327340,
-    332946.0487730671302415
+    MAJOR_BODY_GM[0] / GE,
+    MAJOR_BODY_GM[1] / GE,
+    MAJOR_BODY_GM[2] / GE,
+    MAJOR_BODY_GM[3] / GE,
+    MAJOR_BODY_GM[4] / GE,
+    MAJOR_BODY_GM[5] / GE,
+    MAJOR_BODY_GM[6] / GE,
+    MAJOR_BODY_GM[7] / GE,
+    MAJOR_BODY_GM[8] / GE,
+    MAJOR_BODY_GM[9] / GE,
+    MAJOR_BODY_GM[10] / GE
 };
 
-const double MOON_EARTH_MASS_RATIO = 0.0123000383;  // 月球/地球质量比
-const double SUN_EARTH_MASS_RATIO = HELIOCENTRIC_GRAVITATIONAL_CONSTANT / GEOCENTRIC_GRAVITATIONAL_CONSTANT;  //太阳/地球质量比
+constexpr double MOON_EARTH_MASS_RATIO = MAJOR_BODY_EARTH_GM_RATIO[9];
+constexpr double SUN_EARTH_MASS_RATIO = MAJOR_BODY_EARTH_GM_RATIO[10];
 //速度归一化
 const double MPS_TO_NORMALIZED_VELOCITY = UNITTIME / ae;
 const double KMPS_TO_NORMALIZED_VELOCITY = 1000.0 * UNITTIME / ae;

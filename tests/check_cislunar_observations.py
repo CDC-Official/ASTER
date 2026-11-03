@@ -25,6 +25,14 @@ reference = [line.split() for line in args.reference.read_text().splitlines() if
 diagnostics = [[float(x) for x in line.split()] for line in args.diagnostic.read_text().splitlines()]
 assert len(rows) == len(reference) == len(diagnostics) == 448
 assert metadata['jpl_de'] == '440'
+# LHH 参考使用固定地球 GM 乘质量比；统一 DE440 后，各天体 GM 有共同的尺度变化。
+# 保留原始分项差异，同时用已知 GM 比例检查引力时延的变化。
+gm_scale = 1.0
+if metadata.get('gravity_gm_model') == 'DE440_Park2021_Table2':
+    assert float(metadata['gravity_gm_earth_m3_s2']) == 3.98600435507e14
+    gm_scale = 3.98600435507e14 / 3.986004415e14
+gravity_residual_m = []
+
 origin = datetime(1858, 11, 17) + timedelta(days=float(metadata['reference_mjd_tdb_integer'])
                                         + float(metadata['reference_mjd_tdb_fraction']))
 
@@ -53,6 +61,10 @@ for row, diagnostic in zip(ordered, diagnostics):
     lhh = {name: diagnostic[index] * scale for name, (index, scale) in fields.items()}
     for name in fields:
         difference[name] = float(row[name]) - lhh[name]
+    residual_m = float(row['gravity_m']) - lhh['gravity_m'] * gm_scale
+    gravity_residual_m.append(residual_m)
+    assert abs(residual_m) <= 1e-9, ('gravity after GM rescaling', row['record'], residual_m)
+    assert abs(float(row['gravity_s']) - lhh['gravity_s'] * gm_scale) <= 1e-16
     differences.append(difference)
     if int(row['record']) in (1, 2):
         samples.append({'record': int(row['record']), 'aster': row, 'lhh': lhh, 'aster_minus_lhh': difference})
@@ -73,6 +85,8 @@ for direction in ('all', 'BDS_to_901', '901_to_BDS'):
             'worst_record': worst['record']}
 assert summary['BDS_to_901']['count'] == summary['901_to_BDS']['count'] == 224
 for name, metric in summary['all']['metrics'].items():
+    if name in ('gravity_m', 'gravity_s'):
+        continue  # 已逐条检查扣除已知 GM 尺度变化后的差异。
     tolerance = 1e-4 if name in ('geometric_m', 'propagation_m', 'pseudorange_m') else (
         1e-9 if name == 'gravity_m' else (1e-11 if name in ('tx_tdb_s', 'rx_tdb_s') else 1e-16))
     assert metric['max_abs'] <= tolerance, (name, metric, tolerance)
@@ -83,6 +97,8 @@ with (args.output / 'differences.csv').open('w') as stream:
     writer.writeheader()
     writer.writerows(differences)
 report = {'metadata': metadata, 'diagnostic_preserves_original_output': True, 'checks_passed': True,
+          'gravity_model_comparison': {'gm_scale_aster_over_lhh': gm_scale,
+                                       'max_abs_residual_after_gm_rescaling_m': max(map(abs, gravity_residual_m))},
           'summary': summary, 'samples': samples,
           'sha256': {str(path): hashlib.sha256(path.read_bytes()).hexdigest()
                      for path in (args.aster, args.reference, args.diagnostic, args.diagnostic_observations)}}
