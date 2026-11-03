@@ -186,6 +186,20 @@ int Get_Libration(const double MJD_TDB, double& Omega_p, double& i_s, double& La
 *****************************************************************************/
 void pleph(double et, int ntarg, int ncent, double rrd[])
 {
+    pleph(et, 0.0, ntarg, ncent, rrd);
+}
+
+/**
+ * @brief 用拆分儒略日查询 JPL 天体相对状态。
+ * @param[in] jd1 TDB 儒略日的整数日或参考日，与 jd2 相加为完整 JD。
+ * @param[in] jd2 相对 jd1 的 TDB 小数日，独立保存亚秒时间精度。
+ * @param[in] ntarg JPL 目标天体编号，1—13；14、15 分别查询章动和天平动。
+ * @param[in] ncent JPL 中心天体编号，12 为太阳系质心。
+ * @param[out] rrd 六维相对位置和速度；默认 JPLEPH_KM=1 时为 km、km/s，角运动为 rad、rad/s。
+ * @details 使用已载入的历表，将两部分日期直接传给 state 的插值过程。
+ */
+void pleph(double jd1, double jd2, int ntarg, int ncent, double rrd[])
+{
 	double et2[2], pv[13][6];
 	/* pv is the position/velocity array
                              NUMBERED FROM ZERO: 0=Mercury,1=Venus,...
@@ -200,8 +214,8 @@ void pleph(double et, int ntarg, int ncent, double rrd[])
 						   9=geocentric Moon, 10=nutations in long. & obliq.
 						   11= lunar librations  */
 	/*  initialize et2 for 'state' and set up component count   */
-	et2[0] = et;
-	et2[1] = 0.0;
+	et2[0] = jd1;
+	et2[1] = jd2;
 
 	for (i = 0; i < 6; ++i) rrd[i] = 0.0;
 

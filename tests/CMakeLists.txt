@@ -76,3 +76,9 @@ add_test(NAME observation_angular_noise COMMAND "${Python3_EXECUTABLE}"
     --script "${PROJECT_SOURCE_DIR}/tools/add_angular_noise.py")
 set_tests_properties(observation_runtime observation_geometry PROPERTIES TIMEOUT 120)
 set_tests_properties(observation_angular_noise PROPERTIES TIMEOUT 60)
+
+add_executable(aster_test_cislunar_interpolation core/cislunar_interpolation.cpp)
+target_link_libraries(aster_test_cislunar_interpolation PRIVATE ASTER::core)
+add_test(NAME cislunar_interpolation COMMAND aster_test_cislunar_interpolation
+    "${PROJECT_SOURCE_DIR}/data/ephemeris/JPLEPH_C.430")
+set_tests_properties(cislunar_interpolation PROPERTIES TIMEOUT 30)

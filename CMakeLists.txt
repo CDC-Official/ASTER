@@ -36,6 +36,8 @@ add_library(aster_core STATIC
     src/model_atmosphere.cpp
     src/model_ephemeris_analytic.cpp
     src/model_ephemeris_jpl.cpp
+    src/io_cislunar_observation.cpp
+    src/model_cislunar_observation.cpp
     src/model_observation.cpp
     src/model_propagation.cpp
     src/model_satellite.cpp

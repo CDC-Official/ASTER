@@ -70,6 +70,17 @@ void split(double tt, double fr[]);
 void interp(double buf[], double t[], int ncf, int ncm, int na, int ifl, double pv[]);
 void pleph(double et, int ntarg, int ncent, double rrd[]);
 
+/**
+ * @brief 用拆分儒略日查询 JPL 天体相对状态。
+ * @param[in] jd1 TDB 儒略日的整数日或参考日，与 jd2 相加为完整 JD。
+ * @param[in] jd2 相对 jd1 的 TDB 小数日，独立保存亚秒时间精度。
+ * @param[in] ntarg JPL 目标天体编号，1—13；14、15 分别查询章动和天平动。
+ * @param[in] ncent JPL 中心天体编号，12 为太阳系质心。
+ * @param[out] rrd 六维相对位置和速度；默认 JPLEPH_KM=1 时为 km、km/s，角运动为 rad、rad/s。
+ * @details 使用已载入的历表，将两部分日期直接传给 state 的插值过程。
+ */
+void pleph(double jd1, double jd2, int ntarg, int ncent, double rrd[]);
+
 // Load: 1=new, 2=same path already loaded, -1=failure/different path.
 // File switching is unsupported; load failure may be retried.
 // Get wrappers return -1 before loading and leave output unchanged.
