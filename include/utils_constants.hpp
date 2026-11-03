@@ -28,6 +28,27 @@ const double J2 = 0.0010826359;                                          // Dyna
 const double pi = 3.141592653589793238462643;                          // 15～16 accuracy
 const double UNITTIME = sqrt(pow(ae, 3) / GE);                          // unit time 跟老师一致
 const double START_OF_MJD = 2400000.5;
+
+// 真空光速，单位 m/s；归一化时除以各模型的速度尺度。
+constexpr double SPEED_OF_LIGHT_MPS = 299792458.0;
+
+// 主要天体的 GM / GM_Earth，按 JPL 编号 1—11 排列：
+// 水星、金星、地球、火星、木星、土星、天王星、海王星、冥王星、月球、太阳。
+// 地月预报和测距引力时延共用这组比值，各模型分别提供所用的地球 GM。
+constexpr double MAJOR_BODY_EARTH_GM_RATIO[11] = {
+    0.0552730669322440,
+    0.8149980859574224,
+    1.0000000000000000,
+    0.1074468866586270,
+    317.8941938154875402,
+    95.1845042355296442,
+    14.5372555667923731,
+    17.1513287281893625,
+    0.0024473129307027,
+    0.0123000370327340,
+    332946.0487730671302415
+};
+
 const double MOON_EARTH_MASS_RATIO = 0.0123000383;  // 月球/地球质量比
 const double SUN_EARTH_MASS_RATIO = HELIOCENTRIC_GRAVITATIONAL_CONSTANT / GEOCENTRIC_GRAVITATIONAL_CONSTANT;  //太阳/地球质量比
 //速度归一化

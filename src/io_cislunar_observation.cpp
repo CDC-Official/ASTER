@@ -4,7 +4,7 @@
  * @details 日期拆分为整数 MJD 和日内小数；采样时刻保存为相对参考历元的天数。
  */
 #include "model_cislunar_observation.hpp"
-#include <sofa.h>
+#include "time_transform.hpp"
 #include <cmath>
 #include <cstdio>
 #include <fstream>
@@ -13,26 +13,6 @@
 
 namespace observation
 {
-
-/**
- * @brief 将日历日期转换成拆分 MJD。
- * @param[in] text YYYY-MM-DDThh:mm:ss 格式的 TDB 参考日期或星钟日期。
- * @return 整数 MJD 和日内小数，两者分别保存以保留亚秒分辨率。
- */
-static std::array<double, 2> ParseCislunarDate(const std::string& text)
-{
-    int year, month, day, hour, minute;
-    double second, zero, mjd;
-    const int fields = std::sscanf(text.c_str(), "%d-%d-%dT%d:%d:%lf", &year, &month, &day, &hour, &minute, &second);
-
-    if (fields != 6) throw std::runtime_error("Invalid TDB calendar: " + text);
-
-    const int status = iauCal2jd(year, month, day, &zero, &mjd);
-    if (status || hour < 0 || hour > 23 || minute < 0 || minute > 59 || !std::isfinite(second) || second < 0 || second >= 60)
-        throw std::runtime_error("Invalid TDB calendar: " + text);
-
-    return {mjd, (hour * 3600.0 + minute * 60.0 + second) / 86400.0};
-}
 
 /**
  * @brief 读取收发时隙表，并保存接收端钟时标签。
@@ -67,9 +47,12 @@ std::vector<CislunarSlot> ReadCislunarSlots(const std::string& path, std::array<
             if (!(row >> year >> month >> day >> hour >> minute >> second))
                 throw std::runtime_error(path + ": invalid T row " + std::to_string(line_number));
 
-            char date[80];
-            std::snprintf(date, sizeof(date), "%04d-%02d-%02dT%02d:%02d:%.9f", year, month, day, hour, minute, second);
-            current = ParseCislunarDate(date);
+            // 整数日与日内小数分别保存，供后续收发时刻迭代使用。
+            const int status = Calendar2MJD(year, month, day, 0.0, current[0]);
+            if (status || hour < 0 || hour > 23 || minute < 0 || minute > 59 || !std::isfinite(second) || second < 0 || second >= 60)
+                throw std::runtime_error(path + ": invalid T calendar at line " + std::to_string(line_number));
+
+            current[1] = (hour * 3600.0 + minute * 60.0 + second) / DAYSEC;
 
             if (!have_reference) reference_mjd = current;
 
@@ -85,7 +68,7 @@ std::vector<CislunarSlot> ReadCislunarSlots(const std::string& path, std::array<
                 >> slot.transmit_antenna >> slot.receiver >> slot.receive_antenna) || !std::isfinite(receive_s))
                 throw std::runtime_error(path + ": invalid ISLL row " + std::to_string(line_number));
 
-            slot.clock_tag_day = (current[0] - reference_mjd[0]) + (current[1] + receive_s / 86400.0) - reference_mjd[1];
+            slot.clock_tag_day = (current[0] - reference_mjd[0]) + (current[1] + receive_s / DAYSEC) - reference_mjd[1];
             slots.push_back(slot);
         }
     }
@@ -138,7 +121,18 @@ CislunarSeries ReadCislunarSeries(const std::string& path, const std::array<doub
 
         if (!in_data) continue;
 
-        const std::array<double, 2> epoch = ParseCislunarDate(word);
+        int year, month, calendar_day, hour, minute;
+        double second;
+        const int fields = std::sscanf(word.c_str(), "%d-%d-%dT%d:%d:%lf", &year, &month, &calendar_day, &hour, &minute, &second);
+
+        if (fields != 6) throw std::runtime_error(path + ": invalid sample calendar at line " + std::to_string(line_number));
+
+        std::array<double, 2> epoch = {};
+        const int status = Calendar2MJD(year, month, calendar_day, 0.0, epoch[0]);
+        if (status || hour < 0 || hour > 23 || minute < 0 || minute > 59 || !std::isfinite(second) || second < 0 || second >= 60)
+            throw std::runtime_error(path + ": invalid sample calendar at line " + std::to_string(line_number));
+
+        epoch[1] = (hour * 3600.0 + minute * 60.0 + second) / DAYSEC;
         const double day = (epoch[0] - reference_mjd[0]) + epoch[1] - reference_mjd[1];
         Eigen::VectorXd value(components);
 
@@ -164,7 +158,7 @@ CislunarSeries ReadCislunarSeries(const std::string& path, const std::array<doub
 
     for (std::size_t i = 0; i < samples.size(); ++i)
     {
-        if (i > 0 && std::abs((series.days[i] - series.days[i - 1]) - step) * 86400.0 > 1e-6)
+        if (i > 0 && std::abs((series.days[i] - series.days[i - 1]) - step) * DAYSEC > 1e-6)
             throw std::runtime_error("Nonuniform sampling: " + path);
 
         series.values.row(i) = samples[i].transpose();

@@ -5,6 +5,8 @@
  */
 #include "model_cislunar_observation.hpp"
 #include "model_ephemeris_jpl.hpp"
+#include "utils_constants.hpp"
+#include <sofam.h>
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
@@ -55,7 +57,6 @@ CislunarInterpolant PrepareCislunarInterpolant(CislunarSeries& series, double cl
     interpolant.start_day = series.days[series.window_start];
     interpolant.span_days = series.days[series.window_start + 9] - interpolant.start_day;
     interpolant.coefficients = Eigen::MatrixXd::Zero(17, series.values.cols());
-    const double pi = 3.14159265358979323846;
     double nodes[10], cgl[17], polynomial[17][17];
 
     for (int i = 0; i < 10; ++i) nodes[i] = -1.0 + 2.0 * i / 9.0;
@@ -133,7 +134,7 @@ Eigen::VectorXd EvaluateCislunarInterpolant(const CislunarInterpolant& interpola
  */
 static Eigen::Vector3d CislunarBodyPosition(const std::array<double, 2>& reference_mjd, double day, int body)
 {
-    const double jd1 = 2400000.5 + reference_mjd[0];
+    const double jd1 = START_OF_MJD + reference_mjd[0];
     const double jd2 = reference_mjd[1] + day;
 
     if (jd1 + jd2 < JPLEPH_R1.r1.ss[0] || jd1 + jd2 > JPLEPH_R1.r1.ss[1])
@@ -162,7 +163,7 @@ OneWayRange ComputeCislunarOneWayRange(const std::array<double, 2>& reference_mj
     const CislunarInterpolant& transmit_orbit, const CislunarInterpolant& receive_orbit,
     const CislunarInterpolant& transmit_clock, const CislunarInterpolant& receive_clock)
 {
-    const double c = 299792458.0;
+    const double c = SPEED_OF_LIGHT_MPS;
     const double length_scale = 6378136.3;
     const double time_scale = 806.810991306733;
     const double speed_scale = 7905.36614984607;
@@ -175,8 +176,8 @@ OneWayRange ComputeCislunarOneWayRange(const std::array<double, 2>& reference_mj
     for (int iteration = 1; iteration <= 10; ++iteration)
     {
         receive_bias = EvaluateCislunarInterpolant(receive_clock, result.receive_day);
-        const double next = clock_tag_day - (receive_bias(0) + receive_bias(1)) / 86400.0;
-        result.receive_update_s = std::abs(next - result.receive_day) * 86400.0;
+        const double next = clock_tag_day - (receive_bias(0) + receive_bias(1)) / DAYSEC;
+        result.receive_update_s = std::abs(next - result.receive_day) * DAYSEC;
         result.receive_day = next;
         result.receive_iterations = iteration;
 
@@ -191,9 +192,6 @@ OneWayRange ComputeCislunarOneWayRange(const std::array<double, 2>& reference_mj
 
     // =================================== 02 准备接收时刻的引力天体 ===================================
     const double gm_earth = 3.986004415e14;
-    const double mass_ratio[11] = {0.0552730669322440, 0.8149980859574224, 1.0, 0.1074468866586270,
-        317.8941938154875402, 95.1845042355296442, 14.5372555667923731, 17.1513287281893625,
-        0.0024473129307027, 0.0123000370327340, 332946.0487730671302415};
     std::array<Eigen::Vector3d, 11> body_positions;
 
     for (int body = 1; body <= 11; ++body)
@@ -223,7 +221,7 @@ OneWayRange ComputeCislunarOneWayRange(const std::array<double, 2>& reference_mj
 
             const double r1 = (transmit_bcrs - body_positions[body - 1]).norm() * length_scale;
             const double r2 = (receive_bcrs - body_positions[body - 1]).norm() * length_scale;
-            const double gm = gm_earth * mass_ratio[body - 1];
+            const double gm = gm_earth * MAJOR_BODY_EARTH_GM_RATIO[body - 1];
             const double solar_term = body == 11 ? 2.0 * gm / (c * c) : 0.0;
             const double denominator = r1 + r2 - result.geometric_m + solar_term;
 
@@ -234,8 +232,8 @@ OneWayRange ComputeCislunarOneWayRange(const std::array<double, 2>& reference_mj
         }
 
         const double light_time_s = range_norm / c_norm * time_scale + delay_s;
-        const double next = result.receive_day - light_time_s / 86400.0;
-        result.transmit_update_s = std::abs(next - result.transmit_day) * 86400.0;
+        const double next = result.receive_day - light_time_s / DAYSEC;
+        result.transmit_update_s = std::abs(next - result.transmit_day) * DAYSEC;
         result.transmit_day = next;
         result.transmit_iterations = iteration;
 

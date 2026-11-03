@@ -9,6 +9,8 @@
 #include "model_cislunar_observation.hpp"
 #include "model_ephemeris_jpl.hpp"
 #include "io_settings.hpp"
+#include "utils_constants.hpp"
+#include <sofam.h>
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
@@ -160,9 +162,9 @@ int main(int argc, char* argv[])
             const CislunarSlot& slot = slots[i];
             const OneWayRange& result = observations[i];
             output << i + 1 << ',' << slot.type << ',' << slot.transmitter << ',' << slot.transmit_antenna << ','
-                   << slot.receiver << ',' << slot.receive_antenna << ',' << slot.clock_tag_day * 86400.0 << ','
-                   << result.transmit_day * 86400.0 << ',' << result.receive_day * 86400.0 << ','
-                   << result.geometric_m << ',' << result.gravity_m / 299792458.0 << ',' << result.gravity_m << ','
+                   << slot.receiver << ',' << slot.receive_antenna << ',' << slot.clock_tag_day * DAYSEC << ','
+                   << result.transmit_day * DAYSEC << ',' << result.receive_day * DAYSEC << ','
+                   << result.geometric_m << ',' << result.gravity_m / SPEED_OF_LIGHT_MPS << ',' << result.gravity_m << ','
                    << result.propagation_m << ',' << result.transmit_physical_s << ',' << result.transmit_relativistic_s << ','
                    << result.receive_physical_s << ',' << result.receive_relativistic_s << ',' << result.clock_m << ','
                    << result.pseudorange_m << ',' << result.receive_iterations << ',' << result.transmit_iterations << ','

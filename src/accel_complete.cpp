@@ -12,24 +12,6 @@ namespace
 	constexpr int PN_BODY_COUNT = 11;
 	constexpr int PN_STATE_SIZE = 6;
 	constexpr int PN_EARTH_INDEX = 2;
-	constexpr double SPEED_OF_LIGHT_MPS = 299792458.0;
-
-	// 太阳系主要天体的 GM / GM_Earth。顺序必须与 JPL PLEPH 的 1..11 编号保持一致：
-	// Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, Moon, Sun。
-	// 这里沿用师兄 EOM_EBCRS.FOR 里 FPNEWTON1/FPNEWTON2 的 UU 常数。
-	constexpr double PN_GM_EARTH_RATIO[PN_BODY_COUNT] = {
-		0.0552730669322440,
-		0.8149980859574224,
-		1.0000000000000000,
-		0.1074468866586270,
-		317.8941938154875402,
-		95.1845042355296442,
-		14.5372555667923731,
-		17.1513287281893625,
-		0.0024473129307027,
-		0.0123000370327340,
-		332946.0487730671302415
-	};
 
 	double Norm3(const double x, const double y, const double z)
 	{
@@ -95,12 +77,12 @@ namespace
 				const double dr3 = dr * dr * dr;
 
 				// 经典牛顿加速度：a_i += -mu_j * (r_i - r_j) / |r_i - r_j|^3。
-				body_acc_norm[i][0] -= PN_GM_EARTH_RATIO[j] * dx / dr3;
-				body_acc_norm[i][1] -= PN_GM_EARTH_RATIO[j] * dy / dr3;
-				body_acc_norm[i][2] -= PN_GM_EARTH_RATIO[j] * dz / dr3;
+				body_acc_norm[i][0] -= MAJOR_BODY_EARTH_GM_RATIO[j] * dx / dr3;
+				body_acc_norm[i][1] -= MAJOR_BODY_EARTH_GM_RATIO[j] * dy / dr3;
+				body_acc_norm[i][2] -= MAJOR_BODY_EARTH_GM_RATIO[j] * dz / dr3;
 
 				// EIH 公式中的势函数求和项 sum(mu_j / r_ij)。
-				body_potential_norm[i] += PN_GM_EARTH_RATIO[j] / dr;
+				body_potential_norm[i] += MAJOR_BODY_EARTH_GM_RATIO[j] / dr;
 			}
 		}
 	}
@@ -146,7 +128,7 @@ namespace
 		double spacecraft_potential_norm = 0.0;
 		for (int j = 0; j < PN_BODY_COUNT; ++j)
 		{
-			spacecraft_potential_norm += PN_GM_EARTH_RATIO[j] / relative_distance[j];
+			spacecraft_potential_norm += MAJOR_BODY_EARTH_GM_RATIO[j] / relative_distance[j];
 		}
 
 		// v^2，注意这是卫星 BCRS 速度平方，不是希腊字母 nu。
@@ -197,17 +179,17 @@ namespace
 				4.0 * vvi -
 				1.5 * rvi * rvi -
 				0.5 * rai;
-			temp1 = -PN_GM_EARTH_RATIO[i] * temp1 / dr3 / cl2;
+			temp1 = -MAJOR_BODY_EARTH_GM_RATIO[i] * temp1 / dr3 / cl2;
 
 			// 第二组项：乘在相对速度 (v-v_i) 前面的系数。
 			const double sum3 =
 				(4.0 * target_bcrs_state_norm[3] - 3.0 * major_body_bcrs_state_norm[i][3]) * relative_state[i][0] +
 				(4.0 * target_bcrs_state_norm[4] - 3.0 * major_body_bcrs_state_norm[i][4]) * relative_state[i][1] +
 				(4.0 * target_bcrs_state_norm[5] - 3.0 * major_body_bcrs_state_norm[i][5]) * relative_state[i][2];
-			const double temp2 = PN_GM_EARTH_RATIO[i] * sum3 / dr3 / cl2;
+			const double temp2 = MAJOR_BODY_EARTH_GM_RATIO[i] * sum3 / dr3 / cl2;
 
 			// 第三组项：乘在大天体牛顿加速度 ddot(r_i) 前面的系数。
-			const double temp3 = 3.5 * PN_GM_EARTH_RATIO[i] / dr / cl2;
+			const double temp3 = 3.5 * MAJOR_BODY_EARTH_GM_RATIO[i] / dr / cl2;
 
 			fpn_bcrs_norm[0] += temp1 * relative_state[i][0] + temp2 * relative_state[i][3] + temp3 * body_acc_norm[i][0];
 			fpn_bcrs_norm[1] += temp1 * relative_state[i][1] + temp2 * relative_state[i][4] + temp3 * body_acc_norm[i][1];
@@ -264,7 +246,7 @@ namespace
 		for (int j = 0; j < PN_BODY_COUNT; ++j)
 		{
 			if (j == target_body_index) continue;
-			target_potential_norm += PN_GM_EARTH_RATIO[j] / relative_distance[j];
+			target_potential_norm += MAJOR_BODY_EARTH_GM_RATIO[j] / relative_distance[j];
 		}
 
 		fpn_bcrs_norm[0] = 0.0;
@@ -306,14 +288,14 @@ namespace
 				4.0 * vvi -
 				1.5 * rvi * rvi -
 				0.5 * rai;
-			temp1 = -PN_GM_EARTH_RATIO[i] * temp1 / dr3 / cl2;
+			temp1 = -MAJOR_BODY_EARTH_GM_RATIO[i] * temp1 / dr3 / cl2;
 
 			const double sum3 =
 				(4.0 * major_body_bcrs_state_norm[target_body_index][3] - 3.0 * major_body_bcrs_state_norm[i][3]) * relative_state[i][0] +
 				(4.0 * major_body_bcrs_state_norm[target_body_index][4] - 3.0 * major_body_bcrs_state_norm[i][4]) * relative_state[i][1] +
 				(4.0 * major_body_bcrs_state_norm[target_body_index][5] - 3.0 * major_body_bcrs_state_norm[i][5]) * relative_state[i][2];
-			const double temp2 = PN_GM_EARTH_RATIO[i] * sum3 / dr3 / cl2;
-			const double temp3 = 3.5 * PN_GM_EARTH_RATIO[i] / dr / cl2;
+			const double temp2 = MAJOR_BODY_EARTH_GM_RATIO[i] * sum3 / dr3 / cl2;
+			const double temp3 = 3.5 * MAJOR_BODY_EARTH_GM_RATIO[i] / dr / cl2;
 
 			fpn_bcrs_norm[0] += temp1 * relative_state[i][0] + temp2 * relative_state[i][3] + temp3 * body_acc_norm[i][0];
 			fpn_bcrs_norm[1] += temp1 * relative_state[i][1] + temp2 * relative_state[i][4] + temp3 * body_acc_norm[i][1];
@@ -1037,7 +1019,7 @@ void Acceleration_Cart_EBCRS(bastion::Overwatch& tracer, const OrbitPropagationJ
 			// Get_JPLEPH 的 n_center = 3 直接返回行星相对地球的 EBCRS 状态，不需要先取 BCRS 再手动作差。
 			a = Get_JPLEPH(MJDs_t.TDB, body_id, 3, planet_ebcrs_state_norm);
 
-			Thirdbody_Gravity_Acceleration(axyz_planet_single, cart_array, planet_ebcrs_state_norm, PN_GM_EARTH_RATIO[body_index]);
+			Thirdbody_Gravity_Acceleration(axyz_planet_single, cart_array, planet_ebcrs_state_norm, MAJOR_BODY_EARTH_GM_RATIO[body_index]);
 			axyz_planetGravity[0] += axyz_planet_single[0];
 			axyz_planetGravity[1] += axyz_planet_single[1];
 			axyz_planetGravity[2] += axyz_planet_single[2];
