@@ -1,0 +1,39 @@
+{
+  "state_sources": [
+    {
+      "satellite": 12,
+      "orbit_source": "/Users/chendingcun/Projects/五院地月空间滤波项目/03_参考代码/LHH_program/original/simulation/202512-pre-research/BDS - 副本/SATEPH_12.dat",
+      "clock_source": "/Users/chendingcun/Projects/五院地月空间滤波项目/03_参考代码/LHH_program/original/simulation/202512-pre-research/BDS - 副本/SATCLK_12.dat",
+      "orbit_sha256": "82135c04334fd10e78d52e29aa9465b5caa19332b0d9542234ff82225d5c3fc1",
+      "clock_sha256": "46e96b24bb580c2e640a92c096107ce9d611815f91f464ea44ad15512d87ed18"
+    },
+    {
+      "satellite": 901,
+      "orbit_source": "/Users/chendingcun/Projects/五院地月空间滤波项目/03_参考代码/LHH_program/runs/native-002/cislunar/SATEPH_901.dat",
+      "clock_source": "/Users/chendingcun/Projects/五院地月空间滤波项目/03_参考代码/LHH_program/runs/native-002/cislunar/SATCLK_901.dat",
+      "orbit_sha256": "f55813b7b4ad11136ba8bec45d52b9b7b561a7058f77afa123df0265d7ec52ea",
+      "clock_sha256": "8f846bfdcf98138604437307fc8e75ae8ff5285f1ccedd16aa68a26179e9bb75"
+    }
+  ],
+  "clock_definition": "两列钟差在各状态采样时刻相加；位置速度保留原始数值。",
+  "receive_events": "取已验证基准结果中的真实接收 TDB 时刻，作为正向仿真的独立输入。",
+  "selection": "每颗星从 2029-05-20T06:00:00 起取十个状态采样点；导航星间隔 300 s，用户星间隔 60 s。",
+  "files": [
+    {
+      "file": "input/JPLEPH_C.440",
+      "sha256": "0cff70007ea4f21d9cc29d1c772b335af2a0fbed145a5dab682d5dc25ce8cde2"
+    },
+    {
+      "file": "input/navigation_state.txt",
+      "sha256": "be4216373c7890a62141bec21b814c7cde8cd4d4ac8e45ff04eafb5e68fba03b"
+    },
+    {
+      "file": "input/receive_events.txt",
+      "sha256": "a9641abc2392ff3bc917b312fe6c20e0774c5870f2d074f5053e6ff77888c0db"
+    },
+    {
+      "file": "input/user_state.txt",
+      "sha256": "cbd1cf6577f0025efb60bf7a6c0a70e935cfb6a80f56b03e98b1a05e979718c4"
+    }
+  ]
+}

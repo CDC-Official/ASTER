@@ -1,0 +1,11 @@
+file_navigation_state = input/navigation_state.txt
+file_user_state = input/user_state.txt
+file_receive_events = input/receive_events.txt
+file_JPLEPH = input/JPLEPH_C.440
+directory_output = output
+navigation_id = 12
+user_id = 901
+gravity_delay = 1
+systematic_bias_m = 0
+noise_sigma_m = 0
+noise_seed = 1

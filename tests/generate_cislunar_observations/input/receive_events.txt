@@ -1,0 +1,3 @@
+# true receive TDB: year month day hour minute second transmitter receiver
+2029 5 20 6 0 4.999999993909314 12 901
+2029 5 20 6 0 9.999876301810568 901 12

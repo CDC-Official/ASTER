@@ -82,3 +82,14 @@ target_link_libraries(aster_test_cislunar_interpolation PRIVATE ASTER::core)
 add_test(NAME cislunar_interpolation COMMAND aster_test_cislunar_interpolation
     "${PROJECT_SOURCE_DIR}/data/ephemeris/JPLEPH_C.430")
 set_tests_properties(cislunar_interpolation PROPERTIES TIMEOUT 30)
+
+add_executable(aster_test_cislunar_observation core/cislunar_observation.cpp)
+target_link_libraries(aster_test_cislunar_observation PRIVATE ASTER::core)
+add_test(NAME core_cislunar_observation COMMAND aster_test_cislunar_observation
+    "${PROJECT_SOURCE_DIR}/tests/generate_cislunar_observations/input/JPLEPH_C.440")
+add_test(NAME cislunar_observation_runtime COMMAND "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/check_cislunar_observations.py"
+    --binary $<TARGET_FILE:aster_generate_cislunar_observations>
+    --case "${CMAKE_CURRENT_SOURCE_DIR}/generate_cislunar_observations"
+    --output "${PROJECT_BINARY_DIR}/test-output/cislunar_observation")
+set_tests_properties(core_cislunar_observation cislunar_observation_runtime PROPERTIES TIMEOUT 120)

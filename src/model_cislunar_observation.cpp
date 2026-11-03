@@ -1,255 +1,434 @@
 /**
  * @file model_cislunar_observation.cpp
- * @brief 用固定采样窗口插值轨道与钟差，迭代求解单程光时和伪距。
- * @details 内部几何长度以 6378136.3 m 归一化，时刻采用相对天数；引力参数取公共 DE440 GM，结果使用 SI 单位。
+ * @brief 插值地月空间状态，计算单程光行时、引力时延和伪距。
+ * @details 状态历元采用 TDB 年月日时分秒，位置为 E-BCRS，计算量使用 SI 单位。
+ * 传播端点分别转换为各自事件的 BCRS 位置，再求解发射事件。
  */
 #include "model_cislunar_observation.hpp"
 #include "model_ephemeris_jpl.hpp"
 #include "utils_constants.hpp"
+#include <sofa.h>
 #include <sofam.h>
+#include <Eigen/Core>
 #include <algorithm>
 #include <cmath>
-#include <stdexcept>
 
-namespace observation
+namespace Cislunar
 {
 
 /**
- * @brief 为当前接收钟时选取采样窗口，并计算切比雪夫系数。
- * @param[in,out] series 读取 days、values、is_clock，向后更新 window_number 和 window_start；观测须按钟时递增调用。
- * @param[in] clock_tag_day 接收端钟时距参考历元的天数，用于固定本条观测的插值窗口。
- * @return 当前窗口的起始时刻、跨度及 17 行系数；分量和单位与 series 相同。
- * @details 轨道窗口每次前进 9 点；钟差从第二段起按 7 点步长、提前一行取 10 点。
- * 先以 Neville 方法求 17 个 Chebyshev–Gauss–Lobatto 节点值，再计算 16 阶展开。
+ * @brief 将状态历元分为午夜儒略日和日内小数日。
+ * @param[in,out] tracer 记录无效日期或时分秒。
+ * @param[in] state 读取 TDB 年月日时分秒；秒数应在 [0,60) 内。
+ * @param[out] jd 两部分 TDB 儒略日，供 JPL 查询及日差计算使用。
  */
-CislunarInterpolant PrepareCislunarInterpolant(CislunarSeries& series, double clock_tag_day)
+static void EpochParts(bastion::Overwatch& tracer, const StateRecord& state, double jd[2])
 {
-    const int count = static_cast<int>(series.days.size());
-    const int stride = series.is_clock ? 7 : 9;
-    const int last_window = count / stride;
-    double end_day = series.days[series.window_start + 9];
+    if (tracer.Code() != bastion::ERR_NOERROR) return;
 
-    if (clock_tag_day < series.days.front() || clock_tag_day > series.days.back())
-        throw std::runtime_error("Clock tag outside satellite table: " + std::to_string(series.satellite_id));
+    tracer.CheckIn(__FILE__, __func__, __LINE__);
+    // SOFA 返回儒略日基准和该日期的 MJD，二者相加得到当天午夜的儒略日。
+    double origin, day;
+    const int status = iauCal2jd(state.year, state.month, state.day, &origin, &day);
 
-    // 时刻递增时推进窗口；末段取文件最后十点。
-    while (end_day < clock_tag_day && series.window_number <= last_window)
+    // 检查日期和日内时间；TDB 的秒字段取 0 到 60 之间的数值。
+    if (status != 0 || state.hour < 0 || state.hour > 23 || state.minute < 0 || state.minute > 59
+        || !std::isfinite(state.second) || state.second < 0.0 || state.second >= 60.0)
     {
-        ++series.window_number;
-        int start = stride * (series.window_number - 1);
-
-        if (series.is_clock) --start;
-
-        if (series.window_number == last_window + 1 || start + 10 > count)
-        {
-            start = count - 10;
-        }
-        else
-        {
-            if (start + 10 == count) ++series.window_number;
-        }
-
-        series.window_start = start;
-        end_day = series.days[start + (series.is_clock ? 8 : 9)];
+        tracer.LogEvent(__FILE__, __func__, __LINE__, "Invalid TDB calendar epoch.", bastion::EventType::ERROR);
+        return;
     }
 
-    CislunarInterpolant interpolant;
-    interpolant.start_day = series.days[series.window_start];
-    interpolant.span_days = series.days[series.window_start + 9] - interpolant.start_day;
-    interpolant.coefficients = Eigen::MatrixXd::Zero(17, series.values.cols());
-    double nodes[10], cgl[17], polynomial[17][17];
-
-    for (int i = 0; i < 10; ++i) nodes[i] = -1.0 + 2.0 * i / 9.0;
-
-    for (int j = 0; j <= 16; ++j)
-    {
-        cgl[j] = -std::cos(pi * j / 16.0);
-        polynomial[j][0] = 1.0;
-        polynomial[j][1] = cgl[j];
-
-        for (int k = 2; k <= 16; ++k)
-            polynomial[j][k] = 2.0 * cgl[j] * polynomial[j][k - 1] - polynomial[j][k - 2];
-    }
-
-    // 每个分量独立做 Neville 插值，再由 CGL 节点值求切比雪夫系数。
-    for (int component = 0; component < series.values.cols(); ++component)
-    {
-        double values[17];
-
-        for (int k = 0; k <= 16; ++k)
-        {
-            double work[10];
-
-            for (int j = 0; j < 10; ++j) work[j] = series.values(series.window_start + j, component);
-
-            for (int i = 0; i < 10; ++i)
-            {
-                for (int j = i - 1; j >= 0; --j)
-                    work[j] = work[j + 1] + (work[j + 1] - work[j]) * (cgl[k] - nodes[i]) / (nodes[i] - nodes[j]);
-            }
-
-            values[k] = work[0];
-        }
-
-        for (int i = 0; i <= 16; ++i)
-        {
-            double coefficient = (values[0] * polynomial[0][i] + values[16] * polynomial[16][i]) / 16.0;
-
-            for (int j = 1; j < 16; ++j) coefficient += values[j] * polynomial[j][i] * 2.0 / 16.0;
-
-            interpolant.coefficients(i, component) = coefficient;
-        }
-    }
-
-    return interpolant;
+    // 午夜日期与日内时间分别保存，后续查询将两部分一起传给 JPL。
+    jd[0] = origin + day;
+    jd[1] = (state.hour * 3600.0 + state.minute * 60.0 + state.second) / DAYSEC;
+    tracer.CheckOut(__func__);
 }
 
 /**
- * @brief 在固定的切比雪夫窗口内计算轨道或钟差。
- * @param[in] interpolant 起始时刻、跨度和 0—16 阶系数，单位与原始采样值相同。
- * @param[in] day 待求时刻距参考 TDB 历元的天数。
- * @return 按原始列顺序排列的六维轨道或二维钟差；单位为 m、m/s 或 s。
- * @details 使用 T0=1、T1=x 的递推，零阶系数取一半；收发事件共用接收钟时选定的窗口。
+ * @brief 将历元移动指定秒数，保留秒的小数部分。
+ * @param[in,out] tracer 记录日期转换错误。
+ * @param[in] epoch 起始 TDB 历元，只读取年月日时分秒。
+ * @param[in] offset_s 时间增量，单位 s，可为负数。
+ * @param[in,out] shifted 只更新年月日时分秒，位置、速度和钟差保持原值。
+ * @details 先在秒字段上加增量，再将整分钟进位到日期，跨日时使用 SOFA 日历转换。
  */
-Eigen::VectorXd EvaluateCislunarInterpolant(const CislunarInterpolant& interpolant, double day)
+static void ShiftEpoch(bastion::Overwatch& tracer, const StateRecord& epoch, double offset_s, StateRecord& shifted)
 {
-    const double x = ((day - interpolant.start_day) - interpolant.span_days / 2.0) * 2.0 / interpolant.span_days;
-    double polynomial[17] = {1.0, x};
+    if (tracer.Code() != bastion::ERR_NOERROR) return;
 
-    for (int j = 2; j <= 16; ++j) polynomial[j] = 2.0 * x * polynomial[j - 1] - polynomial[j - 2];
+    tracer.CheckIn(__FILE__, __func__, __LINE__);
+    double jd[2];
+    EpochParts(tracer, epoch, jd);
+    if (tracer.Code() != bastion::ERR_NOERROR) return;
 
-    Eigen::VectorXd value = interpolant.coefficients.row(0).transpose() / 2.0;
+    if (!std::isfinite(offset_s))
+    {
+        tracer.LogEvent(__FILE__, __func__, __LINE__, "Non-finite epoch offset.", bastion::EventType::ERROR);
+        return;
+    }
 
-    for (int j = 1; j <= 16; ++j) value += interpolant.coefficients.row(j).transpose() * polynomial[j];
+    // 先把时间增量加到秒字段，再用整分钟数表示进位或借位。
+    const double seconds = epoch.second + offset_s;
+    const double minute_shift = std::floor(seconds / 60.0);
+    // 将进位计入时分，分出整日偏移和目标日期内的分钟数。
+    const double minutes = epoch.hour * 60.0 + epoch.minute + minute_shift;
+    const double day_shift = std::floor(minutes / 1440.0);
+    const int minute_of_day = static_cast<int>(minutes - day_shift * 1440.0);
+    // 用整日偏移更新年月日；秒的小数部分留在 seconds 中。
+    double fraction;
+    const int status = iauJd2cal(jd[0], day_shift, &shifted.year, &shifted.month, &shifted.day, &fraction);
 
-    return value;
+    // 确认目标日期和累加后的秒数有效。
+    if (status != 0 || !std::isfinite(seconds))
+    {
+        tracer.LogEvent(__FILE__, __func__, __LINE__, "Cannot shift TDB epoch.", bastion::EventType::ERROR);
+        return;
+    }
+
+    // 把日内分钟拆回时分，余下的秒连同小数写入目标历元。
+    shifted.hour = minute_of_day / 60;
+    shifted.minute = minute_of_day % 60;
+    shifted.second = seconds - minute_shift * 60.0;
+    tracer.CheckOut(__func__);
 }
 
 /**
- * @brief 取得指定天体的 BCRS 位置，用于端点平移和引力时延。
- * @param[in] reference_mjd 参考 TDB MJD 的整数日、小数日。
- * @param[in] day 距参考历元的 TDB 天数。
- * @param[in] body JPL 天体编号，1—11，3 为地球，10 为月球，11 为太阳。
- * @return BCRS 位置，单位 m；历表由主程序预先载入。
+ * @brief 按 TDB 历元查询天体的 BCRS 位置。
+ * @param[in,out] tracer 记录历表覆盖范围错误。
+ * @param[in] epoch 读取 TDB 年月日时分秒。
+ * @param[in] body JPL 天体编号，1—11，其中 3 为地球、10 为月球、11 为太阳。
+ * @param[out] position_m 天体的 BCRS 三维位置，单位 m。
+ * @details 使用主程序已经载入的 JPL 历表，以两部分儒略日查询。
  */
-static Eigen::Vector3d CislunarBodyPosition(const std::array<double, 2>& reference_mjd, double day, int body)
+static void BodyPosition(bastion::Overwatch& tracer, const StateRecord& epoch, int body, Eigen::Vector3d& position_m)
 {
-    const double jd1 = START_OF_MJD + reference_mjd[0];
-    const double jd2 = reference_mjd[1] + day;
+    if (tracer.Code() != bastion::ERR_NOERROR) return;
 
-    if (jd1 + jd2 < JPLEPH_R1.r1.ss[0] || jd1 + jd2 > JPLEPH_R1.r1.ss[1])
-        throw std::runtime_error("Observation event outside JPL ephemeris.");
+    tracer.CheckIn(__FILE__, __func__, __LINE__);
+    double jd[2];
+    EpochParts(tracer, epoch, jd);
+    if (tracer.Code() != bastion::ERR_NOERROR) return;
 
+    // 将历表起止日期减去查询日期的午夜值，再与日内小数日比较。
+    if (jd[1] < JPLEPH_R1.r1.ss[0] - jd[0] || jd[1] > JPLEPH_R1.r1.ss[1] - jd[0])
+    {
+        tracer.LogEvent(__FILE__, __func__, __LINE__, "TDB epoch outside loaded JPL ephemeris.", bastion::EventType::ERROR);
+        return;
+    }
+
+    // JPL 的中心编号 12 表示太阳系质心，返回状态的前三项是位置。
     double state_km[6];
-    pleph(jd1, jd2, body, 12, state_km);
-    return Eigen::Vector3d(state_km[0], state_km[1], state_km[2]) * 1000.0;
+    pleph(jd[0], jd[1], body, 12, state_km);
+    // 将历表返回的位置从 km 换成 m。
+    position_m = Eigen::Vector3d(state_km[0], state_km[1], state_km[2]) * 1000.0;
+    tracer.CheckOut(__func__);
 }
 
 /**
- * @brief 求解一条星间单程观测的收发 TDB 时刻和理论伪距。
- * @param[in] reference_mjd 参考 TDB MJD 的整数日和小数日，用于查询已载入的 JPL 二进制历表。
- * @param[in] clock_tag_day 接收端钟时距参考历元的天数。
- * @param[in] transmit_orbit 发射星 E-BCRS 轨道插值，位置 m、速度 m/s。
- * @param[in] receive_orbit 接收星 E-BCRS 轨道插值，位置 m、速度 m/s。
- * @param[in] transmit_clock 发射星钟差插值，两列为相对论钟差和物理钟偏，单位 s。
- * @param[in] receive_clock 接收星钟差插值，定义及单位与 transmit_clock 相同。
- * @return 收发时刻、几何距离、引力时延距离、两端钟差和伪距，以及迭代次数与末次变化量。
- * @details 先反求接收 TDB，再迭代发射 TDB；单次时刻变化不超过 1e-12 s 时收敛。
- * 两端 E-BCRS 位置分别加各自事件的地球 BCRS 位置。引力天体取接收 TDB，跳过地球，
- * 太阳项的对数分子、分母均加 2GM/c²。伪距等于几何距离、引力时延距离和接收减发射钟差距离之和。
- * 引力参数采用 Park 等（2021）表 2 的 DE440 GM。
- * 设备时延、天线偏移和测量噪声取零。十轮内未收敛时报告错误。
+ * @brief 从离散状态中插值指定 TDB 时刻的位置、速度和钟差。
+ * @param[in,out] tracer 记录节点不足、时间乱序、越界及非有限状态错误。
+ * @param[in] records 按 TDB 递增的状态序列，至少两点；位置 m、速度 m/s、钟差 s。
+ * @param[in,out] state 输入年月日时分秒，输出该历元的 E-BCRS 位置、速度和总钟差。
+ * @details 选取查询时刻附近最多十个节点，逐分量使用 Neville 多项式插值，最高九次。
+ * 节点间隔可不等；位置、速度和钟差分别插值。时间差由整日差、整分钟差和秒差组成。
  */
-OneWayRange ComputeCislunarOneWayRange(const std::array<double, 2>& reference_mjd, double clock_tag_day,
-    const CislunarInterpolant& transmit_orbit, const CislunarInterpolant& receive_orbit,
-    const CislunarInterpolant& transmit_clock, const CislunarInterpolant& receive_clock)
+void InterpolateState(bastion::Overwatch& tracer, const std::vector<StateRecord>& records, StateRecord& state)
 {
-    const double c = SPEED_OF_LIGHT_MPS;
-    const double length_scale = 6378136.3;
-    OneWayRange result;
-    result.receive_day = clock_tag_day;
-    Eigen::VectorXd receive_bias;
+    if (tracer.Code() != bastion::ERR_NOERROR) return;
 
-    // =================================== 01 由接收钟时反求接收 TDB ===================================
-    for (int iteration = 1; iteration <= 10; ++iteration)
+    tracer.CheckIn(__FILE__, __func__, __LINE__);
+
+    // 本函数至少使用两个节点进行状态插值。
+    if (records.size() < 2)
     {
-        receive_bias = EvaluateCislunarInterpolant(receive_clock, result.receive_day);
-        const double next = clock_tag_day - (receive_bias(0) + receive_bias(1)) / DAYSEC;
-        result.receive_update_s = std::abs(next - result.receive_day) * DAYSEC;
-        result.receive_day = next;
-        result.receive_iterations = iteration;
-
-        if (result.receive_update_s <= 1e-12) break;
+        tracer.LogEvent(__FILE__, __func__, __LINE__, "State interpolation needs at least two records.", bastion::EventType::ERROR);
+        return;
     }
 
-    if (result.receive_update_s > 1e-12) throw std::runtime_error("Receive TDB did not converge in 10 iterations.");
+    // 以查询时刻为零点，分别计算整日、整分钟及秒的差值。
+    double query_jd[2];
+    EpochParts(tracer, state, query_jd);
+    if (tracer.Code() != bastion::ERR_NOERROR) return;
 
-    const Eigen::VectorXd receive_state = EvaluateCislunarInterpolant(receive_orbit, result.receive_day);
-    const Eigen::Vector3d receive_bcrs = (receive_state.head<3>()
-        + CislunarBodyPosition(reference_mjd, result.receive_day, 3)) / length_scale;
+    // times 保存各采样点相对查询时刻的秒数，负值表示采样点在查询时刻之前。
+    std::vector<double> times(records.size());
 
-    // =================================== 02 准备接收时刻的引力天体 ===================================
-    std::array<Eigen::Vector3d, 11> body_positions;
-
-    for (int body = 1; body <= 11; ++body)
+    for (std::size_t i = 0; i < records.size(); ++i)
     {
-        if (body == 3) continue;
+        // 逐点检查日历历元，并取得该采样日期的午夜儒略日。
+        const StateRecord& record = records[i];
+        double jd[2];
+        EpochParts(tracer, record, jd);
+        if (tracer.Code() != bastion::ERR_NOERROR) return;
 
-        body_positions[body - 1] = CislunarBodyPosition(reference_mjd, result.receive_day, body) / length_scale;
-    }
+        // 整日差与时分秒差分别计算，最后合成以秒为单位的时间间隔。
+        times[i] = (jd[0] - query_jd[0]) * DAYSEC + (record.hour - state.hour) * 3600.0
+            + (record.minute - state.minute) * 60.0 + (record.second - state.second);
 
-    // =================================== 03 迭代发射 TDB 与传播光时 ===================================
-    result.transmit_day = result.receive_day;
-    double delay_s = 0.0;
-
-    for (int iteration = 1; iteration <= 10; ++iteration)
-    {
-        const Eigen::VectorXd transmit_state = EvaluateCislunarInterpolant(transmit_orbit, result.transmit_day);
-        const Eigen::Vector3d transmit_bcrs = (transmit_state.head<3>()
-            + CislunarBodyPosition(reference_mjd, result.transmit_day, 3)) / length_scale;
-        const double range_norm = (receive_bcrs - transmit_bcrs).norm();
-        result.geometric_m = range_norm * length_scale;
-        delay_s = 0.0;
-
-        // 端点到天体的距离与传播距离共同给出一阶引力时延。
-        for (int body = 1; body <= 11; ++body)
+        // 采样时刻必须严格递增，重复或倒序时记录具体节点。
+        if (i > 0 && times[i] <= times[i - 1])
         {
-            if (body == 3) continue;
+            tracer.LogEvent(__FILE__, __func__, __LINE__, "State epochs must increase: record " + std::to_string(i + 1), bastion::EventType::ERROR);
+            return;
+        }
+    }
 
-            const double r1 = (transmit_bcrs - body_positions[body - 1]).norm() * length_scale;
-            const double r2 = (receive_bcrs - body_positions[body - 1]).norm() * length_scale;
-            const double gm = MAJOR_BODY_GM[body - 1];
-            const double solar_term = body == 11 ? 2.0 * gm / (c * c) : 0.0;
-            const double denominator = r1 + r2 - result.geometric_m + solar_term;
+    // 查询时刻应落在首末采样点之间，包含两个端点。
+    if (times.front() > 0.0 || times.back() < 0.0)
+    {
+        tracer.LogEvent(__FILE__, __func__, __LINE__, "Requested TDB epoch outside state records.", bastion::EventType::ERROR);
+        return;
+    }
 
-            if (denominator <= 0.0) throw std::runtime_error("Invalid gravitational time-delay geometry.");
+    // 窗口围绕查询时刻选取；靠近两端时使用端部节点。
+    const int count = static_cast<int>(std::min<std::size_t>(10, records.size()));
+    // 找到不早于查询时刻的首个节点，用它确定局部窗口的位置。
+    const int right = static_cast<int>(std::lower_bound(times.begin(), times.end(), 0.0) - times.begin());
+    const int start = std::clamp(right - count / 2, 0, static_cast<int>(records.size()) - count);
+    // 七个插值分量依次为三维位置、三维速度和总钟差。
+    std::array<double, 7> value{};
 
-            delay_s += 2.0 * gm / (c * c * c)
-                * std::log((r1 + r2 + result.geometric_m + solar_term) / denominator);
+    for (int component = 0; component < 7; ++component)
+    {
+        // 每次取一个分量的节点值，work 同时保存 Neville 递推的中间结果。
+        double work[10];
+
+        for (int i = 0; i < count; ++i)
+        {
+            // 按分量编号从当前节点取出位置、速度或钟差。
+            const StateRecord& record = records[start + i];
+            work[i] = component < 3 ? record.position_ebcrs_m[component]
+                : (component < 6 ? record.velocity_ebcrs_mps[component - 3] : record.clock_offset_s);
+
+            // 记录当前窗口内非有限数值所在的原始采样行。
+            if (!std::isfinite(work[i]))
+            {
+                tracer.LogEvent(__FILE__, __func__, __LINE__, "Non-finite state at record " + std::to_string(start + i + 1), bastion::EventType::ERROR);
+                return;
+            }
         }
 
-        const double light_time_s = result.geometric_m / c + delay_s;
-        const double next = result.receive_day - light_time_s / DAYSEC;
-        result.transmit_update_s = std::abs(next - result.transmit_day) * DAYSEC;
-        result.transmit_day = next;
-        result.transmit_iterations = iteration;
+        // Neville 递推在零点求值，节点时刻保留实际采样间隔。
+        for (int order = 1; order < count; ++order)
+        {
+            for (int i = 0; i < count - order; ++i)
+            {
+                // 用左右两个低一阶插值值，构造跨越这两个端点的高一阶插值值。
+                const double left = times[start + i];
+                const double right_time = times[start + i + order];
+                work[i] = (right_time * work[i] - left * work[i + 1]) / (right_time - left);
+            }
+        }
 
-        if (result.transmit_update_s <= 1e-12) break;
+        // 完成全部阶次后，首项就是该分量在查询时刻的插值结果。
+        value[component] = work[0];
     }
 
-    if (result.transmit_update_s > 1e-12) throw std::runtime_error("Transmit TDB did not converge in 10 iterations.");
+    // 将七个插值结果写回状态记录，历元保持为传入的查询时刻。
+    for (int i = 0; i < 3; ++i)
+    {
+        state.position_ebcrs_m[i] = value[i];
+        state.velocity_ebcrs_mps[i] = value[i + 3];
+    }
 
-    // =================================== 04 组合传播距离与两端钟差 ===================================
-    const Eigen::VectorXd transmit_bias = EvaluateCislunarInterpolant(transmit_clock, result.transmit_day);
-    result.gravity_m = c * delay_s;
-    result.propagation_m = result.geometric_m + result.gravity_m;
-    result.transmit_physical_s = transmit_bias(1);
-    result.transmit_relativistic_s = transmit_bias(0);
-    result.receive_physical_s = receive_bias(1);
-    result.receive_relativistic_s = receive_bias(0);
-    result.clock_m = c * ((receive_bias(0) - transmit_bias(0)) + (receive_bias(1) - transmit_bias(1)));
-    result.pseudorange_m = result.propagation_m + result.clock_m;
-    return result;
+    state.clock_offset_s = value[6];
+    tracer.CheckOut(__func__);
+}
+
+/**
+ * @brief 计算多个天体单极场产生的单程引力传播时延。
+ * @param[in,out] tracer 记录天体编号、重复天体及无效传播几何错误。
+ * @param[in] transmit_m 发射事件的 BCRS 位置，单位 m。
+ * @param[in] receive_m 接收事件的 BCRS 位置，单位 m。
+ * @param[in] body_positions_m 十一个天体在接收时刻的 BCRS 位置，按 JPL 编号减一索引，单位 m。
+ * @param[in] gravity_bodies 参与求和的 JPL 天体编号，取 1—11；空列表对应零时延。
+ * @param[out] delay_s 引力传播时延，单位 s。
+ * @details 各项为 2GM/c³ ln[(r发+r收+距离+修正)/(r发+r收−距离+修正)]。
+ * GM 使用公共 DE440 参数；太阳项的修正为 2GM/c²，其余天体为零。
+ */
+void ComputeGravityDelay(bastion::Overwatch& tracer, const std::array<double, 3>& transmit_m,
+    const std::array<double, 3>& receive_m, const std::array<std::array<double, 3>, 11>& body_positions_m,
+    const std::vector<int>& gravity_bodies, double& delay_s)
+{
+    if (tracer.Code() != bastion::ERR_NOERROR) return;
+
+    tracer.CheckIn(__FILE__, __func__, __LINE__);
+    // 把发收位置作为三维向量使用，求两个事件之间的直线距离。
+    const Eigen::Map<const Eigen::Vector3d> transmit(transmit_m.data()), receive(receive_m.data());
+    const double distance = (receive - transmit).norm();
+    const double c = SPEED_OF_LIGHT_MPS;
+    // 记录已经计入的天体，引力时延从零开始逐项累加。
+    std::array<bool, 11> included{};
+    delay_s = 0.0;
+
+    for (int body : gravity_bodies)
+    {
+        // 参与求和的天体编号取 1—11，同一天体只计入一次。
+        if (body < 1 || body > 11 || included[body - 1])
+        {
+            tracer.LogEvent(__FILE__, __func__, __LINE__, "Invalid or repeated gravity body: " + std::to_string(body), bastion::EventType::ERROR);
+            return;
+        }
+
+        // 求发射端、接收端到当前天体的距离之和。
+        included[body - 1] = true;
+        const Eigen::Map<const Eigen::Vector3d> position(body_positions_m[body - 1].data());
+        const double radius_sum = (transmit - position).norm() + (receive - position).norm();
+        // 取当前天体的 GM；太阳项在对数分子、分母中各加 2GM/c²。
+        const double gm = MAJOR_BODY_GM[body - 1];
+        const double correction = body == 11 ? 2.0 * gm / (c * c) : 0.0;
+        const double denominator = radius_sum - distance + correction;
+
+        // 对数的分母应为有限正数，几何异常时报告对应天体。
+        if (!std::isfinite(denominator) || denominator <= 0.0)
+        {
+            tracer.LogEvent(__FILE__, __func__, __LINE__, "Invalid gravitational delay geometry for body " + std::to_string(body), bastion::EventType::ERROR);
+            return;
+        }
+
+        // log1p 在距离远小于端点至天体距离时仍能保留有效数字。
+        delay_s += 2.0 * gm / (c * c * c) * std::log1p(2.0 * distance / denominator);
+    }
+
+    tracer.CheckOut(__func__);
+}
+
+/**
+ * @brief 从真实接收事件计算单程理论伪距及发射事件。
+ * @param[in,out] tracer 记录状态查询、JPL 覆盖范围及光行时收敛错误。
+ * @param[in] receive 接收事件的 TDB 历元、E-BCRS 位置和钟差，单位 m、s。
+ * @param[in] query_transmit 根据传入状态的 TDB 历元填写发射端位置、速度和总钟差，并通过 tracer 报错。
+ * @param[in] gravity_bodies 参与引力时延的 JPL 天体编号 1—11；空列表关闭引力时延。
+ * @param[out] record 发收状态、接收钟读数、几何距离、引力时延、钟差贡献和理论伪距；编号由调用方填写。
+ * @details 两端 E-BCRS 位置分别加各自事件的地球 BCRS 位置。引力天体位置取接收 TDB。
+ * 以秒为单位迭代光行时，末次变化不超过 1e-12 s 时收敛，最多二十轮。
+ * 伪距为几何距离加 c 倍引力时延，再加 c 倍接收减发射钟差；接收钟读数为接收 TDB 加接收钟差。
+ */
+void ComputeOneWayRange(bastion::Overwatch& tracer, const StateRecord& receive,
+    const std::function<void(bastion::Overwatch&, StateRecord&)>& query_transmit,
+    const std::vector<int>& gravity_bodies, OneWayRangeRecord& record)
+{
+    if (tracer.Code() != bastion::ERR_NOERROR) return;
+
+    tracer.CheckIn(__FILE__, __func__, __LINE__);
+    // 初始化本次计算记录，保存给定的真实接收事件。
+    record = OneWayRangeRecord{};
+    record.receive_state = receive;
+    const double c = SPEED_OF_LIGHT_MPS;
+
+    // =================================== 01 准备接收事件及引力天体 ===================================
+    // 查询接收时刻的地球位置，用于把接收端坐标平移到太阳系质心。
+    Eigen::Vector3d earth_receive;
+    BodyPosition(tracer, receive, 3, earth_receive);
+    if (tracer.Code() != bastion::ERR_NOERROR) return;
+
+    // 接收事件在整轮光行时迭代中固定，位置只需转换一次。
+    const Eigen::Vector3d receive_bcrs = Eigen::Map<const Eigen::Vector3d>(receive.position_ebcrs_m.data()) + earth_receive;
+    std::array<double, 3> receive_m{receive_bcrs[0], receive_bcrs[1], receive_bcrs[2]};
+    // 引力天体的位置按 JPL 编号减一存放，供每轮时延计算使用。
+    std::array<std::array<double, 3>, 11> body_positions{};
+
+    for (int body : gravity_bodies)
+    {
+        // 查询前检查天体编号，数组下标与 JPL 编号一一对应。
+        if (body < 1 || body > 11)
+        {
+            tracer.LogEvent(__FILE__, __func__, __LINE__, "Invalid gravity body: " + std::to_string(body), bastion::EventType::ERROR);
+            return;
+        }
+
+        // 统一在接收时刻取得引力天体位置，并在本次迭代中固定使用。
+        Eigen::Vector3d position;
+        BodyPosition(tracer, receive, body, position);
+        if (tracer.Code() != bastion::ERR_NOERROR) return;
+
+        body_positions[body - 1] = {position[0], position[1], position[2]};
+    }
+
+    // =================================== 02 迭代发射事件与光行时 ===================================
+    // 从零光行时开始，首轮在接收时刻查询发射端，随后逐步回推发射事件。
+    double light_time_s = 0.0;
+    bool converged = false;
+
+    for (int iteration = 1; iteration <= 20; ++iteration)
+    {
+        // 本轮发射时刻由真实接收时刻减去当前光行时得到。
+        ShiftEpoch(tracer, receive, -light_time_s, record.transmit_state);
+        if (tracer.Code() != bastion::ERR_NOERROR) return;
+
+        // 查询函数按这个发射时刻填写发射端的位置、速度和钟差。
+        query_transmit(tracer, record.transmit_state);
+        if (tracer.Code() != bastion::ERR_NOERROR) return;
+
+        // 发射端的坐标平移使用发射时刻的地球位置。
+        Eigen::Vector3d earth_transmit;
+        BodyPosition(tracer, record.transmit_state, 3, earth_transmit);
+        if (tracer.Code() != bastion::ERR_NOERROR) return;
+
+        // 两端都表达为 BCRS 位置后，计算不同事件之间的几何距离。
+        const Eigen::Vector3d transmit_bcrs = Eigen::Map<const Eigen::Vector3d>(record.transmit_state.position_ebcrs_m.data()) + earth_transmit;
+        const std::array<double, 3> transmit_m{transmit_bcrs[0], transmit_bcrs[1], transmit_bcrs[2]};
+        record.geometric_m = (receive_bcrs - transmit_bcrs).norm();
+
+        // 用当前发收几何计算引力传播时延，并计入下一轮光行时。
+        ComputeGravityDelay(tracer, transmit_m, receive_m, body_positions, gravity_bodies, record.gravity_delay_s);
+        if (tracer.Code() != bastion::ERR_NOERROR) return;
+
+        // 新光行时由几何距离除以光速，再加引力时延得到。
+        const double next_light_time_s = record.geometric_m / c + record.gravity_delay_s;
+        if (!std::isfinite(next_light_time_s))
+        {
+            tracer.LogEvent(__FILE__, __func__, __LINE__, "Non-finite one-way light time.", bastion::EventType::ERROR);
+            return;
+        }
+
+        // 记录新旧光行时的差值，以及产生当前发射状态所用的光行时。
+        record.light_time_update_s = std::abs(next_light_time_s - light_time_s);
+        record.light_time_s = light_time_s;
+        record.iterations = iteration;
+
+        // 光行时变化达到收敛阈值时，保存当前事件和分项并结束迭代。
+        if (record.light_time_update_s <= 1e-12)
+        {
+            converged = true;
+            break;
+        }
+
+        // 尚未收敛时，用新光行时重新求下一轮的发射事件。
+        light_time_s = next_light_time_s;
+    }
+
+    // 二十轮结束仍未达到阈值时，通过 Tracer 报告求解失败。
+    if (!converged)
+    {
+        tracer.LogEvent(__FILE__, __func__, __LINE__, "One-way light time did not converge in 20 iterations.", bastion::EventType::ERROR);
+        return;
+    }
+
+    // =================================== 03 合成伪距与接收钟读数 ===================================
+    // 钟差贡献取接收钟差减发射钟差，乘光速后换成距离。
+    record.clock_contribution_m = c * (receive.clock_offset_s - record.transmit_state.clock_offset_s);
+    // 将几何距离、引力时延对应的距离和钟差贡献相加，得到理论伪距。
+    record.theoretical_pseudorange_m = record.geometric_m + c * record.gravity_delay_s + record.clock_contribution_m;
+    record.pseudorange_m = record.theoretical_pseudorange_m;
+
+    // 检查合成后的伪距是否为有限数值。
+    if (!std::isfinite(record.pseudorange_m))
+    {
+        tracer.LogEvent(__FILE__, __func__, __LINE__, "Non-finite one-way pseudorange.", bastion::EventType::ERROR);
+        return;
+    }
+
+    // 在真实接收 TDB 上加接收钟差，得到接收端实际记录的钟读数。
+    StateRecord clock_epoch;
+    ShiftEpoch(tracer, receive, receive.clock_offset_s, clock_epoch);
+    if (tracer.Code() != bastion::ERR_NOERROR) return;
+
+    // 将接收钟读数的年月日时分与小数秒分别写入观测记录。
+    record.receive_clock_calendar = {clock_epoch.year, clock_epoch.month, clock_epoch.day, clock_epoch.hour, clock_epoch.minute};
+    record.receive_clock_second = clock_epoch.second;
+    tracer.CheckOut(__func__);
 }
 
 }

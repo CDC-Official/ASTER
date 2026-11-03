@@ -36,5 +36,18 @@
     "description": "原工程大气密度表，Ap=10、F10.7=150",
     "source": "/Users/chendingcun/CLionProjects/CDC_lib/cases/propagation/cartesian-leo/data/atmosphere.txt",
     "resolved_source": "/Users/chendingcun/CLionProjects/CDC_lib/cases/propagation/cartesian-leo/data/atmosphere.txt"
+  },
+  {
+    "file": "ephemeris/JPLEPH_C.440",
+    "bytes": 18617184,
+    "sha256": "0cff70007ea4f21d9cc29d1c772b335af2a0fbed145a5dab682d5dc25ce8cde2",
+    "description": "JPL DE440，原 LHH 地月单程观测算例所用二进制实体文件",
+    "source": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/LHH测距样例_001/InputFile/JPLEPH",
+    "resolved_source": "/Users/chendingcun/Projects/五院地月空间滤波项目/03_参考代码/LHH_program/original/simulation/202512-pre-research/InputFile/JPLEPH",
+    "coverage": {
+      "start_jed": 2433264.5,
+      "end_jed": 2506352.5,
+      "step_days": 32.0
+    }
   }
 ]
