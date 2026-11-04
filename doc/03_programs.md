@@ -1,12 +1,13 @@
 # 程序使用
 
-ASTER 的十个主程序按任务选择。配置关键词见[配置参考](04_configuration.md)，文件列序和单位见[数据格式](05_data-formats.md)。以下命令从仓库根目录执行，程序已按[构建指南](02_quick-start.md)生成。
+ASTER 的十一个主程序按任务选择。配置关键词见[配置参考](04_configuration.md)，文件列序和单位见[数据格式](05_data-formats.md)。以下命令从仓库根目录执行，程序已按[构建指南](02_quick-start.md)生成。
 
 ## 选择入口
 
 | 任务 | 可执行程序 | 仓库内的配置或输入 | 主要结果 |
 | --- | --- | --- | --- |
 | 星历生成地基光学观测 | `aster_generate_observations` | [generate_observations/setting.txt](../tests/generate_observations/setting.txt) | 理论 OBS 弧段、可选轨道真值 |
+| 两星状态生成单程测距 | `aster_generate_cislunar_observations` | [generate_cislunar_observations/aster.settings](../tests/generate_cislunar_observations/aster.settings) | 接收钟读数、伪距、计算分项与日志 |
 | GL 初轨确定 | `aster_iod_gl` | [iod_gl/setting.txt](../tests/iod_gl/setting.txt) | 参考历元轨道、测角残差、报告 |
 | GLML 初轨确定 | `aster_iod_glml` | [iod_glml/setting.txt](../tests/iod_glml/setting.txt) | 最小 J 轨道、候选表、残差、报告 |
 | 地球 Cartesian 数值预报 | `aster_opn_cartesian` | [opn_cartesian/setting.txt](../tests/opn_cartesian/setting.txt) | Cartesian、Keplerian、NSG2 星历 |
@@ -17,7 +18,7 @@ ASTER 的十个主程序按任务选择。配置关键词见[配置参考](04_co
 | 直角坐标转 Kepler 根数 | `aster_convert_cartesian_to_keplerian` | [七列 Cartesian](../tests/convert_cartesian_to_keplerian/input.txt) | 七列根数，km、deg |
 | 密切根数转均根数 | `aster_convert_osculating_to_mean` | [convert_osculating_to_mean/setting.txt](../tests/convert_osculating_to_mean/setting.txt) | 同历元七列均根数 |
 
-每个程序支持 `--version` 和 `--help`。八个配置型程序通过 `-I setting.txt` 启动；两项直接转换通过位置参数接收文件名。配置内的输入和输出相对路径从 setting 所在目录解释，父目录由运行前的准备步骤创建。
+每个程序支持 `--version` 和 `--help`。九个配置型程序通过 `-I setting.txt` 启动；两项直接转换通过位置参数接收文件名。配置内的输入和输出相对路径从 setting 所在目录解释，普通程序的父目录由运行前创建；单程测距程序会创建配置指定的输出目录。
 
 ## 先准备七套独立配置
 
@@ -58,7 +59,7 @@ PYTHON
 ## GL：从测角资料求初轨
 
 ```sh
-build/v1.2.0/bin/aster_iod_gl -I build/examples/trial-001/iod_gl/setting.txt
+build/v1.3.0/bin/aster_iod_gl -I build/examples/trial-001/iod_gl/setting.txt
 ```
 
 输入是一份同目标的地基 RA/Dec 观测、一份测站表和 EOP。可选 `file_initial_orbit` 提供同参考历元的 GCRS 初值；未填写时使用默认线性初值。至少选用三条观测，`observations_to_use` 可指定前 N 条或 `All`。
@@ -68,7 +69,7 @@ build/v1.2.0/bin/aster_iod_gl -I build/examples/trial-001/iod_gl/setting.txt
 ## GLML：生成候选并按 J 选轨
 
 ```sh
-OMP_NUM_THREADS=2 OMP_DYNAMIC=FALSE build/v1.2.0/bin/aster_iod_glml \
+OMP_NUM_THREADS=2 OMP_DYNAMIC=FALSE build/v1.3.0/bin/aster_iod_glml \
     -I build/examples/trial-001/iod_glml/setting.txt
 ```
 
@@ -81,9 +82,9 @@ OMP_NUM_THREADS=2 OMP_DYNAMIC=FALSE build/v1.2.0/bin/aster_iod_glml \
 ## 地球预报：Cartesian 或 NSG2
 
 ```sh
-build/v1.2.0/bin/aster_opn_cartesian \
+build/v1.3.0/bin/aster_opn_cartesian \
     -I build/examples/trial-001/opn_cartesian/setting.txt
-build/v1.2.0/bin/aster_opn_nonsingular2 \
+build/v1.3.0/bin/aster_opn_nonsingular2 \
     -I build/examples/trial-001/opn_nonsingular2/setting.txt
 ```
 
@@ -96,7 +97,7 @@ build/v1.2.0/bin/aster_opn_nonsingular2 \
 ## 地月预报：E-BCRS / TDB
 
 ```sh
-build/v1.2.0/bin/aster_opn_cislunar \
+build/v1.3.0/bin/aster_opn_cislunar \
     -I build/examples/trial-001/opn_cislunar/setting.txt
 ```
 
@@ -107,7 +108,7 @@ build/v1.2.0/bin/aster_opn_cislunar \
 ## BODN：用观测改正已有轨道
 
 ```sh
-build/v1.2.0/bin/aster_odn_batch -I build/examples/trial-001/odn_batch/setting.txt
+build/v1.3.0/bin/aster_odn_batch -I build/examples/trial-001/odn_batch/setting.txt
 ```
 
 BODN 接收同一目标的地基测角（类型 1）、天基测角（类型 6）和 GCRS 位置（类型 7），允许多测站及同历元多条记录。资料按 UTC 非递减排列。程序准备首观测历元的先验轨道，通过加权批处理估计六状态，按配置增加一个阻力或光压面积质量比 AMR。
@@ -124,9 +125,9 @@ BODN 接收同一目标的地基测角（类型 1）、天基测角（类型 6�
 
 ```sh
 mkdir -p build/conversion-demo
-build/v1.2.0/bin/aster_convert_keplerian_to_cartesian \
+build/v1.3.0/bin/aster_convert_keplerian_to_cartesian \
     tests/convert_keplerian_to_cartesian/input.txt build/conversion-demo/cartesian.txt
-build/v1.2.0/bin/aster_convert_cartesian_to_keplerian \
+build/v1.3.0/bin/aster_convert_cartesian_to_keplerian \
     build/conversion-demo/cartesian.txt build/conversion-demo/keplerian.txt m
 ```
 
@@ -137,7 +138,7 @@ build/v1.2.0/bin/aster_convert_cartesian_to_keplerian \
 ## 瞬转平：密切根数转均根数
 
 ```sh
-build/v1.2.0/bin/aster_convert_osculating_to_mean \
+build/v1.3.0/bin/aster_convert_osculating_to_mean \
     -I build/examples/trial-001/convert_osculating_to_mean/setting.txt
 ```
 
@@ -158,3 +159,30 @@ build/v1.2.0/bin/aster_convert_osculating_to_mean \
 | 观测生成 / 加噪 | 生成器覆盖同名弧段；加噪要求新的结果目录 |
 
 准备自己的资料时，以对应配置副本为起点，依次修改输入路径、目标与历元、模型参数、输出路径。保留实际运行的 setting，并记录 `--version`、Git 提交、线程数和随机种子。检查输出格式后再增加数据量。
+
+## 地月单程测距：两颗星、两个方向
+
+`aster_generate_cislunar_observations` 读取导航星和用户星的离散状态，并按给定的真实接收事件生成单程观测。每条事件指定发射与接收编号，因此同一份配置可以处理导航星发射、用户星接收，也可以处理反方向。最小算例中每个方向各有一条观测。
+
+先把仓库配置准备成独立运行副本：
+
+```sh
+python3 - <<'PYTHON'
+from pathlib import Path
+case = Path('tests/generate_cislunar_observations').resolve()
+run = Path('build/examples/trial-001/cislunar').resolve()
+run.mkdir(parents=True, exist_ok=False)
+settings = dict(line.split('=', 1) for line in (case / 'aster.settings').read_text().splitlines() if '=' in line)
+settings = {key.strip(): value.strip() for key, value in settings.items()}
+for key in ['file_navigation_state', 'file_user_state', 'file_receive_events', 'file_JPLEPH']:
+    settings[key] = str(case / settings[key])
+settings['directory_output'] = str(run / 'output')
+(run / 'setting.txt').write_text('\n'.join(f'{key} = {value}' for key, value in settings.items()) + '\n')
+PYTHON
+build/v1.3.0/bin/aster_generate_cislunar_observations \
+    -I build/examples/trial-001/cislunar/setting.txt
+```
+
+状态历元采用 TDB 年月日时分秒，位置、速度采用 E-BCRS 下的 m、m/s，钟差为卫星钟读数减 TDB，单位 s。输出的 `observations.txt` 保存接收钟读数和伪距；`components.csv` 保存真实发收时刻、几何距离、引力时延、两端钟差、误差和迭代结果；`run.log` 保存运行与错误追踪。同名输出已存在时，重新指定输出目录再运行。
+
+完整输入列序见[数据格式](05_data-formats.md#cislunar)，模型与计算流程见[观测生成](06_observations.md#cislunar)，库接口见[公共接口](07_interfaces.md#cislunar)。

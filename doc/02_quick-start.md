@@ -24,8 +24,8 @@ git status --short --branch
 在现有 Mac 环境中执行：
 
 ```sh
-cmake -S . -B build/v1.2.0 -DCMAKE_BUILD_TYPE=Release
-cmake --build build/v1.2.0 --parallel 3
+cmake -S . -B build/v1.3.0 -DCMAKE_BUILD_TYPE=Release
+cmake --build build/v1.3.0 --parallel 3
 ```
 
 本机 Boost 头文件位于 `/usr/local/include/boost_1_87_0`，CMake 已包含这个搜索位置。OpenMP 先通过 CMake 查找；Apple 平台查找失败时，再查询现有 Homebrew libomp。
@@ -35,22 +35,22 @@ cmake --build build/v1.2.0 --parallel 3
 服务器复用已保存的 Boost，配置时明确给出路径：
 
 ```sh
-cmake -S . -B build/v1.2.0 -DCMAKE_BUILD_TYPE=Release \
+cmake -S . -B build/v1.3.0 -DCMAKE_BUILD_TYPE=Release \
     -DASTER_BOOST_ROOT=/home/cdc/projects/aster-deployment-20261101/dependencies/boost_1_87_0
-cmake --build build/v1.2.0 --parallel 3
+cmake --build build/v1.3.0 --parallel 3
 ```
 
-`-S .` 表示读取当前目录的源码，`-B` 指定构建目录，`Release` 启用发布构建，`--parallel 3` 同时使用三个编译任务。配置成功后再构建，生成的程序位于 `build/v1.2.0/bin/`。
+`-S .` 表示读取当前目录的源码，`-B` 指定构建目录，`Release` 启用发布构建，`--parallel 3` 同时使用三个编译任务。配置成功后再构建，生成的程序位于 `build/v1.3.0/bin/`。
 
 已有 `release` preset 也可使用：`cmake --preset release` 和 `cmake --build --preset release`。它将程序放在 `build/release/bin/`；后续命令应使用与所选构建目录对应的路径。
 
 ## 3. 查询程序版本
 
 ```sh
-build/v1.2.0/bin/aster_iod_gl --version
+build/v1.3.0/bin/aster_iod_gl --version
 ```
 
-首行应包含程序名和 `1.2.0`。后续文字显示实际数学后端、构建类型和浮点条件。默认后端为 `OPENLIBM-0.8.8`。
+首行应包含程序名和 `1.3.0`。多数程序的后续文字显示实际数学后端、构建类型和浮点条件。默认后端为 `OPENLIBM-0.8.8`。
 
 OPENLIBM 程序需要同目录中的 `libopenlibm.dylib`（Mac）或 `libopenlibm.so`（Linux）。移动程序时一起移动该库。切换后端和链接公共库的方法见[数学后端](08_math-backend.md)。
 
@@ -60,9 +60,9 @@ OPENLIBM 程序需要同目录中的 `libopenlibm.dylib`（Mac）或 `libopenlib
 
 ```sh
 mkdir -p build/quick-start
-build/v1.2.0/bin/aster_convert_keplerian_to_cartesian \
+build/v1.3.0/bin/aster_convert_keplerian_to_cartesian \
     tests/convert_keplerian_to_cartesian/input.txt build/quick-start/cartesian.txt
-build/v1.2.0/bin/aster_convert_cartesian_to_keplerian \
+build/v1.3.0/bin/aster_convert_cartesian_to_keplerian \
     build/quick-start/cartesian.txt build/quick-start/keplerian.txt m
 ```
 
@@ -87,7 +87,7 @@ CLion 的 Ninja 配置与终端的 Unix Makefiles 配置分别使用自己的构
 ## 6. 做一次小范围检查
 
 ```sh
-ctest --test-dir build/v1.2.0 \
+ctest --test-dir build/v1.3.0 \
     -R '^(core_frame_coordinates|math_backend_sofa|data_integrity)$' --output-on-failure
 ```
 

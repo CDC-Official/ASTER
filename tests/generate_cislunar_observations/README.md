@@ -43,6 +43,6 @@ ctest --test-dir build/cislunar_minimal -R '^(core_cislunar_observation|cislunar
 
 核心验证覆盖解析插值、亚微秒历元、引力时延、跨日发收事件和钟差符号；主程序验证覆盖双向观测、系统差、噪声复现、引力开关及错误追踪。
 
-## 待查事项
+## 关联验证
 
-DE440 常数统一后，600 秒近地预报算例的位置变化约 3.65 cm，留待单独检查。
+GM 修改引起的轨道变化已完成分项核查，取值与初值的影响见[地球 GM 验证](../../doc/validation/05_earth-gm.md)。当前程序的核心、主程序和跨平台结果见[1.3.0 发布验收](../../doc/validation/11_release-1.3.0.md)。

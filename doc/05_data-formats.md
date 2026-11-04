@@ -10,16 +10,17 @@ MJD 是以日为单位的历元数值，`MJD = JD − 2400000.5`。UTC、TT、TD
 
 | 使用位置 | 文件或接口历元 | 内部计算 |
 | --- | --- | --- |
-| GL / GLML | UTC MJD | 观测相对参考历元的 UTC 日差，再除以 UNITTIME |
+| GL / GLML | UTC MJD | 观测相对参考历元的 UTC 日差，再除以 `UNIT_TIME_S` |
 | 地球 Cartesian / NSG2 预报 | 输入输出 UTC MJD | TT 积分 |
 | BODN | 输入输出 UTC MJD | TT 积分，在观测时刻插值 |
 | 地月预报 | 输入输出 TDB MJD，日历初始时刻也按 TDB | E-BCRS/TDB 积分 |
-| 观测生成 | UTC MJD | 逐点读轨道，逐历元准备 EOP；JPL 太阳采用 TDB |
+| 地基光学观测生成 | UTC MJD | 逐点读轨道，逐历元准备 EOP；JPL 太阳采用 TDB |
+| 地月单程测距 | 输入真实 TDB 年月日时分秒；输出接收钟年月日时分秒 | 光行时迭代及地球 BCRS 位置平移 |
 | 瞬转平 | UTC MJD | 岁差章动用 TT，日月解析平位置与格林尼治角取 UT1=UTC |
 | 两项直接状态转换 | 入口约定为 UTC MJD | 保留历元数值，逐行转换状态 |
 | `Get_JPLEPH` / `Get_Libration` | TDB MJD | JPL 二进制星历插值 |
 
-普通配置中的时间、文件中的 MJD 都保持“日”，不因状态单位码为 1 而归一化。传播时长和积分步长在配置中用 s，进入任务结构时再除以 `UNITTIME`。
+普通配置中的时间、文件中的 MJD 都保持“日”，不因状态单位码为 1 而归一化。传播时长和积分步长在配置中用 s，进入任务结构时再除以 `UNIT_TIME_S`。
 
 ### 状态属于哪一个参考系
 
@@ -27,25 +28,26 @@ MJD 是以日为单位的历元数值，`MJD = JD − 2400000.5`。UTC、TT、TD
 
 Cartesian/Keplerian/NSG2 是状态的表示形式。转换这些表示时保留参考系，GCRS 与地月 E-BCRS 之间的转换需单独处理。GCRS↔ITRS 的矩阵接口用于位置，速度还需考虑矩阵随时间的变化。
 
-测站 `Geodetic` 类采用项目常数中的参考椭球：`ae=6378137 m`，扁率 `1/298.25642`。原始观测类型 8 标记为 WGS84 地固 XYZ，它的读写保持资料原值；当前 BODN 接收类型 1、6、7。
+测站 `Geodetic` 类采用项目常数中的参考椭球：WGS84 赤道半径 `6378137 m`，扁率 `1/298.257223563`。原始观测类型 8 标记为 WGS84 地固 XYZ，它的读写保持资料原值；当前 BODN 接收类型 1、6、7。
 
 ### 归一化的具体含义
 
-常数定义见 [utils_constants.hpp](../include/utils_constants.hpp)：
+常数定义见 [utils_constants.hpp](../include/utils_constants.hpp)，计算用途和来源见[物理常数与模型参数](11_constants.md)。下列名称位于 `constants::Scale` 中：
 
 ```text
-长度尺度：ae = 6378137 m
-时间尺度：UNITTIME = sqrt(ae^3 / GE)
-GE = 3.986004418e14 m^3/s^2
-位置_norm = 位置_m / ae
-速度_norm = 速度_m_s * UNITTIME / ae
-时间差_norm = 时间差_s / UNITTIME
-AMR_norm = AMR_m2_kg * MASS_OF_EARTH / ae^2
+长度单位：UNIT_LENGTH_M = 6378136.3 m
+GM 单位：UNIT_GM_M3_S2 = 3.986004415e14 m^3/s^2
+时间单位：UNIT_TIME_S = sqrt(UNIT_LENGTH_M^3 / UNIT_GM_M3_S2)
+质量单位：UNIT_MASS_KG = UNIT_GM_M3_S2 / G
+位置_norm = 位置_m / UNIT_LENGTH_M
+速度_norm = 速度_m_s * UNIT_TIME_S / UNIT_LENGTH_M
+时间差_norm = 时间差_s / UNIT_TIME_S
+AMR_norm = AMR_m2_kg * UNIT_MASS_KG / UNIT_LENGTH_M^2
 ```
 
 | 状态单位码 | Cartesian | Keplerian | NSG2 |
 | --- | --- | --- | --- |
-| 1 | 位置/ae，速度/(ae/UNITTIME) | a/ae，角度 rad | a/ae，lambda 为 rad，其余无量纲 |
+| 1 | 位置/UNIT_LENGTH_M，速度/(UNIT_LENGTH_M/UNIT_TIME_S) | a/UNIT_LENGTH_M，角度 rad | a/UNIT_LENGTH_M，lambda 为 rad，其余无量纲 |
 | 2 | km、km/s | a 为 km，角度 deg | a 为 km，lambda 为 deg，其余无量纲 |
 | 3 | m、m/s | a 为 m，角度 deg | a 为 m，lambda 为 deg，其余无量纲 |
 
@@ -186,7 +188,7 @@ BODN 残差文件为九列：
 index MJD_UTC type accepted r1 r2 r3 object observer
 ```
 
-`accepted=1` 表示采用，0 表示剔除，文件保留原始记录顺序。类型 1/6 的三个残差分量为 `r_E(rad) r_N(rad) NaN`；类型 7 为 `dX/ae dY/ae dZ/ae`，要恢复米制残差需乘 ae。库内 `BatchResult::residuals` 的类型 7 分量直接为 m。
+`accepted=1` 表示采用，0 表示剔除，文件保留原始记录顺序。类型 1/6 的三个残差分量为 `r_E(rad) r_N(rad) NaN`；类型 7 为 `dX/UNIT_LENGTH_M dY/UNIT_LENGTH_M dZ/UNIT_LENGTH_M`，要恢复米制残差需乘 UNIT_LENGTH_M。库内 `BatchResult::residuals` 的类型 7 分量直接为 m。
 
 GLML 候选 CSV 的表头为：
 
@@ -199,3 +201,34 @@ RMS 为 rad，RAAN 即 OMEGA；状态使用边界处理后的轨道，source_fla
 ## 科学数据文件
 
 EOP、JPL、月球重力场和大气密度表保存在 `data/`。[数据说明](../data/README.md)记录覆盖范围，[manifest.json](../data/manifest.json)记录来源、大小和 SHA-256。JPL 文件是当前读取器支持的二进制格式；EOP 插值需要连续日记录和必要的下一日数据，超出覆盖时通过 tracer 报错。
+
+<a id="cislunar"></a>
+## 地月单程测距状态、事件与观测
+
+状态文件每行十三列：
+
+```text
+year month day hour minute second x y z vx vy vz clock_offset_s
+```
+
+年月日时分由整数保存，秒保留小数；历元为真实 TDB，位置和速度采用 E-BCRS，单位为 m 和 m/s。`clock_offset_s` 为该事件的卫星钟读数减 TDB，单位 s。位置、速度和钟差对应同一事件，各行按历元严格递增。
+
+接收事件文件每行八列：
+
+```text
+year month day hour minute second transmitter_id receiver_id
+```
+
+这里的时刻是真实 TDB 接收时刻。发射端状态由光行时迭代按需查询。状态和事件文件均可使用空行及 `#` 注释。
+
+输出 `observations.txt` 每行九列：
+
+```text
+year month day hour minute second transmitter_id receiver_id pseudorange_m
+```
+
+输出年月日时分秒是接收钟读数，即真实接收 TDB 加接收钟差；末列为加入系统差和白噪声后的伪距，单位 m。钟差跨越午夜时，输出日历会相应进位或借位。
+
+`components.csv` 用列名保存真实发收历元、光行时、两个发收事件的 BCRS 几何距离、引力时延、发射钟差、接收钟差、钟差距离贡献、理论伪距、系统差、噪声、最终伪距和迭代量。其 `rx_*`、`tx_*` 历元字段均为真实 TDB。文件开头的注释记录所用历表版本、GM 来源和引力天体。
+
+理论伪距等于几何距离，加上光速乘引力时延，再加上光速乘“接收钟差减发射钟差”。最小算例和状态来源说明见 [generate_cislunar_observations](../tests/generate_cislunar_observations/README.md)。

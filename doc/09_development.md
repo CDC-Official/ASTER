@@ -6,7 +6,7 @@
 
 | 目录 | 职责 |
 | --- | --- |
-| `apps/` | 十个主程序，按读资料、准备状态、调用计算、写结果展开 |
+| `apps/` | 十一个主程序，按读资料、准备状态、调用计算、写结果展开 |
 | `include/` / `src/` | 公共声明和科学实现；同名文件通常对应同一模块 |
 | `cmake/` | 固定依赖、OpenMP、SOFA 和数学后端接入 |
 | `third_party/` | Eigen 3.4.0、SOFA 2018-01-30、OpenLibm 0.8.8 源码及许可 |
@@ -130,7 +130,7 @@ ASTER 使用语义化版本 `MAJOR.MINOR.PATCH`，三段都是非负整数：主
 ```sh
 git rev-parse HEAD
 git describe --tags --always --dirty
-build/v1.2.0/bin/aster_iod_gl --version
+build/v1.3.0/bin/aster_iod_gl --version
 ```
 
 上例程序路径随实际构建目录填写。实验同时保存实际 setting、输入数据来源与校验值、数学后端、线程数，以及加噪和求解各自的随机种子。这样即使程序版本行仍显示 1.2.0，也能明确区分发布提交与后续修复。

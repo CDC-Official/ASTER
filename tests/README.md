@@ -4,15 +4,15 @@
 
 ## 日常选择检查
 
-构建当前版本后，从仓库根目录执行对应命令。以下一组覆盖核心计算、SOFA、输入约束、数据校验、初轨到批处理接续，以及观测生成与加噪：
+构建当前版本后，从仓库根目录执行对应命令。以下一组覆盖核心计算、SOFA、输入约束、数据校验、初轨到批处理接续，以及观测几何、加噪和地月测距：
 
 ```sh
-ctest --test-dir build/v1.2.0 \
-    -R '^(core_|math_backend_sofa|invalid_inputs|data_integrity|iod_batch_handoff|observation_)' \
+ctest --test-dir build/v1.3.0 \
+    -R '^(core_|math_backend_sofa|invalid_inputs|data_integrity|iod_batch_handoff|observation_|cislunar_|gravity_conventions)' \
     --output-on-failure
 ```
 
-按改动范围选择正则即可，例如 `-R '^observation_'` 只运行三项观测检查，`-R '^core_frame_coordinates$'` 只检查坐标。
+按改动范围选择正则即可，例如 `-R '^observation_'` 运行三项光学观测检查，`-R '^core_frame_coordinates$'` 只检查坐标。
 
 | 检查 | 关注内容 |
 | --- | --- |
@@ -33,8 +33,8 @@ ctest --test-dir build/v1.2.0 \
 默认 OPENLIBM 的四个单 GL 使用已有观测和科学输出哈希，同时核对逐轮状态与停止分支：
 
 ```sh
-python3 tests/math_backend_cases/run_checks.py --bin-dir build/v1.2.0/bin \
-    --output build/v1.2.0/acceptance/gl --only-gl
+python3 tests/math_backend_cases/run_checks.py --bin-dir build/v1.3.0/bin \
+    --output build/v1.3.0/acceptance/gl --only-gl
 ```
 
 需要完整候选验收时，去掉 `--only-gl`，执行四个单 GL 和 e010/e070 两个各含 10,001 候选的 GLML；`math_backend_iod` 这一 CTest 调用的就是该完整入口，只在 OPENLIBM 构建中注册。
@@ -42,8 +42,8 @@ python3 tests/math_backend_cases/run_checks.py --bin-dir build/v1.2.0/bin \
 七个普通程序使用 `cases.json` 中已有输入，按物理量门限比较：
 
 ```sh
-python3 tests/check_math_backend_apps.py --bin-dir build/v1.2.0/bin \
-    --output build/v1.2.0/acceptance/apps
+python3 tests/check_math_backend_apps.py --bin-dir build/v1.3.0/bin \
+    --output build/v1.3.0/acceptance/apps
 ```
 
 门限为位置/半长轴 1 mm、速度 1 μm/s、偏心率与倾角参数 1e−10、角度 1e−7 deg、角残差 1e−10 rad；历元、编号和文本对应，角度按 360° 周期处理。可用 `--native-summary` 指定已有同平台原生运行清单；默认与仓库参考比较。范围、构建条件和历史结果见[数学后端指南](../doc/08_math-backend.md)及[1.1.0 验收](../doc/validation/03_math-backend.md)。
@@ -53,9 +53,9 @@ python3 tests/check_math_backend_apps.py --bin-dir build/v1.2.0/bin \
 `generate_observations/` 保存 CDC_lib 原 LEO 配置、8,641 条星历与测站，`source.json` 记录来源与 SHA-256。[观测指南](../doc/06_observations.md)给出直接生成和加噪命令。
 
 ```sh
-ctest --test-dir build/v1.2.0 -R '^observation_' --output-on-failure
-python3 tests/check_observation_handoff.py --bin-dir build/v1.2.0/bin \
-    --output build/v1.2.0/acceptance/observation-handoff-new
+ctest --test-dir build/v1.3.0 -R '^observation_' --output-on-failure
+python3 tests/check_observation_handoff.py --bin-dir build/v1.3.0/bin \
+    --output build/v1.3.0/acceptance/observation-handoff-new
 ```
 
 接续检查的输出目录须为新目录。它两次生成理论值，以 seed 42 生成两组 3″ 样本，再把理论及首组带噪观测分别交给现有 GL、GLML 十条观测入口。科学结果、日志和 `summary.json` 一起保存。发布时的原/新入口与 Mac/Linux 对照见[1.2.0 验收记录](../doc/validation/04_observations.md)。
@@ -68,8 +68,8 @@ python3 tests/check_observation_handoff.py --bin-dir build/v1.2.0/bin \
 
 ```sh
 python3 tests/run_case.py --case opn_nonsingular2 \
-    --binary build/v1.2.0/bin/aster_opn_nonsingular2 \
-    --output build/v1.2.0/legacy-reference/nonsingular2
+    --binary build/v1.3.0/bin/aster_opn_nonsingular2 \
+    --output build/v1.3.0/legacy-reference/nonsingular2
 ```
 
 命令执行后仍会比较旧字节；默认 OPENLIBM 与原生数学结果可能不同。无过滤的 `ctest` 包含这九个旧参考检查，当前后端的科学结果按上面的哈希与物理量比较入口判断。
@@ -79,3 +79,18 @@ python3 tests/run_case.py --case opn_nonsingular2 \
 ## 地月单程观测最小案例
 
 [`generate_cislunar_observations/`](generate_cislunar_observations/README.md) 集中保存 12、901 两颗星的仿真状态、双向两条真实接收事件和相对路径配置。运行所需 DE440 实体历表也保存在案例的 `input/` 中；输出保存到案例的 `output/`，生成文件不纳入 Git。构建、命令行和 CLion 运行方法见案例说明。
+
+1.3.0 的当前回归还包括 `cislunar_interpolation`、`core_cislunar_observation`、`cislunar_observation_runtime` 和 `gravity_conventions`。光压参数估计采用连续受光的冬季低倾角高轨，按原门限检查轨道和面质比；圆柱地影的受光、阴影内外状态由 `gravity_conventions` 单独检查。
+
+`observation_runtime` 的固定站址按 WGS84 配套，保留大地坐标与 ECEF 两种输入所得科学输出的逐字节比较。发布条件见[1.3.0 发布验收](../doc/validation/11_release-1.3.0.md)。
+
+## 发布代表算例与跨平台核对
+
+`release_smoke.py` 复用九个既有程序的最小输入，并运行地基测角与双向单程测距。它检查十一程序的版本与帮助，保存科学文件的 SHA-256、行数和实际运行配置。
+
+```sh
+python3 tests/release_smoke.py --bin-dir build/v1.3.0/bin \
+    --output build/v1.3.0/acceptance/local
+```
+
+输出目录须为新目录。两端使用同一源码、输入资料和 OpenLibm 构建，比较同名科学文件的 SHA-256；日志和含机器路径的报告随各次运行保存。

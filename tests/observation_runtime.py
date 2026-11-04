@@ -113,7 +113,8 @@ with tempfile.TemporaryDirectory(prefix='cdc-observation-') as folder:
                     and 5<math.sqrt(sum(v*v for v in c[4:7]))<10
                     for o, k, c in zip(obs, kep, cart)), 'Wrong columns, units or epoch alignment')
     itrf = root/'itrf-stations.txt'
-    itrf.write_text('1 2 318101.62583619246 4757397.4852669435 4223557.4614267414\n')
+    # WGS84：纬度 41.725892°、经度 86.174633°、高 943 m 对应的独立 ECEF 坐标。
+    itrf.write_text('1 2 318101.62456398865 4757397.466240386 4223557.521084583\n')
     alternate, _ = run('itrf-site', {'file_observer':str(itrf)})
     require(all(p.read_bytes()==(alternate/p.name).read_bytes() for p in products), 'ITRS/geodetic station disagreement')
     named = root/'named-stations.txt'

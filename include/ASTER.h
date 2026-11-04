@@ -16,6 +16,7 @@
 #include "math_basic.hpp"
 #include "io_common.hpp"
 #include "model_observation.hpp"
+#include "model_cislunar_observation.hpp"
 #include "orbit_basic.hpp"
 #include "accel_gravity.hpp"
 #include "model_ephemeris_jpl.hpp"

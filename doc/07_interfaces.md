@@ -8,6 +8,7 @@
 | --- | --- | --- |
 | 状态表示与单位转换 | `orbit::Keplerian`、`Cartesian`、`NonSingular2` | [状态对象](#states) |
 | 历元、EOP、测站坐标 | `UTC2TT`、`EOP::Get_EOP`、`Geodetic::ToGCRS` | [时间与坐标](#frames) |
+| 地月状态插值与单程测距 | `Cislunar::InterpolateState`、`ComputeOneWayRange` | [地月测距](#cislunar) |
 | 读写原始观测和站表 | `observation::Observations`、`Observers` | [原始资料](#observations) |
 | 求理论观测和几何偏导 | `determination::Compute_ObsAndPartials` | [观测模型](#observation-model) |
 | 整段预报及观测时刻取样 | `OrbitPropagation_NSG2`、`Interpolate_CartesianOrbit` | [数值预报](#propagation) |
@@ -48,6 +49,8 @@ build/interface-demo/build/aster-build/bin/orbit_demo
 
 Boost 路径按[构建指南](02_quick-start.md)追加。示例将程序放在 OpenLibm 所在的 `aster-build/bin/`；自己的输出目录若不同，需把对应私有共享库放到程序旁边。常用头文件可通过 `#include "ASTER.h"` 引入；GL 求解器额外包含 `core_iod_solver.hpp`。
 
+下文示例通过 `using namespace constants::Scale;` 引入归一化单位，物理值和来源见[常数说明](11_constants.md)。
+
 ## 错误怎样返回
 
 多数科学函数接收 `bastion::Overwatch& tracer`，通过 `tracer.Code()` 传递错误。正常值为 `bastion::ERR_NOERROR`；每次调用后立即检查，出错就停止使用本次结果。库函数通常返回调用者，主程序再决定如何保存日志或结束进程。
@@ -66,8 +69,8 @@ Boost 路径按[构建指南](02_quick-start.md)追加。示例将程序放在 O
 | `Keplerian(a,e,i,OMEGA,omega,M,is_normalized)` | 输入六根数；未归一化角度为 deg，归一化角度为 rad | 保存同历元根数，M 为平近点角 |
 | `Cartesian(x,y,z,vx,vy,vz,is_normalized)` | 输入同系位置和速度 | 保存同历元 Cartesian |
 | `NonSingular2(tracer,a,xi,eta,h,k,lambda,is_normalized)` | 输入 NSG2，只有 lambda 是角度 | 适用于当前 NSG2 计算链 |
-| `kep.Normalize(tracer,uLength)` | 输入输出 kep；a 除以 uLength，角度 deg→rad | 长度原为 km 时用 ae/1000，原为 m 时用 ae |
-| `cart.Normalize(tracer,uLength,uTime)` | 输入输出 cart；位置除以 uLength，速度乘 uTime/uLength | 时间尺度通常为 UNITTIME |
+| `kep.Normalize(tracer,uLength)` | 输入输出 kep；a 除以 uLength，角度 deg→rad | 长度原为 km 时用 UNIT_LENGTH_M/1000，原为 m 时用 UNIT_LENGTH_M |
+| `cart.Normalize(tracer,uLength,uTime)` | 输入输出 cart；位置除以 uLength，速度乘 uTime/uLength | 时间尺度通常为 UNIT_TIME_S |
 | `Restore(...)` | 输入输出对象，按相同尺度恢复长度、速度与角度 | 在输出副本上恢复物理单位 |
 | `ToCartesian` / `ToKeplerian` / `ToNonSingular2` | 输入归一化对象，输出数组或对象 | 状态表示转换，输出仍归一化，参考系和历元由调用方保持 |
 | `SyncAnomaly(tracer)` | 输入输出 Keplerian/NSG2 | 同步近点角等派生量；NSG2 转换和读取派生量前使用 |
@@ -81,11 +84,13 @@ Boost 路径按[构建指南](02_quick-start.md)追加。示例将程序放在 O
 #include <iomanip>
 #include <iostream>
 
+using namespace constants::Scale;
+
 int main()
 {
     bastion::Overwatch tracer(__FILE__, __func__, __LINE__);
     orbit::Keplerian kep(6800.0, 0.01, 45.0, 10.0, 10.0, 10.0, false);
-    kep.Normalize(tracer, ae / 1000.0);
+    kep.Normalize(tracer, UNIT_LENGTH_M / 1000.0);
     if (tracer.Code() != bastion::ERR_NOERROR) return 1;
 
     orbit::Cartesian cart;
@@ -94,7 +99,7 @@ int main()
 
     // 保留计算用归一化状态，在副本中恢复米和米每秒。
     orbit::Cartesian cart_si = cart;
-    cart_si.Restore(tracer, ae, UNITTIME);
+    cart_si.Restore(tracer, UNIT_LENGTH_M, UNIT_TIME_S);
     if (tracer.Code() != bastion::ERR_NOERROR) return 1;
 
     double values[6];
@@ -124,7 +129,7 @@ NSG2 定义为 xi=e·cos(omega+OMEGA)、eta=e·sin(omega+OMEGA)、h=sin(i/2)·co
 | `EOP::Read_EOP(tracer,path)` | 输入路径为可修改字符串引用，读取现有 EOP 文本 | 保存原始 s、arcsec 记录，通过 tracer 报错 |
 | `EOP::Get_EOP(tracer,mjd_utc,eop,fit)` | 输入 UTC MJD，通常 fit=1 插值 | 输出 aEOP；dut1/dat 为 s，xp/yp/dx00/dy00 为 rad；失败时保留传入输出 |
 | `Geodetic(height,lambda,phi,false)` | 高度 m、经度 deg、大地纬度 deg | 构造站址；顺序与测站表不同 |
-| `site.Normalize(tracer,ae)` / `site.ToGCRS(...)` | 输入输出站址归一化；输入 UTC MJD 和同历元 EOP | 输出归一化 GCRS 位置，无速度 |
+| `site.Normalize(tracer,UNIT_LENGTH_M)` / `site.ToGCRS(...)` | 输入输出站址归一化；输入 UTC MJD 和同历元 EOP | 输出归一化 GCRS 位置，无速度 |
 | `GCRS_to_ITRS_Matrix(utc,eop,matrix)` | UTC MJD、s/rad 的 aEOP | 输出 3×3 位置旋转矩阵，`r_itrs=matrix*r_gcrs`；反向接口使用转置 |
 
 EOP 插值要求连续日记录，非整日通常还要有下一日；超出覆盖时失败。站址类的 ITRS/GCRS 相互转换保持长度单位，椭球与归一化约定见[数据格式](05_data-formats.md)。
@@ -142,7 +147,7 @@ void ExampleStation(bastion::Overwatch& tracer, double mjd_utc, frame::GCRS& sta
     if (tracer.Code() != bastion::ERR_NOERROR) return;
 
     frame::Geodetic site(943.0, 86.174633, 41.725892, false);
-    site.Normalize(tracer, ae);
+    site.Normalize(tracer, UNIT_LENGTH_M);
     if (tracer.Code() != bastion::ERR_NOERROR) return;
 
     site.ToGCRS(tracer, mjd_utc, eop, station_norm);
@@ -150,7 +155,7 @@ void ExampleStation(bastion::Overwatch& tracer, double mjd_utc, frame::GCRS& sta
 }
 ```
 
-从仓库根目录调用，例如 `ExampleStation(tracer, 58406.8859375, station)`，输出位置除以 ae。GCRS/ITRS 矩阵仅旋转位置；完整速度变换要加入旋转矩阵的时间导数。站心地平矩阵 `Horizontal_to_GCRS_Matrix` 采用教材北—西—天轴，不含原点平移。
+从仓库根目录调用，例如 `ExampleStation(tracer, 58406.8859375, station)`，输出位置除以 UNIT_LENGTH_M。GCRS/ITRS 矩阵仅旋转位置；完整速度变换要加入旋转矩阵的时间导数。站心地平矩阵 `Horizontal_to_GCRS_Matrix` 采用教材北—西—天轴，不含原点平移。
 
 <a id="observations"></a>
 ## 原始观测与测站资料
@@ -191,7 +196,7 @@ void ExampleReadObservations(bastion::Overwatch& tracer, observation::Observatio
 | --- | --- |
 | `obs` | 输入；历元 UTC MJD。类型 1/6 的 `value=[RA,Dec,0]` 为 rad，观测者 GCRS 位置为 m；类型 7 的 value 为目标 GCRS XYZ（m） |
 | `obs.sigma` | 输入；东西/南北标准差 rad 或 XYZ 标准差 m，留给后续加权阶段使用 |
-| `state` | 输入；归一化 GCRS `[x,y,z,vx,vy,vz]`，长度 ae、时间 UNITTIME |
+| `state` | 输入；归一化 GCRS `[x,y,z,vx,vy,vz]`，长度 UNIT_LENGTH_M、时间 UNIT_TIME_S |
 | `calc_obs` | 输出；1/6 为 `[RA,Dec,0]`（rad），7 为 XYZ（m） |
 | `partials` | 输出；列对应六个归一化 Cartesian 分量，速度列为 0；测角前两行是 `cos(Dec_obs)*dRA/dx`、`dDec/dx`，位置为 `dXYZ_m/dx_norm` |
 
@@ -215,7 +220,7 @@ void ExampleObservationModel(bastion::Overwatch& tracer,
 
 声明：[core_propagation.hpp](../include/core_propagation.hpp)、[model_propagation.hpp](../include/model_propagation.hpp)；实现：[core_propagation.cpp](../src/core_propagation.cpp)。
 
-`OrbitPropagationJob` 分别保存 `opn_model`（力模型、卫星参数）、`opn_setting`（起点、时长、积分设置）、EOP/大气资料和两种归一化初态。GCRS 任务的 UTC、TT 起点须对应同一时刻；duration_norm 和 h0_norm 都以 UNITTIME 为尺度。力模型默认关闭摄动，保留中心二体。
+`OrbitPropagationJob` 分别保存 `opn_model`（力模型、卫星参数）、`opn_setting`（起点、时长、积分设置）、EOP/大气资料和两种归一化初态。GCRS 任务的 UTC、TT 起点须对应同一时刻；duration_norm 和 h0_norm 都以 UNIT_TIME_S 为尺度。力模型默认关闭摄动，保留中心二体。
 
 | 高层接口 | 输入 | 输出及约定 |
 | --- | --- | --- |
@@ -224,7 +229,7 @@ void ExampleObservationModel(bastion::Overwatch& tracer,
 | `OrbitPropagation_Adams_Cart/NSG2` | 任务，Adams 节点及模式设置 | 同样追加完整接受节点；不足整步尾段由 RKF78 处理 |
 | `Interpolate_CartesianOrbit(tracer,nodes,states,requests)` | 严格递增 UTC 节点与逐一配对状态；请求非递减且在覆盖内，允许重复 | 返回与请求一一对应的归一化 Cartesian；错误时空数组并设置 tracer |
 | `determination::PropagateObservationEpochs(tracer,job,id,requests)` | 正向传播任务，覆盖请求历元 | 先整段积分，再调用公共插值，返回观测时刻状态 |
-| `OrbitPropagation_RKF78_Cart_EBCRS` / `OrbitPropagation_Adams_Cart_EBCRS` | `OrbitPropagationJob_EBCRS`，JPL 已加载 | 追加 E-BCRS Cartesian 和 TDB MJD，状态仍采用 ae、UNITTIME |
+| `OrbitPropagation_RKF78_Cart_EBCRS` / `OrbitPropagation_Adams_Cart_EBCRS` | `OrbitPropagationJob_EBCRS`，JPL 已加载 | 追加 E-BCRS Cartesian 和 TDB MJD，状态仍采用 UNIT_LENGTH_M、UNIT_TIME_S |
 
 下面从现成预报初态做一次 600 s 二体传播。示例函数输出完整节点；需要摄动力时，按[预报主程序](../apps/opn/earth/main_opn_nonsingular2.cpp)准备对应资料和卫星归一化参数。
 
@@ -238,7 +243,7 @@ void ExamplePropagation(bastion::Overwatch& tracer, std::vector<double>& epochs_
     if (tracer.Code() != bastion::ERR_NOERROR) return;
 
     job.initKep_norm.Set(6800.0, 0.01, 45.0, 10.0, 10.0, 10.0, false);
-    job.initKep_norm.Normalize(tracer, ae / 1000.0);
+    job.initKep_norm.Normalize(tracer, UNIT_LENGTH_M / 1000.0);
     if (tracer.Code() != bastion::ERR_NOERROR) return;
 
     job.initKep_norm.SyncAnomaly(tracer);
@@ -249,8 +254,8 @@ void ExamplePropagation(bastion::Overwatch& tracer, std::vector<double>& epochs_
 
     job.opn_setting.t0_MJD_UTC = 55255.99923398;
     job.opn_setting.t0_MJD_TT = UTC2TT(job.opn_setting.t0_MJD_UTC);
-    job.opn_setting.duration_norm = 600.0 / UNITTIME;
-    job.opn_setting.h0_norm = 10.0 / UNITTIME;
+    job.opn_setting.duration_norm = 600.0 / UNIT_TIME_S;
+    job.opn_setting.h0_norm = 10.0 / UNIT_TIME_S;
     job.opn_setting.rkf.maxTE_norm = 1e-12;
     job.opn_setting.display_progress = 0;
     std::vector<orbit::NonSingular2> nsg2_norm;
@@ -279,7 +284,7 @@ void ExamplePropagation(bastion::Overwatch& tracer, std::vector<double>& epochs_
 iod_solver::InitialOrbitDetermination(tracer, job, iteration_output = nullptr)
 ```
 
-tracer 和 job 为输入输出，第三项是可选 `std::ostream*`。函数写入 `job.solution`，包括参考历元轨道、O−C、RMS、J、flag 和逐轮历史。轨道/测站在 GCRS 中，位置除以 ae，速度以 ae/UNITTIME 归一化，测角与残差为 rad。
+tracer 和 job 为输入输出，第三项是可选 `std::ostream*`。函数写入 `job.solution`，包括参考历元轨道、O−C、RMS、J、flag 和逐轮历史。轨道/测站在 GCRS 中，位置除以 UNIT_LENGTH_M，速度以 UNIT_LENGTH_M/UNIT_TIME_S 归一化，测角与残差为 rad。
 
 | 调用前的 job 字段 | 必须准备的内容 |
 | --- | --- |
@@ -288,8 +293,8 @@ tracer 和 job 为输入输出，第三项是可选 `std::ostream*`。函数写�
 | `obs.time_MJDUTC`、`ra_rad`、`dec_rad` | 长度均为 N，UTC MJD、rad、rad，属于同一目标 |
 | `obs.tau` | `(time_MJDUTC−epochMJDUTC)*DAY_TO_NORMALIZED_TIME` |
 | `obs.sigma_RaDec` | 东西、南北共同标准差，有限正数，rad |
-| `observer.positions_gcrs_norm_emat` | 3×N，每列对应一条观测同历元测站位置/ae |
-| `observer.position_gcrs_epoch_norm` | 第一条观测所属测站在参考历元的位置/ae，用于几何诊断 |
+| `observer.positions_gcrs_norm_emat` | 3×N，每列对应一条观测同历元测站位置/UNIT_LENGTH_M |
+| `observer.position_gcrs_epoch_norm` | 第一条观测所属测站在参考历元的位置/UNIT_LENGTH_M，用于几何诊断 |
 | `dynamicsModel`、`iterMethod`、`constraintType`、`constraintEcc` | 模型、迭代和约束，取值见[配置参考](04_configuration.md) |
 | `initValue.type` | 默认线性初值取 `IOD_INITIAL_VALUE_DEFAULT`；指定初值取 `IOD_INITIAL_VALUE_SPECIFIED` 并准备 initCart |
 | `iterCountMax`、`iterTOL`、`printIterInfo` | 最大轮数、归一化最大状态改正门限、屏幕开关 |
@@ -389,7 +394,7 @@ bool ExampleBatch(bastion::Overwatch& tracer, const OrbitPropagationJob& prior_a
 orbit::OsculatingToMean(tracer, mjd_utc, osculating, options, mean)
 ```
 
-输入为 UTC MJD、GCRS 密切 NSG2 和 `AveragingOptions`，输出同历元、同系、同尺度的均 NSG2。状态的 a 以 ae 归一化、lambda 为 rad，其余无量纲；输入要求椭圆、i<pi、a≤90000 km。`options` 的物理 AMR 使用 m²/kg，Cr 无量纲，和状态的归一化单位分开。
+输入为 UTC MJD、GCRS 密切 NSG2 和 `AveragingOptions`，输出同历元、同系、同尺度的均 NSG2。状态的 a 以 UNIT_LENGTH_M 归一化、lambda 为 rad，其余无量纲；输入要求椭圆、i<pi、a≤90000 km。`options` 的物理 AMR 使用 m²/kg，Cr 无量纲，和状态的归一化单位分开。
 
 函数固定次数求解 `mean=osculating−short(mean)`，模型开关、展开阶数和月球模式决定均根数含义。失败时保持传入 mean 并设置 tracer。默认模型及 e≥0.5 时 JLM 的处理见[配置参考](04_configuration.md)。
 
@@ -433,7 +438,7 @@ int ExampleSun(double mjd_tdb, double state_norm[6])
 }
 ```
 
-读取器使用进程内全局句柄，同一进程继续使用同一路径。长度尺度为 ae，速度尺度为 ae/UNITTIME；上例输出为太阳相对地球的六状态。
+读取器使用进程内全局句柄，同一进程继续使用同一路径。长度尺度为 UNIT_LENGTH_M，速度尺度为 UNIT_LENGTH_M/UNIT_TIME_S；上例输出为太阳相对地球的六状态。
 
 <a id="settings"></a>
 ## 配置读取
@@ -483,3 +488,42 @@ bool ExampleReadStep(bastion::Overwatch& tracer, std::string setting_file, doubl
 | [aster::math_backend::BuildDescription](../include/math_backend.hpp) | 无参数，返回构建后端与浮点配置的静态字符串，供版本和实验记录使用 |
 
 GL 还在 `core_iod_solver.hpp` 暴露首轮、方程构造和残差函数，供研究者检查求解过程；完整任务从 `InitialOrbitDetermination` 进入。摄动力的分项公式位于 `accel_*.hpp`，解析短周期项位于 `analyt_*.hpp`，其调用组合由当前力模型或瞬转平接口负责。
+
+<a id="cislunar"></a>
+## 地月状态与单程测距
+
+声明：[model_cislunar_observation.hpp](../include/model_cislunar_observation.hpp)，也由 `ASTER.h` 引入。状态使用绝对 TDB 日历历元和 E-BCRS 下的米制位置速度。调用时显式使用 `Cislunar::`。
+
+| 对象或接口 | 输入与输出 |
+| --- | --- |
+| `Cislunar::StateRecord` | 年月日时分、带小数的秒、三维位置 m、三维速度 m/s、总钟差 s |
+| `Cislunar::OneWayRangeRecord` | 真实收发状态、接收钟日历读数、几何距离、引力时延、钟差贡献和伪距；主程序另填编号和误差 |
+| `InterpolateState(tracer,records,state)` | 输入递增状态表及 state 的 TDB 历元，写回该事件的位置、速度和钟差；覆盖范围包含首末端点 |
+| `ComputeGravityDelay(tracer,transmit,receive,bodies,ids,delay)` | 输入两个事件的 BCRS 位置 m、接收时刻各天体位置及 JPL 编号；输出引力时延 s |
+| `ComputeOneWayRange(tracer,receive,query_transmit,ids,record)` | 输入真实接收状态和按历元填写发射状态的函数；输出光行时解、发射事件、接收钟读数及理论伪距 |
+
+`ComputeOneWayRange` 调用前先载入覆盖计算时段的 JPL 二进制历表。空引力天体列表关闭引力时延；命令行程序默认选择除地球外的十个主要天体。光行时按秒迭代，末次变化不超过 1e−12 s，最多二十轮。噪声与系统差由调用方在理论伪距上加入。
+
+下面的示例用离散状态构成发射端查询函数。接收状态由调用方在真实接收时刻准备，包含位置和钟差；JPL 也由调用方预先加载。
+
+```cpp
+/**
+ * @brief 根据接收真值和发射端状态序列计算一条理论单程测距。
+ * @param[in,out] tracer 记录插值及光行时求解的错误。
+ * @param[in] receive 真实 TDB 接收历元、E-BCRS 位置 m 和钟差 s。
+ * @param[in] transmit_states 发射端按 TDB 递增的状态，位置 m、速度 m/s、钟差 s。
+ * @param[out] record 输出收发事件、接收钟读数和各项理论伪距贡献。
+ */
+void ExampleOneWayRange(bastion::Overwatch& tracer, const Cislunar::StateRecord& receive,
+    const std::vector<Cislunar::StateRecord>& transmit_states, Cislunar::OneWayRangeRecord& record)
+{
+    const auto query_transmit = [&transmit_states](bastion::Overwatch& trace, Cislunar::StateRecord& state)
+    {
+        Cislunar::InterpolateState(trace, transmit_states, state);
+    };
+
+    const std::vector<int> gravity_bodies{1, 2, 4, 5, 6, 7, 8, 9, 10, 11};
+    Cislunar::ComputeOneWayRange(tracer, receive, query_transmit, gravity_bodies, record);
+    if (tracer.Code() != bastion::ERR_NOERROR) return;
+}
+```

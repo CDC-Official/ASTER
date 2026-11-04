@@ -92,7 +92,7 @@ GLML 的指定偏心率网格在主程序中固定为 `[0,0.8)` 的 10,000 点�
 | `satellite_drag_Cd` | 阻力系数 Cd，无量纲 |
 | `satellite_srp_eta` | 光压反射参数 eta，无量纲；此字段沿用当前动力学实现，和瞬转平 `reflectivity` 分别设置 |
 
-当前数值预报的光压加速度实现关闭了地影衰减；观测生成中的地影开关用于筛选目标是否受光，两处用途不同。
+数值预报的光压采用地球圆柱地影：进入阴影后光压为零，离开后恢复。测角观测生成中的 `use_earth_shadow` 则用于筛选受光目标。月球非球形加速度采用卫星处与地心处加速度之差。
 
 地月入口另读 `planetary_gravity`（0/1）、`planetary_body`（空格分隔的 JPL 行星编号，1、2、4、5、6、7、8、9）和 `use_post_newtonian`（0/1）。前者指定行星第三体，后者加入当前 EIH 后牛顿修正。
 
@@ -144,7 +144,7 @@ GLML 的指定偏心率网格在主程序中固定为 `[0,0.8)` 的 10,000 点�
 | `rejection_scale` | 可选，默认 3；按同类型原始残差 RMS 的倍数剔除，0 关闭 |
 | `rejection_start` | 剔除开启时可选，默认第 1 轮 |
 | `rejection_angle_window_rad` | 剔除开启时可选，默认 1 rad；测角分量硬窗口 |
-| `rejection_position_window_m` | 剔除开启时可选，默认 ae（6378137 m）；位置分量硬窗口 |
+| `rejection_position_window_m` | 剔除开启时可选，默认一个归一化长度单位（6378136.3 m）；位置分量硬窗口 |
 | `compute_covariance` | 可选，默认 1；0 关闭、1 计算已知 sigma 下的形式协方差 |
 | `display_iterations` | 必填，0/1；仅控制屏幕，报告仍保留逐轮记录 |
 
@@ -161,7 +161,7 @@ WRMS 由采用分量的 `(O−C)/sigma` 计算。只有前后两轮采用集合�
 | `file_aposteriori_eph_Keplerian_BODN` | 可选，同历元 Kepler 后验星历，km、deg |
 | `file_aposteriori_eph_NonSingular2_BODN` | 可选，同历元 NSG2 后验星历，km、deg |
 | `ephemeris_interval` | 可选，默认 0，输出完整积分节点；正值须≥1e−5 s，按 UTC 秒等间隔取样并补末历元 |
-| `file_residual` | 可选，含采用标记的逐条残差；测角为 rad，类型 7 位置残差除以 ae |
+| `file_residual` | 可选，含采用标记的逐条残差；测角为 rad，类型 7 位置残差除以 `UNIT_LENGTH_M` |
 | `file_report` / `file_programlog` | 可选，科学报告/事件日志；现有入口均覆盖写入 |
 
 ## 瞬转平
@@ -195,7 +195,7 @@ WRMS 由采用分量的 `(O−C)/sigma` 计算。只有前后两轮采用集合�
 | --- | --- |
 | `object_id` | 必填，目标标识，用于观测和文件名 |
 | `file_eph_Cartesian` / `file_eph_Keplerian` | 二选一，另一项留空；每行整数 ID、UTC MJD、六分量状态 |
-| `is_input_normalized` | 0 为 km、km/s、deg；1 为 ae、UNITTIME、rad；缺项为 0 |
+| `is_input_normalized` | 0 为 km、km/s、deg；1 为归一化长度、时间及 rad；缺项为 0 |
 | `file_EOP` | 必填，逐观测历元插值使用 |
 | `file_observer` / `observer_id` | 必填，测站表与选用的原始站号 |
 | `observation_type` | 必填，当前取 1，地基几何 RA/Dec |
@@ -210,3 +210,22 @@ WRMS 由采用分量的 `(O−C)/sigma` 计算。只有前后两轮采用集合�
 | `file_programlog` | 可选，事件日志，拒绝覆盖 |
 
 加噪通过 `tools/add_angular_noise.py` 单独运行，使用 `--sigma-arcsec`、`--samples`、`--seed` 和 `--output`；输出目录须为新目录。从旧生成配置迁移时，删除 `noise_sigma_as` 和 `random_seed`，改在加噪命令填写。加噪 seed 与 GLML 回退 seed 控制不同阶段，实验记录中分别保存。
+
+## 地月单程测距仿真
+
+依据：[单程测距主程序](../apps/observation/main_generate_cislunar_observations.cpp)。配置使用普通 SimpleInput 文件规则，数值字段通过严格读取接口检查。相对路径以配置目录为基准。
+
+| 关键词 | 取值、单位与用途 |
+| --- | --- |
+| `file_navigation_state` | 必填，导航星的 TDB/E-BCRS 状态与总钟差文件 |
+| `file_user_state` | 必填，用户星的同格式状态与总钟差文件 |
+| `file_receive_events` | 必填，真实 TDB 接收时刻、发射编号和接收编号 |
+| `file_JPLEPH` | 必填，覆盖事件及发射迭代时刻的 JPL 二进制历表；用于地球位置平移和引力时延 |
+| `directory_output` | 必填，程序创建目录，并写出观测、分项与日志；已有同名结果时结束并报告路径 |
+| `navigation_id` / `user_id` | 必填，两个不同的正整数，事件中的发收编号须为这两个编号 |
+| `gravity_delay` | 可选，0 关闭、1 开启，默认 1；计入除地球外的十个主要天体，GM 采用 DE440 |
+| `systematic_bias_m` | 可选，统一加入各条伪距的有限系统差，单位 m，默认 0 |
+| `noise_sigma_m` | 可选，高斯白噪声标准差，单位 m，有限且非负，默认 0 |
+| `noise_seed` | 可选，非负整数，默认 1；同一平台与构建下重复运行可复现噪声序列 |
+
+两份状态表使用相同结构，每颗星至少两个严格递增的采样点。采样时段应覆盖接收事件及光行时求解访问的发射时刻。每条事件的方向由编号决定。输入列序和输出时刻的物理含义见[地月测距数据](05_data-formats.md#cislunar)。
