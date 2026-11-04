@@ -280,7 +280,7 @@ int main(int argc, char** argv)
                 input.GetDoubleStrict(tracer, "SRP_AMR_m2_kg", srp_amr_m2_kg);
                 if (tracer.Code() != bastion::ERR_NOERROR) break;
 
-                srp_amr_norm = srp_amr_m2_kg / NORMALIZED_AM_TO_IAM;
+                srp_amr_norm = srp_amr_m2_kg / constants::Conversion::NORMALIZED_AM_TO_IAM;
             }
             else if (input.HasKeyword("SRP_AMR_normalized"))
             {
@@ -351,7 +351,7 @@ int main(int argc, char** argv)
             }
 
             // 库接口接收物理 m²/kg；原始归一化数值只留作日志显示。
-            model.srp_area_mass_m2_kg = srp_amr_norm * NORMALIZED_AM_TO_IAM;
+            model.srp_area_mass_m2_kg = srp_amr_norm * constants::Conversion::NORMALIZED_AM_TO_IAM;
 
             // =================================== 03 检查路径并创建日志 ===================================
 
@@ -534,7 +534,7 @@ int main(int argc, char** argv)
 
                 // 输入采用 km、deg；Normalize 将半长轴换为 a/ae、角度换为 rad。
                 Keplerian osculating(values[1], values[2], values[3], values[4], values[5], values[6], false);
-                osculating.Normalize(tracer, ae / 1000.);
+                osculating.Normalize(tracer, constants::Scale::UNIT_LENGTH_M / 1000.);
                 if (tracer.Code() != bastion::ERR_NOERROR)
                 {
                     tracer.LogEvent(__FILE__, __func__, __LINE__, "根数归一化失败" + location, bastion::ERROR);
@@ -566,7 +566,7 @@ int main(int argc, char** argv)
                     break;
                 }
 
-                mean.Restore(tracer, ae / 1000.);
+                mean.Restore(tracer, constants::Scale::UNIT_LENGTH_M / 1000.);
                 if (tracer.Code() != bastion::ERR_NOERROR)
                 {
                     tracer.LogEvent(__FILE__, __func__, __LINE__, "均根数单位恢复失败" + location, bastion::ERROR);

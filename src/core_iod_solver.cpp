@@ -23,6 +23,9 @@
 #include <limits>
 #include <sstream>
 
+using namespace constants::Scale;
+using constants::PI;
+
 using namespace Eigen;
 using namespace iod;
 using namespace bastion;
@@ -702,7 +705,7 @@ void iod_solver::Compute_Residuals(Overwatch &tracer, IodJob &job, const VectorX
 		// 赤经先作 O-C ，再乘cos(Dec_o)
 		// 赤纬直接作 O-C；这两个量分别表示东西方向与南北方向的角偏差。
 		const double res_ra = std::cos(job.obs.dec_rad(k)) *
-							  std::remainder(job.obs.ra_rad(k) - equatorial[1], 2 * pi);
+							  std::remainder(job.obs.ra_rad(k) - equatorial[1], 2 * PI);
 		const double res_dec = job.obs.dec_rad(k) - equatorial[2];
 
 		if (!std::isfinite(res_ra) || !std::isfinite(res_dec))
@@ -821,7 +824,7 @@ void iod_solver::InitialOrbitDetermination(Overwatch &tracer, IodJob &job, std::
 
 	// 后面的似然评价包含标准差的倒数与对数，因此标准差应为有限正数。
 	if (!std::isfinite(job.obs.sigma_RaDec) || job.obs.sigma_RaDec <= 0.0 ||
-		!std::isfinite(2 * pi * job.obs.sigma_RaDec * job.obs.sigma_RaDec) ||
+		!std::isfinite(2 * PI * job.obs.sigma_RaDec * job.obs.sigma_RaDec) ||
 		job.obs.sigma_RaDec * job.obs.sigma_RaDec == 0.0)
 	{
 		tracer.LogEvent(__FILE__, __func__, __LINE__, "Likelihood noise sigma must yield a finite positive variance in radian units.", ERROR);
@@ -911,12 +914,12 @@ void iod_solver::InitialOrbitDetermination(Overwatch &tracer, IodJob &job, std::
 
 		message << "\n\n" << std::left << std::setw(label_width) << "- Cartesian [km, km/s]" << ": [ "
 				<< std::right << std::fixed << std::setprecision(6)
-				<< std::setw(value_width) << r0v0_norm(0) * ae / 1000.0 << ", "
-				<< std::setw(value_width) << r0v0_norm(1) * ae / 1000.0 << ", "
-				<< std::setw(value_width) << r0v0_norm(2) * ae / 1000.0 << " ]\n"
-				<< continuation << "[ " << std::setw(value_width) << r0v0_norm(3) * ae / (1000.0 * UNITTIME) << ", "
-				<< std::setw(value_width) << r0v0_norm(4) * ae / (1000.0 * UNITTIME) << ", "
-				<< std::setw(value_width) << r0v0_norm(5) * ae / (1000.0 * UNITTIME) << " ]\n";
+				<< std::setw(value_width) << r0v0_norm(0) * UNIT_LENGTH_M / 1000.0 << ", "
+				<< std::setw(value_width) << r0v0_norm(1) * UNIT_LENGTH_M / 1000.0 << ", "
+				<< std::setw(value_width) << r0v0_norm(2) * UNIT_LENGTH_M / 1000.0 << " ]\n"
+				<< continuation << "[ " << std::setw(value_width) << r0v0_norm(3) * UNIT_LENGTH_M / (1000.0 * UNIT_TIME_S) << ", "
+				<< std::setw(value_width) << r0v0_norm(4) * UNIT_LENGTH_M / (1000.0 * UNIT_TIME_S) << ", "
+				<< std::setw(value_width) << r0v0_norm(5) * UNIT_LENGTH_M / (1000.0 * UNIT_TIME_S) << " ]\n";
 
 		// 当前根数转换适用于非退化椭圆轨道；其他中间状态用 N/A 表示，不改变求解器的状态。
 		std::array<double, 6> display_kep;
@@ -941,7 +944,7 @@ void iod_solver::InitialOrbitDetermination(Overwatch &tracer, IodJob &job, std::
 
 			if (has_keplerian)
 			{
-				const double scale = j == 0 ? ae / 1000.0 : (j >= 2 ? RAD_TO_DEGREE : 1.0);
+				const double scale = j == 0 ? UNIT_LENGTH_M / 1000.0 : (j >= 2 ? constants::Conversion::RAD_TO_DEGREE : 1.0);
 				message << std::right << std::setw(value_width) << display_kep[j] * scale;
 			}
 			else
@@ -954,7 +957,7 @@ void iod_solver::InitialOrbitDetermination(Overwatch &tracer, IodJob &job, std::
 
 		message << "\n\n" << std::left << std::setw(label_width) << "- RMS [rad / arcsec]" << ": "
 				<< std::scientific << std::setprecision(2) << record.rms_angle_rad << " / "
-				<< std::fixed << std::setprecision(2) << record.rms_angle_rad / ARCSEC_TO_RAD
+				<< std::fixed << std::setprecision(2) << record.rms_angle_rad / constants::Conversion::ARCSEC_TO_RAD
 				<< '\n' << std::setw(label_width) << "- Max absolute correction [norm]" << ": ";
 
 		if (std::isfinite(max_dr0v0_norm))
@@ -1086,7 +1089,7 @@ void iod_solver::InitialOrbitDetermination(Overwatch &tracer, IodJob &job, std::
 	// 东西、南北方向的独立高斯误差共用标准差 sigma（rad）。
 	// resRa 已乘观测赤纬的 cos，直接与 resDec 一起构成负对数似然，不再缩放标准差。
 	const double sigma = job.obs.sigma_RaDec;
-	job.solution.J_likelihood = obs_count * std::log(2 * pi * sigma * sigma) +
+	job.solution.J_likelihood = obs_count * std::log(2 * PI * sigma * sigma) +
 		(job.solution.resRa.square().sum() + job.solution.resDec.square().sum()) / (2 * sigma * sigma);
 
 	// 用第一条观测所属测站在参考历元的位置，计算其与轨道平面的夹角（deg）。

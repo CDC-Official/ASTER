@@ -17,7 +17,7 @@ void near(double x,double y,double tolerance,const char* message) {
     require(std::isfinite(x)&&std::abs(x-y)<=tolerance,message);
 }
 orbit::NonSingular2 state(bastion::Overwatch& trace,double inclination=0) {
-    orbit::Keplerian kep(7000000./ae,.001,inclination,0.,.4,.6,true);
+    orbit::Keplerian kep(7000000./constants::Scale::UNIT_LENGTH_M,.001,inclination,0.,.4,.6,true);
     orbit::NonSingular2 nsg;
     kep.ToNonSingular2(trace,nsg);
     return nsg;
@@ -26,7 +26,7 @@ orbit::NonSingular2 state(bastion::Overwatch& trace,double inclination=0) {
 
 int main() try {
     // 独立低阶封闭式同时核对倾角函数的符号、值和两阶导数。
-    for (double i:{0.,1e-9,.1,.7,1.5,3.0,pi}) {
+    for (double i:{0.,1e-9,.1,.7,1.5,3.0,constants::PI}) {
         double F,dF,ddF;
         FlmpDerivatives(2,0,1,i,F,dF,ddF);
         near(F,.75*pow(sin(i),2)-.5,2e-14,"F201");
@@ -55,7 +55,7 @@ int main() try {
             near(ddF,dd,3e-5*scale,"Inclination second derivative finite difference");
             ++derivative_checks;
         }
-        for (double i:{0.,1e-10,pi-1e-10,pi}) {
+        for (double i:{0.,1e-10,constants::PI-1e-10,constants::PI}) {
             double F,dF,ddF; FlmpDerivatives(l,m,p,i,F,dF,ddF);
             require(std::isfinite(F)&&std::isfinite(dF)&&std::isfinite(ddF),"Nonfinite endpoint inclination function");
         }
@@ -141,7 +141,7 @@ int main() try {
         bastion::Overwatch failed(__FILE__,__func__,__LINE__);
         auto invalid=input; auto result=input; auto badopt=opt;
         if (kind==0) badopt.hansen_order=5;
-        if (kind==1) invalid.Set(failed,100000000./ae,.01,0,0,0,0,true);
+        if (kind==1) invalid.Set(failed,100000000./constants::Scale::UNIT_LENGTH_M,.01,0,0,0,0,true);
         const double epoch=kind==2 ? std::numeric_limits<double>::quiet_NaN() : 60149.;
         orbit::OsculatingToMean(failed,epoch,invalid,badopt,result);
         require(failed.Code()!=bastion::ERR_NOERROR,"Invalid averaging call succeeded");

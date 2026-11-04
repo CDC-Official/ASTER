@@ -8,7 +8,11 @@
 #include "orbit_geometry.hpp"
 #include "math_statistics.hpp"
 #include "core_iod.hpp"
+#include "data_gravityfield.hpp"
 #include <sstream>
+
+using namespace constants::Scale;
+using namespace constants::Conversion;
 
 using namespace iod;
 
@@ -108,8 +112,8 @@ void iod::IodSolution::PrintSummary(std::ostream& output, bool include_iteration
 
 	for (int j = 0; j < 6; ++j)
 	{
-		cart_values[j] *= j < 3 ? ae / 1000.0 : ae / (1000.0 * UNITTIME);
-		kep_values[j] *= j == 0 ? ae / 1000.0 : (j >= 2 ? RAD_TO_DEGREE : 1.0);
+		cart_values[j] *= j < 3 ? UNIT_LENGTH_M / 1000.0 : UNIT_LENGTH_M / (1000.0 * UNIT_TIME_S);
+		kep_values[j] *= j == 0 ? UNIT_LENGTH_M / 1000.0 : (j >= 2 ? RAD_TO_DEGREE : 1.0);
 	}
 
 	const int label_width = 40;
@@ -219,7 +223,9 @@ void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, 
 	sigma = X[0] * X[3] + X[1] * X[4] + X[2] * X[5];
 	sigma2 = sigma * sigma;
 	v02 = X[3] * X[3] + X[4] * X[4] + X[5] * X[5];    // v
-	J = 1.5 * J2;
+
+	// J2 与 GGM03C 的 GM、参考半径及 C20 配套，换算到当前积分尺度。
+	J = 1.5 * constants::GGM03C::NORMALIZED_J2;
 
 	double tau2, tau3, tau4, tau5, tau6;
 	tau2 = tau * tau;
@@ -343,10 +349,10 @@ void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, 
 			r0_sun = sqrt(r_sun[0] * r_sun[0] + r_sun[1] * r_sun[1] + r_sun[2] * r_sun[2]);
 			u3_sun = 1.0 / r0_sun / r0_sun / r0_sun;
 			LagCoeff[0] +=
-				tau2 / 2.0 * (-SUN_EARTH_MASS_RATIO * u3_sun)
-				+ tau4 / 24.0 * (u3 * SUN_EARTH_MASS_RATIO * u3_sun);    // F
+				tau2 / 2.0 * (-NORMALIZED_SUN_GM_TT * u3_sun)
+				+ tau4 / 24.0 * (u3 * NORMALIZED_SUN_GM_TT * u3_sun);    // F
 			LagCoeff[1] +=
-				tau3 / 6.0 * (-SUN_EARTH_MASS_RATIO * u3_sun);// G
+				tau3 / 6.0 * (-NORMALIZED_SUN_GM_TT * u3_sun);// G
 
 			break;
 		}
@@ -397,10 +403,10 @@ void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, 
 			u3_moon = 1.0 / r0_moon / r0_moon / r0_moon;
 
 			//日月分开加，便于剥离；只有FG的低次幂有三体摄动
-			LagCoeff[0] += tau2 / 2.0 * (-MOON_EARTH_MASS_RATIO * u3_moon)
-						   + tau4 / 24.0 * (u3 * MOON_EARTH_MASS_RATIO * u3_moon);    // F
+			LagCoeff[0] += tau2 / 2.0 * (-NORMALIZED_MOON_GM_TT * u3_moon)
+						   + tau4 / 24.0 * (u3 * NORMALIZED_MOON_GM_TT * u3_moon);    // F
 			LagCoeff[1] += tau3 / 6.0
-						   * (-MOON_EARTH_MASS_RATIO * u3_moon);// G
+						   * (-NORMALIZED_MOON_GM_TT * u3_moon);// G
 
 			break;
 		}
@@ -450,11 +456,11 @@ void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, 
 			r0_sun = sqrt(r_sun[0] * r_sun[0] + r_sun[1] * r_sun[1] + r_sun[2] * r_sun[2]);
 			u3_sun = 1.0 / r0_sun / r0_sun / r0_sun;
 			LagCoeff[0] +=
-				tau2 / 2.0 * (-SUN_EARTH_MASS_RATIO * u3_sun)
-				+ tau4 / 24.0 * (u3 * SUN_EARTH_MASS_RATIO * u3_sun);    // F
+				tau2 / 2.0 * (-NORMALIZED_SUN_GM_TT * u3_sun)
+				+ tau4 / 24.0 * (u3 * NORMALIZED_SUN_GM_TT * u3_sun);    // F
 			LagCoeff[1] +=
 				tau3 / 6.0
-				* (-SUN_EARTH_MASS_RATIO * u3_sun);                                                        // G
+				* (-NORMALIZED_SUN_GM_TT * u3_sun);                                                        // G
 			//月
 			double r_moon[3], u3_moon, r0_moon;
 			Cart_MeanMoon(MJD, r_moon);     //该函数返回归一化单位
@@ -462,10 +468,10 @@ void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, 
 			u3_moon = 1.0 / r0_moon / r0_moon / r0_moon;
 
 			//日月分开加，便于剥离；只有FG的低次幂有三体摄动
-			LagCoeff[0] += tau2 / 2.0 * (-MOON_EARTH_MASS_RATIO * u3_moon)
-						   + tau4 / 24.0 * (u3 * MOON_EARTH_MASS_RATIO * u3_moon);    // F
+			LagCoeff[0] += tau2 / 2.0 * (-NORMALIZED_MOON_GM_TT * u3_moon)
+						   + tau4 / 24.0 * (u3 * NORMALIZED_MOON_GM_TT * u3_moon);    // F
 			LagCoeff[1] += tau3 / 6.0
-						   * (-MOON_EARTH_MASS_RATIO * u3_moon);  // G
+						   * (-NORMALIZED_MOON_GM_TT * u3_moon);  // G
 
 			break;
 		}

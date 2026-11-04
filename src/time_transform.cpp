@@ -5,6 +5,8 @@
 #include "time_transform.hpp"
 #include "model_ephemeris_jpl.hpp"
 
+using namespace constants::Conversion;
+
 int Calendar2MJD(const int& year, const int& month, const int& day, const double& day_fraction, double& MJD)
 {
 	//借助IAU SOFA
@@ -56,7 +58,7 @@ int Calendar2MJD(const int& year, const int& month, const int& day, const int& h
 	// hour/24.0：小时转换为日的小数部分
 	// minute/1440.0：分钟转换为日的小数部分 (1440 = 24 * 60)
 	// second/86400.0：秒转换为日的小数部分 (86400 = 24 * 60 * 60)
-	double day_fraction = hour / 24.0 + minute / 1440.0 + second / 86400.0;
+	double day_fraction = hour / 24.0 + minute / 1440.0 + second / constants::SECONDS_PER_DAY;
 
 	// 第二步：调用原有的Calendar2MJD函数进行转换
 	// 利用函数重载，编译器会根据参数选择对应的版本
@@ -119,7 +121,7 @@ int Calendar2JD(const int& year, const int& month, const int& day, const int& ho
 	// hour/24.0：小时转换为日的小数部分
 	// minute/1440.0：分钟转换为日的小数部分 (1440 = 24 * 60)
 	// second/86400.0：秒转换为日的小数部分 (86400 = 24 * 60 * 60)
-	double day_fraction = hour / 24.0 + minute / 1440.0 + second / 86400.0;
+	double day_fraction = hour / 24.0 + minute / 1440.0 + second / constants::SECONDS_PER_DAY;
 
 	// 第二步：调用原有的Calendar2JD函数进行转换
 	// 利用函数重载，编译器会根据参数选择对应的版本
@@ -130,9 +132,9 @@ int MJD2Calendar(const double& MJD, int& year, int& month, int& day, int& hour, 
 {
 	double day_fraction;
 
-	int b = iauJd2cal(2400000.5, MJD, &year, &month, &day, &day_fraction);
+	int b = iauJd2cal(constants::MJD_OFFSET, MJD, &year, &month, &day, &day_fraction);
 	//提取时分秒
-	double total_seconds = day_fraction * 86400.0; //一天86400秒
+	double total_seconds = day_fraction * constants::SECONDS_PER_DAY; //一天86400秒
 	hour = static_cast<int>(total_seconds / 3600);
 	total_seconds -= hour * 3600;
 	minute = static_cast<int>(total_seconds / 60);
@@ -144,12 +146,12 @@ int MJD2Calendar(const double& MJD, int& year, int& month, int& day, int& hour, 
 
 double MJD2JD(double MJD)
 {
-	return MJD + START_OF_MJD;
+	return MJD + constants::MJD_OFFSET;
 }
 
 double JD2MJD(double JD)
 {
-	return JD - START_OF_MJD;
+	return JD - constants::MJD_OFFSET;
 }
 
 TimesMJD Utc2Else(double dut1, double MJD_UTC)
@@ -160,17 +162,17 @@ TimesMJD Utc2Else(double dut1, double MJD_UTC)
 
 	//GET TAI
 	double JD1_TAI, JD2_TAI;
-	int a = iauUtctai(START_OF_MJD + MJD_UTC, 0, &JD1_TAI, &JD2_TAI);
-	x.TAI = JD1_TAI + JD2_TAI - START_OF_MJD;
+	int a = iauUtctai(constants::MJD_OFFSET + MJD_UTC, 0, &JD1_TAI, &JD2_TAI);
+	x.TAI = JD1_TAI + JD2_TAI - constants::MJD_OFFSET;
 
 	//GET TT
 	double JD1_TT, JD2_TT;
 	int b = iauTaitt(JD1_TAI, JD2_TAI, &JD1_TT, &JD2_TT);
-	x.TT = JD1_TT + JD2_TT - START_OF_MJD;
+	x.TT = JD1_TT + JD2_TT - constants::MJD_OFFSET;
 
 	//日月平均历表需要用到UT1
 	double UT1_1, UT1_2;
-	int c = iauUtcut1(START_OF_MJD, MJD_UTC, dut1, &UT1_1, &UT1_2);
+	int c = iauUtcut1(constants::MJD_OFFSET, MJD_UTC, dut1, &UT1_1, &UT1_2);
 	x.UT1 = UT1_2;
 	return x;
 }
@@ -181,11 +183,11 @@ double UTC2TT(double MJD_UTC)
 	// 对 LEO 相当于分米量级沿轨误差。返回 MJD 时也先减去公共起点。
 	//GET TAI
 	double JD1_TAI, JD2_TAI;
-	int a = iauUtctai(START_OF_MJD, MJD_UTC, &JD1_TAI, &JD2_TAI);
+	int a = iauUtctai(constants::MJD_OFFSET, MJD_UTC, &JD1_TAI, &JD2_TAI);
 	//GET TT
 	double JD1_TT, JD2_TT;
 	int b = iauTaitt(JD1_TAI, JD2_TAI, &JD1_TT, &JD2_TT);
-	double TT = (JD1_TT - START_OF_MJD) + JD2_TT;
+	double TT = (JD1_TT - constants::MJD_OFFSET) + JD2_TT;
 	return TT;
 }
 
@@ -193,8 +195,8 @@ double UTC2TAI(double MJD_UTC)
 {
 	//GET TAI
 	double JD1_TAI, JD2_TAI;
-	int a = iauUtctai(START_OF_MJD + MJD_UTC, 0, &JD1_TAI, &JD2_TAI);
-	double TAI = JD1_TAI + JD2_TAI - START_OF_MJD;
+	int a = iauUtctai(constants::MJD_OFFSET + MJD_UTC, 0, &JD1_TAI, &JD2_TAI);
+	double TAI = JD1_TAI + JD2_TAI - constants::MJD_OFFSET;
 	return TAI;
 }
 
@@ -202,8 +204,8 @@ double TT2TAI(double MJD_TT)
 {
 	//GET TAI
 	double JD1_TAI, JD2_TAI;
-	int a = iauTttai(START_OF_MJD + MJD_TT, 0, &JD1_TAI, &JD2_TAI);
-	double TAI = JD1_TAI + JD2_TAI - START_OF_MJD;
+	int a = iauTttai(constants::MJD_OFFSET + MJD_TT, 0, &JD1_TAI, &JD2_TAI);
+	double TAI = JD1_TAI + JD2_TAI - constants::MJD_OFFSET;
 	return TAI;
 }
 
@@ -213,9 +215,9 @@ double TT2UTC(double MJD_TT)
 	//GET TAI
 	double JD1_TAI, JD2_TAI;
 	double JD1_UTC, JD2_UTC;
-	int a = iauTttai(START_OF_MJD, MJD_TT, &JD1_TAI, &JD2_TAI);
+	int a = iauTttai(constants::MJD_OFFSET, MJD_TT, &JD1_TAI, &JD2_TAI);
 	a = iauTaiutc(JD1_TAI, JD2_TAI, &JD1_UTC, &JD2_UTC);
-	double MJD_UTC = (JD1_UTC - START_OF_MJD) + JD2_UTC;
+	double MJD_UTC = (JD1_UTC - constants::MJD_OFFSET) + JD2_UTC;
 	return MJD_UTC;
 }
 
@@ -238,10 +240,10 @@ double TT2TCG(double MJD_TT)
 
 	// SOFA expects Julian Date, so add the MJD zero point before calling it.
 	double JD1_TCG, JD2_TCG;
-	iauTttcg(START_OF_MJD + MJD_TT, 0.0, &JD1_TCG, &JD2_TCG);
+	iauTttcg(constants::MJD_OFFSET + MJD_TT, 0.0, &JD1_TCG, &JD2_TCG);
 
 	// SOFA returns a two-part JD. Add the parts and convert back to MJD.
-	return JD1_TCG + JD2_TCG - START_OF_MJD;
+	return JD1_TCG + JD2_TCG - constants::MJD_OFFSET;
 }
 
 double TCG2TT(double MJD_TCG)
@@ -261,10 +263,10 @@ double TCG2TT(double MJD_TCG)
 
 	// Convert the input MJD to the JD form expected by SOFA.
 	double JD1_TT, JD2_TT;
-	iauTcgtt(START_OF_MJD + MJD_TCG, 0.0, &JD1_TT, &JD2_TT);
+	iauTcgtt(constants::MJD_OFFSET + MJD_TCG, 0.0, &JD1_TT, &JD2_TT);
 
 	// Merge SOFA's two-part JD result and return to the project's MJD convention.
-	return JD1_TT + JD2_TT - START_OF_MJD;
+	return JD1_TT + JD2_TT - constants::MJD_OFFSET;
 }
 
 double TDB2TCB(double MJD_TDB)
@@ -285,10 +287,10 @@ double TDB2TCB(double MJD_TDB)
 
 	// Convert project MJD to JD before calling the SOFA time-scale routine.
 	double JD1_TCB, JD2_TCB;
-	iauTdbtcb(START_OF_MJD + MJD_TDB, 0.0, &JD1_TCB, &JD2_TCB);
+	iauTdbtcb(constants::MJD_OFFSET + MJD_TDB, 0.0, &JD1_TCB, &JD2_TCB);
 
 	// Convert SOFA's two-part JD output back to a single MJD.
-	return JD1_TCB + JD2_TCB - START_OF_MJD;
+	return JD1_TCB + JD2_TCB - constants::MJD_OFFSET;
 }
 
 double TCB2TDB(double MJD_TCB)
@@ -312,10 +314,10 @@ double TCB2TDB(double MJD_TCB)
 
 	// Convert project MJD to JD before calling the SOFA time-scale routine.
 	double JD1_TDB, JD2_TDB;
-	iauTcbtdb(START_OF_MJD + MJD_TCB, 0.0, &JD1_TDB, &JD2_TDB);
+	iauTcbtdb(constants::MJD_OFFSET + MJD_TCB, 0.0, &JD1_TDB, &JD2_TDB);
 
 	// Convert SOFA's two-part JD output back to a single MJD.
-	return JD1_TDB + JD2_TDB - START_OF_MJD;
+	return JD1_TDB + JD2_TDB - constants::MJD_OFFSET;
 }
 
 double GeocenterTCBMinusTCG_HF2002(double JD)
@@ -357,7 +359,7 @@ double GeocenterTCBMinusTCG_HF2002(double JD)
 	const int NX = 36;
 
 	// IAU defining constant L_B = 1 - d(TDB)/d(TCB).
-	const double LB = 1.550519768e-8;
+	const double LB = ELB;
 
 	// IERS linear c^-4 correction term, retained from HF2002_IERS.F.
 	const double C4TERMS = 1.15e-16;
@@ -958,7 +960,7 @@ double TCG2TCB(double MJD_TCG,
 
 	// Convert the input TCG epoch to TT because the geocentric HF2002 term is evaluated with a TT/TDB-like JD.
 	double JD1_TT, JD2_TT;
-	iauTcgtt(START_OF_MJD + MJD_TCG, 0.0, &JD1_TT, &JD2_TT);
+	iauTcgtt(constants::MJD_OFFSET + MJD_TCG, 0.0, &JD1_TT, &JD2_TT);
 
 	// Geocentric term: TCB-TCG at the Earth's center, in seconds.
 	double geocenter_sec = GeocenterTCBMinusTCG_HF2002(JD1_TT + JD2_TT);
@@ -1000,7 +1002,7 @@ double TCB2TCG(double MJD_TCB,
 
 	// Convert the input TCB epoch to TDB before evaluating the HF2002 geocentric term.
 	double JD1_TDB, JD2_TDB;
-	iauTcbtdb(START_OF_MJD + MJD_TCB, 0.0, &JD1_TDB, &JD2_TDB);
+	iauTcbtdb(constants::MJD_OFFSET + MJD_TCB, 0.0, &JD1_TDB, &JD2_TDB);
 
 	// Geocentric term: TCB-TCG at the Earth's center, in seconds.
 	double geocenter_sec = GeocenterTCBMinusTCG_HF2002(JD1_TDB + JD2_TDB);

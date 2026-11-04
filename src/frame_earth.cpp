@@ -10,6 +10,8 @@
 #include "math_basic.hpp"
 #include <sofa.h>
 
+using constants::PI;
+
 void GCRS_to_ITRS_Matrix(double MJD_UTC, const aEOP& EOP_needed, Matrix3d& gcrs_to_itrs_emat)
 {
 	//
@@ -22,16 +24,16 @@ void GCRS_to_ITRS_Matrix(double MJD_UTC, const aEOP& EOP_needed, Matrix3d& gcrs_
 
 
 	double rc2it[3][3];
-	double tai = MJD_UTC + EOP_needed.dat / 86400.0;     // MJD
-	double tt = tai + 32.184 / 86400.0;     // MJD
-	double ut1 = MJD_UTC + EOP_needed.dut1 / 86400.0;     // MJD
+	double tai = MJD_UTC + EOP_needed.dat / constants::SECONDS_PER_DAY;     // MJD
+	double tt = tai + 32.184 / constants::SECONDS_PER_DAY;     // MJD
+	double ut1 = MJD_UTC + EOP_needed.dut1 / constants::SECONDS_PER_DAY;     // MJD
 
 	// IAU2000B method
 	double x, y, s;
 	double rc2i[3][3], rc2ti[3][3], rpom[3][3];
 
 	// CIP and CIO, *******************************IAU2000B**
-	iauXys00b(2400000.5, tt, &x, &y, &s);
+	iauXys00b(constants::MJD_OFFSET, tt, &x, &y, &s);
 
 	// add CIP corrections
 	x += EOP_needed.dx00;
@@ -41,14 +43,14 @@ void GCRS_to_ITRS_Matrix(double MJD_UTC, const aEOP& EOP_needed, Matrix3d& gcrs_
 	iauC2ixys(x, y, s, rc2i);
 
 	// ERA
-	double era = iauEra00(2400000.5, ut1);
+	double era = iauEra00(constants::MJD_OFFSET, ut1);
 
 	// Form celestial-terrestrial matrix (no polar motion yet)
 	iauCr(rc2i, rc2ti);
 	iauRz(era, rc2ti);
 
 	// Polar motion matrix (TIRS->ITRS,IERS2003)
-	iauPom00(EOP_needed.xp, EOP_needed.yp, iauSp00(2400000.5, tt), rpom);
+	iauPom00(EOP_needed.xp, EOP_needed.yp, iauSp00(constants::MJD_OFFSET, tt), rpom);
 
 	// Form celestial-terrestrial matrix(including polar motion)
 	iauRxr(rpom, rc2ti, rc2it);
@@ -202,7 +204,7 @@ void Horizontal_to_GCRS_Matrix(double geodetic_lambda_rad, double geodetic_phi_r
 	double GAST = iauGst00b(DJM0, MJD_UT1);
 	double S = GAST + geodetic_lambda_rad;  //地方恒星时(rad), GAST + geodetic_lambda_rad
 	// 教材式（1.53）中的 ZR：站心地平系到瞬时真赤道系。
-	horizontal_to_tod_emat = Rz(pi - S) * Ry(0.5 * pi - geodetic_phi_rad);
+	horizontal_to_tod_emat = Rz(PI - S) * Ry(0.5 * PI - geodetic_phi_rad);
 
 	double rbpn[3][3];    //虽然写的是bpn，但是确实是NPB：V(date) = rbpn * V(GCRS)
 	// 对应教材岁差章动环节；SOFA 此处还包含框架偏置 B，实际矩阵为 NPB。
@@ -252,16 +254,16 @@ void GCRS_to_ITRS_Matrix(double utc, double dut1, double dat, double xp,
 	 Polar motion included
 
 	 */
-	double tai = utc + dat / 86400.0;     // MJD
-	double tt = tai + 32.184 / 86400.0;     // MJD
-	double ut1 = utc + dut1 / 86400.0;     // MJD
+	double tai = utc + dat / constants::SECONDS_PER_DAY;     // MJD
+	double tt = tai + 32.184 / constants::SECONDS_PER_DAY;     // MJD
+	double ut1 = utc + dut1 / constants::SECONDS_PER_DAY;     // MJD
 
 	// IAU2000B method
 	double x, y, s;
 	double rc2i[3][3], rc2ti[3][3], rpom[3][3];
 
 	// CIP and CIO, *******************************IAU2000B**
-	iauXys00b(2400000.5, tt, &x, &y, &s);
+	iauXys00b(constants::MJD_OFFSET, tt, &x, &y, &s);
 
 	// add CIP corrections
 	x += dx00;
@@ -271,14 +273,14 @@ void GCRS_to_ITRS_Matrix(double utc, double dut1, double dat, double xp,
 	iauC2ixys(x, y, s, rc2i);
 
 	// ERA
-	double era = iauEra00(2400000.5, ut1);
+	double era = iauEra00(constants::MJD_OFFSET, ut1);
 
 	// Form celestial-terrestrial matrix (no polar motion yet)
 	iauCr(rc2i, rc2ti);
 	iauRz(era, rc2ti);
 
 	// Polar motion matrix (TIRS->ITRS,IERS2003)
-	iauPom00(xp, yp, iauSp00(2400000.5, tt), rpom);
+	iauPom00(xp, yp, iauSp00(constants::MJD_OFFSET, tt), rpom);
 
 	// Form celestial-terrestrial matrix(including polar motion)
 	iauRxr(rpom, rc2ti, rc2it);

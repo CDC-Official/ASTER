@@ -16,15 +16,15 @@ int main()
         aEOP eop;
         eop.dat = 37;
         eop.dut1 = 0.15;
-        eop.xp = 0.12 * ARCSEC_TO_RAD;
-        eop.yp = -0.23 * ARCSEC_TO_RAD;
+        eop.xp = 0.12 * constants::Conversion::ARCSEC_TO_RAD;
+        eop.yp = -0.23 * constants::Conversion::ARCSEC_TO_RAD;
         const double utc = 60000.25;
         Matrix3d c2t;
         GCRS_to_ITRS_Matrix(utc, eop, c2t);
         // 非零三分量位置能检查类接口是否确实使用输入向量，而非未赋值的输出。
         for (bool normalized : {false, true})
         {
-            const double scale = normalized ? 1.0 : ae;
+            const double scale = normalized ? 1.0 : constants::Scale::UNIT_LENGTH_M;
             Vector3d input(1.2 * scale, -0.7 * scale, 0.4 * scale);
             frame::GCRS celestial(input[0], input[1], input[2], normalized);
             frame::ITRS terrestrial;
@@ -49,30 +49,31 @@ int main()
         }}; // 每行依次为 lambda(deg)、phi(deg)、height(m)。
         for (const std::array<double, 3>& coordinates : geodetic_cases)
         {
-            const double lambda = coordinates[0] * DEGREE_TO_RAD;
-            const double phi = coordinates[1] * DEGREE_TO_RAD;
+            const double lambda = coordinates[0] * constants::Conversion::DEGREE_TO_RAD;
+            const double phi = coordinates[1] * constants::Conversion::DEGREE_TO_RAD;
             const double height = coordinates[2];
-            const double N = ae / sqrt(1.0 - E_SQUARED * sin(phi) * sin(phi));
-            Vector3d expected((N + height) * cos(phi) * cos(lambda),
-                              (N + height) * cos(phi) * sin(lambda),
-                              (N * (1.0 - E_SQUARED) + height) * sin(phi));
+            // SOFA 按 WGS84 独立计算站址，检查半径与扁率是否配套。
+            double xyz[3];
+            if (iauGd2gc(WGS84, lambda, phi, height, xyz) != 0)
+                throw std::runtime_error("SOFA WGS84 reference conversion failed");
+            Vector3d expected(xyz[0], xyz[1], xyz[2]);
             frame::ITRS terrestrial(expected[0], expected[1], expected[2], false);
-            terrestrial.Normalize(tracer, ae);
+            terrestrial.Normalize(tracer, constants::Scale::UNIT_LENGTH_M);
             frame::Geodetic recovered;
             terrestrial.ToGeodetic(tracer, recovered);
             double result[3];
             recovered.ToArray(result);
-            if (fabs(result[0] * ae - height) > 1e-5 ||
-                fabs(std::remainder(result[1] - lambda, 2 * pi)) > 1e-12 ||
+            if (fabs(result[0] * constants::Scale::UNIT_LENGTH_M - height) > 1e-5 ||
+                fabs(std::remainder(result[1] - lambda, 2 * constants::PI)) > 1e-12 ||
                 fabs(result[2] - phi) > 1e-12)
                 throw std::runtime_error("ITRS to geodetic units or coordinates mismatch");
             frame::ITRS round_trip;
             recovered.ToITRS(tracer, round_trip);
-            round_trip.Restore(tracer, ae);
+            round_trip.Restore(tracer, constants::Scale::UNIT_LENGTH_M);
             round_trip.ToArray(result);
             if ((Eigen::Map<Vector3d>(result) - expected).norm() > 1e-5)
                 throw std::runtime_error("Geodetic to ITRS round trip mismatch");
-            recovered.Restore(tracer, ae);
+            recovered.Restore(tracer, constants::Scale::UNIT_LENGTH_M);
             recovered.ToArray(result);
             if (fabs(result[0] - height) > 1e-5 ||
                 fabs(std::remainder(result[1] - coordinates[0], 360.0)) > 1e-9 ||
@@ -84,7 +85,7 @@ int main()
         Horizontal_to_GCRS_Matrix(1.1, 0.6, utc, eop.dut1, eop.dat, h2c);
         Matrix3d c2h = h2c.transpose();
         Vector3d station(1.0, 2.0, 3.0);
-        for (double azimuth : {0.0, 0.5 * pi, pi, 1.5 * pi, 0.73})
+        for (double azimuth : {0.0, 0.5 * constants::PI, constants::PI, 1.5 * constants::PI, 0.73})
         {
             const double elevation = 0.31, distance = 2.7;
             Vector3d horizontal(cos(elevation) * cos(azimuth),
@@ -94,7 +95,7 @@ int main()
             RelativePosition_to_Horizontal(c2h, target[0], target[1], target[2],
                                   station[0], station[1], station[2], result);
             if (fabs(result[0] - distance) > 1e-12 ||
-                fabs(std::remainder(result[1] - azimuth, 2 * pi)) > 1e-12 ||
+                fabs(std::remainder(result[1] - azimuth, 2 * constants::PI)) > 1e-12 ||
                 fabs(result[2] - elevation) > 1e-12)
                 throw std::runtime_error("Textbook horizontal convention mismatch");
         }
@@ -116,7 +117,7 @@ int main()
             double result[3];
             RelativePosition_to_Horizontal(c2h, target[0], target[1], target[2],
                                            station[0], station[1], station[2], result);
-            if (fabs(std::remainder(result[1] - atan2(east, north), 2 * pi)) > 1e-12 ||
+            if (fabs(std::remainder(result[1] - atan2(east, north), 2 * constants::PI)) > 1e-12 ||
                 fabs(result[2] - asin(up)) > 1e-12)
                 throw std::runtime_error("Textbook equation 1.54 mismatch");
         }

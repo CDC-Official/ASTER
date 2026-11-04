@@ -32,6 +32,8 @@
 #include <string>
 #include <vector>
 
+using namespace constants::Scale;
+
 namespace {
 // 一条输入记录：历元及对应的六根数。
 struct KeplerianRecord {
@@ -118,7 +120,7 @@ int main(int argc, const char* argv[]) {
             orbit::Keplerian elements(kepler[0], kepler[1], kepler[2], kepler[3], kepler[4], kepler[5], false);
             orbit::Cartesian state;
             // 根数归一化：半长轴由 km 除以 ae/1000（km），角度由 deg 转为 rad。
-            elements.Normalize(tracer, ae / 1000.0);
+            elements.Normalize(tracer, UNIT_LENGTH_M / 1000.0);
             if (tracer.Code() != ERR_NOERROR) throw std::runtime_error("Keplerian normalization failed");
 
             // 转换为 Cartesian 位置、速度，结果仍为归一化量。
@@ -126,7 +128,7 @@ int main(int argc, const char* argv[]) {
             if (tracer.Code() != ERR_NOERROR) throw std::runtime_error("Keplerian conversion failed");
 
             // 恢复单位：位置乘 ae 得到 m，速度乘 ae/UNITTIME 得到 m/s。
-            state.Restore(tracer, ae, UNITTIME);
+            state.Restore(tracer, UNIT_LENGTH_M, UNIT_TIME_S);
             if (tracer.Code() != ERR_NOERROR) throw std::runtime_error("Cartesian unit restoration failed");
             std::array<double, 6> values;
             state.ToArray(values.data());

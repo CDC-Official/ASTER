@@ -12,6 +12,11 @@
 | 1.1.0 统一后端的结果与成本 | [后端数值和计时](03_math-backend.md) | [构建、科学差异和计时](evidence/06_math-backend-validation.json) |
 | 1.2.0 观测生成是否保持原行为 | [观测生成验收](04_observations.md) | [迁移来源与输入校验](../../tests/generate_observations/source.json)；完整运行证据位置见说明 |
 | 地球 GM 如何按 TT/TDB 取值，以及对轨道的影响 | [GM 约定与轨道对照](05_earth-gm.md) | [参数、输入校验和数值结果](evidence/07_earth-gm-validation.json) |
+| 全库常数如何按来源调用，修正后与谁比较、差异从何而来 | [常数规范化验证](06_constants.md) | [明确比较双方的数值记录](evidence/08_constants-validation.json) |
+| 当前 ASTER 与 Orekit 的球谐加速度、一天预报及姿态差异 | [Orekit 对照](07_orekit.md) | [比较双方、结果及源码校验](evidence/09_orekit-validation.json) |
+| 当前 ASTER 与 Orekit 的近地摄动逐项开关及全开一天预报 | [摄动开关对照](08_orekit-perturbations.md) | [模型设置、逐项结果及输入校验](evidence/10_orekit-perturbations.json) |
+| 各自采用大气、地影和地球姿态模型时，一天预报相差多少；近地月球间接项是否补齐 | [独立模型对照及月球间接项](09_orekit-models.md) | [独立模型结果](evidence/11_orekit-models.json)、[间接项修正验证](evidence/12_lunar-indirect-fix.json) |
+| 当前 ASTER 与导师程序的百天 ADAMS 预报随步长变化的差异 | [百天预报对照及曲线](10_adams-100days.md) | [运行配置、星历及图件校验](evidence/13_adams-100days.json) |
 
 <a id="migration"></a>
 ## 1.0.0 迁移来源与核对

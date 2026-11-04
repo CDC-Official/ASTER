@@ -384,7 +384,7 @@ int Earth_Nonspherical_Gravitational_Acceleration(double* a_terrestrial, const d
 	int field_id, int zonal_order, int tesseral_degree, double field_gm, double reference_radius)
 {
 	// 球谐展开中的距离以模型参考半径为单位，外部积分状态仍以 ae 为单位。
-	const double length_scale = ae / reference_radius;
+	const double length_scale = constants::Scale::UNIT_LENGTH_M / reference_radius;
 	double X = R_terrestrial[0] * length_scale;
 	double Y = R_terrestrial[1] * length_scale;
 	double Z = R_terrestrial[2] * length_scale;
@@ -442,7 +442,7 @@ int Earth_Nonspherical_Gravitational_Acceleration(double* a_terrestrial, const d
 		double temp_Cl0;
 		for (l = 2; l <= zonal_order; l++)
 		{
-			temp_Cl0 = GGM03C_arr[(3 + l) * (l - 2) / 2][0];
+			temp_Cl0 = constants::GGM03C::COEFFICIENTS[(3 + l) * (l - 2) / 2][0];
 			//注意是减号
 			a_zonal -= temp_Cl0 / pow(R, l + 3)
 					   * (((l + 1) * LP[l] + sin_phi * LPD[l]) * R_vec - R * LPD[l] * k_hat);
@@ -504,8 +504,8 @@ int Earth_Nonspherical_Gravitational_Acceleration(double* a_terrestrial, const d
 
 			for (m = 1; m <= l; m++)
 			{
-				temp_C_lm = GGM03C_arr[(3 + l) * (l - 2) / 2 + m][0];
-				temp_S_lm = GGM03C_arr[(3 + l) * (l - 2) / 2 + m][1];
+				temp_C_lm = constants::GGM03C::COEFFICIENTS[(3 + l) * (l - 2) / 2 + m][0];
+				temp_S_lm = constants::GGM03C::COEFFICIENTS[(3 + l) * (l - 2) / 2 + m][1];
 				//注意是减号
 				a_tesseral -= 1.0 / (pow(R, l + 3))
 							  * (((l + 1) * LPA[l][m] + sin_phi * LPAD[l][m]) * R_vec - R * LPAD[l][m] * k_hat)
@@ -523,7 +523,7 @@ int Earth_Nonspherical_Gravitational_Acceleration(double* a_terrestrial, const d
 
 
 	// 将模型的 GM/reference_radius² 加速度尺度换成积分器使用的 GE/ae²。
-	const double acceleration_scale = (field_gm / GE) * length_scale * length_scale;
+	const double acceleration_scale = (field_gm / constants::Scale::UNIT_GM_M3_S2) * length_scale * length_scale;
 	Vector3d a_total_terrestrial = (a_zonal + a_tesseral) * acceleration_scale;
 	a_terrestrial[0] = a_total_terrestrial[0];
 	a_terrestrial[1] = a_total_terrestrial[1];

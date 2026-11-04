@@ -1,0 +1,683 @@
+{
+  "plot": {
+    "comparison": "ASTER vs mentor NAO, Cartesian position norm in metres",
+    "alignment": "same nominal elapsed time; final sample uses final output of each program",
+    "duration_days": 100,
+    "integrator": "Adams PECE, 9 steps",
+    "curves": [
+      {
+        "step_s": 60,
+        "source_rows": [
+          144001,
+          144001
+        ],
+        "plotted_points": 144001,
+        "max_m": 2252.5481174037272,
+        "max_day": 99.98333333333333,
+        "final_m": 2242.1401987457384,
+        "max_printed_epoch_difference_s": 1.5087425708770752e-05,
+        "files": [
+          {
+            "path": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/导师百天对照_014/aster/cart.txt",
+            "sha256": "5bb2e1788d5652598c495a4ac529407b921d7e1aae7613ce89dff5ff1421f6f6"
+          },
+          {
+            "path": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/导师百天对照_014/nao/cart.txt",
+            "sha256": "182915caf4e87502155b82b5d83645693991233a57dcf370b0d0ad37f44aea4e"
+          }
+        ]
+      },
+      {
+        "step_s": 30,
+        "source_rows": [
+          288002,
+          288001
+        ],
+        "plotted_points": 288001,
+        "max_m": 101.00697101863742,
+        "max_day": 99.97708333333334,
+        "final_m": 99.68893147567273,
+        "max_printed_epoch_difference_s": 5.2177347242832184e-05,
+        "files": [
+          {
+            "path": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/导师百天对照_014/aster_30s/cart.txt",
+            "sha256": "02d7600aa9c11d4f2e8e38cad51bcc31605a35ba7df0bcbbdc0296f5742645ea"
+          },
+          {
+            "path": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/导师百天对照_014/nao_30s/cart.txt",
+            "sha256": "44de93577f09bbf3c5d46bb4c1bf33374101c7d469a3175c9fee866b35641f01"
+          }
+        ]
+      },
+      {
+        "step_s": 10,
+        "source_rows": [
+          864002,
+          864001
+        ],
+        "plotted_points": 864001,
+        "max_m": 75.99351672442103,
+        "max_day": 83.70694444444445,
+        "final_m": 71.19552808741936,
+        "max_printed_epoch_difference_s": 7.292255759239197e-05,
+        "files": [
+          {
+            "path": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/导师百天对照_014/aster_10s/cart.txt",
+            "sha256": "43f81d7c28e31c2c1d4d474030c31ccd85ebb7874138ac7257eecc342e1cb6b6"
+          },
+          {
+            "path": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/导师百天对照_014/nao_10s/cart.txt",
+            "sha256": "f86056af518843a58ca2f0b5bd1475c5ad5a3689cfaf839ab0a03a457e739e62"
+          }
+        ]
+      }
+    ],
+    "rendering": {
+      "all_regular_samples_used": true,
+      "smoothing": false,
+      "pdf": "vector text and axes; all curve samples rasterized at 450 dpi",
+      "alignment_audit": "not applicable: one panel"
+    }
+  },
+  "runs": {
+    "aster": {
+      "returncode": 0,
+      "duration_s": 22.194759917,
+      "binary": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/ASTER单程测距对照_001/build/bin/aster_opn_cartesian",
+      "binary_sha256": "855aa8701d5ce977dfaf6b6d37c39247e71ff874cbd385c9c01da4d99869d8b1",
+      "config": {
+        "reference_epoch": "55255.99923398",
+        "reference_Keplerian": "",
+        "reference_Cartesian": "5937.3763146517094 2716.356956252755 1644.074813304293 -3.5084830876880702 4.594869895007859 5.1343051912384086",
+        "propagation_length": "8640000",
+        "file_EOP": "/Users/chendingcun/CLionProjects/ASTER/data/eop/EOP-All_250516.txt",
+        "file_JPLEPH": "/Users/chendingcun/CLionProjects/ASTER/data/ephemeris/JPLEPH_C.430",
+        "file_atmosphere_density": "/Users/chendingcun/CLionProjects/ASTER/data/atmosphere/atmosphere.txt",
+        "file_lunar_gravity_field": "/Users/chendingcun/CLionProjects/ASTER/data/gravity/grail.txt",
+        "earth_zonal_order": "80",
+        "earth_tesseral_degree": "80",
+        "solar_gravity": "1",
+        "lunar_gravity": "1",
+        "use_lunar_NSG": "1",
+        "lunar_zonal_order": "20",
+        "lunar_tesseral_degree": "20",
+        "use_drag_perturb": "1",
+        "use_SRP_perturb": "1",
+        "satellite_id": "LEO-test-260208",
+        "satellite_mass": "1",
+        "satellite_drag_cross_area": "0.01",
+        "satellite_srp_cross_area": "0.01",
+        "satellite_drag_Cd": "2.2",
+        "satellite_srp_eta": "0.44",
+        "integrator_id": "202",
+        "integrator_adams_steps": "9",
+        "integrator_stepsize": "60",
+        "integrator_maxTE": "1e-12",
+        "file_eph_Cartesian": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/导师百天对照_014/aster/cart.txt",
+        "file_eph_Keplerian": "",
+        "file_eph_NonSingular2": "",
+        "file_report": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/导师百天对照_014/aster/report.txt",
+        "output_state_units": "2",
+        "display_model": "0",
+        "display_setting": "0",
+        "display_progress": "0",
+        "display_summary": "0"
+      }
+    },
+    "nao": {
+      "returncode": 0,
+      "duration_s": 18.178400749999998,
+      "binary": "/Users/chendingcun/CLionProjects/CDC_lib/build/nao-propagation-quick-20261021/nao-make/opnApp/opnApp",
+      "binary_sha256": "8ff710cc7f4a7c3a5b6a552a5354fa9518066c579f2e6643dba323f989e60f46",
+      "config": {
+        "initial_epoch": "55255.99923398",
+        "initial_Keplerian": "",
+        "propagation_length": "8640000",
+        "display_model": "0",
+        "display_setting": "0",
+        "display_event": "0",
+        "file_EOP": "/Users/chendingcun/CLionProjects/ASTER/data/eop/EOP-All_250516.txt",
+        "file_JPLEPH": "/Users/chendingcun/CLionProjects/ASTER/data/ephemeris/JPLEPH_C.430",
+        "file_eph_Cartesian": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/导师百天对照_014/nao/cart.txt",
+        "file_eph_Keplerian": "",
+        "file_report": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/导师百天对照_014/nao/report.txt",
+        "file_eph_NonSingular2": "",
+        "normalized_state": "0",
+        "integrator_id": "202",
+        "integrator_stepsize": "60",
+        "integrator_stage": "9",
+        "integrator_maxTE": "1e-12",
+        "Earth_gravity_field": "GGM03C",
+        "Earth_gravity_field_degree": "80",
+        "perturbing_body": "10 11",
+        "eph_sync_threshold_10": "0.00001",
+        "eph_sync_threshold_11": "0.00001",
+        "eph_sync_threshold_4": "0.00001",
+        "ephemeris_model_10": "21",
+        "ephemeris_model_11": "21",
+        "eph_sync_threshold_Earth": "3.6525",
+        "ephemeris_model_Earth": "21",
+        "use_drag_perturb": "1",
+        "use_SRP_perturb": "1",
+        "use_solidtide_perturb": "0",
+        "satellite_mass": "1",
+        "satellite_drag_cross_area": "0.01",
+        "satellite_srp_cross_area": "0.01",
+        "initial_Cartesian": "5937.3763146517094 2716.356956252755 1644.074813304293 -3.5084830876880702 4.594869895007859 5.1343051912384086",
+        "satellite_id": "TEST01",
+        "use_empirical_force": "0",
+        "solidtide_model": "1",
+        "use_scrutiny": "1",
+        "progress_frequency": "0",
+        "ephout_frequency": "1",
+        "additional_job": "",
+        "additional_job_directory": ""
+      }
+    },
+    "aster_30s": {
+      "returncode": 0,
+      "duration_s": 43.178561458,
+      "binary": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/ASTER单程测距对照_001/build/bin/aster_opn_cartesian",
+      "binary_sha256": "855aa8701d5ce977dfaf6b6d37c39247e71ff874cbd385c9c01da4d99869d8b1",
+      "config": {
+        "reference_epoch": "55255.99923398",
+        "reference_Keplerian": "",
+        "reference_Cartesian": "5937.3763146517094 2716.356956252755 1644.074813304293 -3.5084830876880702 4.594869895007859 5.1343051912384086",
+        "propagation_length": "8640000",
+        "file_EOP": "/Users/chendingcun/CLionProjects/ASTER/data/eop/EOP-All_250516.txt",
+        "file_JPLEPH": "/Users/chendingcun/CLionProjects/ASTER/data/ephemeris/JPLEPH_C.430",
+        "file_atmosphere_density": "/Users/chendingcun/CLionProjects/ASTER/data/atmosphere/atmosphere.txt",
+        "file_lunar_gravity_field": "/Users/chendingcun/CLionProjects/ASTER/data/gravity/grail.txt",
+        "earth_zonal_order": "80",
+        "earth_tesseral_degree": "80",
+        "solar_gravity": "1",
+        "lunar_gravity": "1",
+        "use_lunar_NSG": "1",
+        "lunar_zonal_order": "20",
+        "lunar_tesseral_degree": "20",
+        "use_drag_perturb": "1",
+        "use_SRP_perturb": "1",
+        "satellite_id": "LEO-test-260208",
+        "satellite_mass": "1",
+        "satellite_drag_cross_area": "0.01",
+        "satellite_srp_cross_area": "0.01",
+        "satellite_drag_Cd": "2.2",
+        "satellite_srp_eta": "0.44",
+        "integrator_id": "202",
+        "integrator_adams_steps": "9",
+        "integrator_stepsize": "30",
+        "integrator_maxTE": "1e-12",
+        "file_eph_Cartesian": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/导师百天对照_014/aster_30s/cart.txt",
+        "file_eph_Keplerian": "",
+        "file_eph_NonSingular2": "",
+        "file_report": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/导师百天对照_014/aster_30s/report.txt",
+        "output_state_units": "2",
+        "display_model": "0",
+        "display_setting": "0",
+        "display_progress": "0",
+        "display_summary": "0"
+      }
+    },
+    "nao_30s": {
+      "returncode": 0,
+      "duration_s": 37.012306458,
+      "binary": "/Users/chendingcun/CLionProjects/CDC_lib/build/nao-propagation-quick-20261021/nao-make/opnApp/opnApp",
+      "binary_sha256": "8ff710cc7f4a7c3a5b6a552a5354fa9518066c579f2e6643dba323f989e60f46",
+      "config": {
+        "initial_epoch": "55255.99923398",
+        "initial_Keplerian": "",
+        "propagation_length": "8640000",
+        "display_model": "0",
+        "display_setting": "0",
+        "display_event": "0",
+        "file_EOP": "/Users/chendingcun/CLionProjects/ASTER/data/eop/EOP-All_250516.txt",
+        "file_JPLEPH": "/Users/chendingcun/CLionProjects/ASTER/data/ephemeris/JPLEPH_C.430",
+        "file_eph_Cartesian": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/导师百天对照_014/nao_30s/cart.txt",
+        "file_eph_Keplerian": "",
+        "file_report": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/导师百天对照_014/nao_30s/report.txt",
+        "file_eph_NonSingular2": "",
+        "normalized_state": "0",
+        "integrator_id": "202",
+        "integrator_stepsize": "30",
+        "integrator_stage": "9",
+        "integrator_maxTE": "1e-12",
+        "Earth_gravity_field": "GGM03C",
+        "Earth_gravity_field_degree": "80",
+        "perturbing_body": "10 11",
+        "eph_sync_threshold_10": "0.00001",
+        "eph_sync_threshold_11": "0.00001",
+        "eph_sync_threshold_4": "0.00001",
+        "ephemeris_model_10": "21",
+        "ephemeris_model_11": "21",
+        "eph_sync_threshold_Earth": "3.6525",
+        "ephemeris_model_Earth": "21",
+        "use_drag_perturb": "1",
+        "use_SRP_perturb": "1",
+        "use_solidtide_perturb": "0",
+        "satellite_mass": "1",
+        "satellite_drag_cross_area": "0.01",
+        "satellite_srp_cross_area": "0.01",
+        "initial_Cartesian": "5937.3763146517094 2716.356956252755 1644.074813304293 -3.5084830876880702 4.594869895007859 5.1343051912384086",
+        "satellite_id": "TEST01",
+        "use_empirical_force": "0",
+        "solidtide_model": "1",
+        "use_scrutiny": "1",
+        "progress_frequency": "0",
+        "ephout_frequency": "1",
+        "additional_job": "",
+        "additional_job_directory": ""
+      }
+    },
+    "aster_10s": {
+      "returncode": 0,
+      "duration_s": 150.7235345,
+      "binary": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/ASTER单程测距对照_001/build/bin/aster_opn_cartesian",
+      "binary_sha256": "855aa8701d5ce977dfaf6b6d37c39247e71ff874cbd385c9c01da4d99869d8b1",
+      "config": {
+        "reference_epoch": "55255.99923398",
+        "reference_Keplerian": "",
+        "reference_Cartesian": "5937.3763146517094 2716.356956252755 1644.074813304293 -3.5084830876880702 4.594869895007859 5.1343051912384086",
+        "propagation_length": "8640000",
+        "file_EOP": "/Users/chendingcun/CLionProjects/ASTER/data/eop/EOP-All_250516.txt",
+        "file_JPLEPH": "/Users/chendingcun/CLionProjects/ASTER/data/ephemeris/JPLEPH_C.430",
+        "file_atmosphere_density": "/Users/chendingcun/CLionProjects/ASTER/data/atmosphere/atmosphere.txt",
+        "file_lunar_gravity_field": "/Users/chendingcun/CLionProjects/ASTER/data/gravity/grail.txt",
+        "earth_zonal_order": "80",
+        "earth_tesseral_degree": "80",
+        "solar_gravity": "1",
+        "lunar_gravity": "1",
+        "use_lunar_NSG": "1",
+        "lunar_zonal_order": "20",
+        "lunar_tesseral_degree": "20",
+        "use_drag_perturb": "1",
+        "use_SRP_perturb": "1",
+        "satellite_id": "LEO-test-260208",
+        "satellite_mass": "1",
+        "satellite_drag_cross_area": "0.01",
+        "satellite_srp_cross_area": "0.01",
+        "satellite_drag_Cd": "2.2",
+        "satellite_srp_eta": "0.44",
+        "integrator_id": "202",
+        "integrator_adams_steps": "9",
+        "integrator_stepsize": "10",
+        "integrator_maxTE": "1e-12",
+        "file_eph_Cartesian": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/导师百天对照_014/aster_10s/cart.txt",
+        "file_eph_Keplerian": "",
+        "file_eph_NonSingular2": "",
+        "file_report": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/导师百天对照_014/aster_10s/report.txt",
+        "output_state_units": "2",
+        "display_model": "0",
+        "display_setting": "0",
+        "display_progress": "0",
+        "display_summary": "0"
+      }
+    },
+    "nao_10s": {
+      "returncode": 0,
+      "duration_s": 127.001109125,
+      "binary": "/Users/chendingcun/CLionProjects/CDC_lib/build/nao-propagation-quick-20261021/nao-make/opnApp/opnApp",
+      "binary_sha256": "8ff710cc7f4a7c3a5b6a552a5354fa9518066c579f2e6643dba323f989e60f46",
+      "config": {
+        "initial_epoch": "55255.99923398",
+        "initial_Keplerian": "",
+        "propagation_length": "8640000",
+        "display_model": "0",
+        "display_setting": "0",
+        "display_event": "0",
+        "file_EOP": "/Users/chendingcun/CLionProjects/ASTER/data/eop/EOP-All_250516.txt",
+        "file_JPLEPH": "/Users/chendingcun/CLionProjects/ASTER/data/ephemeris/JPLEPH_C.430",
+        "file_eph_Cartesian": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/导师百天对照_014/nao_10s/cart.txt",
+        "file_eph_Keplerian": "",
+        "file_report": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/导师百天对照_014/nao_10s/report.txt",
+        "file_eph_NonSingular2": "",
+        "normalized_state": "0",
+        "integrator_id": "202",
+        "integrator_stepsize": "10",
+        "integrator_stage": "9",
+        "integrator_maxTE": "1e-12",
+        "Earth_gravity_field": "GGM03C",
+        "Earth_gravity_field_degree": "80",
+        "perturbing_body": "10 11",
+        "eph_sync_threshold_10": "0.00001",
+        "eph_sync_threshold_11": "0.00001",
+        "eph_sync_threshold_4": "0.00001",
+        "ephemeris_model_10": "21",
+        "ephemeris_model_11": "21",
+        "eph_sync_threshold_Earth": "3.6525",
+        "ephemeris_model_Earth": "21",
+        "use_drag_perturb": "1",
+        "use_SRP_perturb": "1",
+        "use_solidtide_perturb": "0",
+        "satellite_mass": "1",
+        "satellite_drag_cross_area": "0.01",
+        "satellite_srp_cross_area": "0.01",
+        "initial_Cartesian": "5937.3763146517094 2716.356956252755 1644.074813304293 -3.5084830876880702 4.594869895007859 5.1343051912384086",
+        "satellite_id": "TEST01",
+        "use_empirical_force": "0",
+        "solidtide_model": "1",
+        "use_scrutiny": "1",
+        "progress_frequency": "0",
+        "ephout_frequency": "1",
+        "additional_job": "",
+        "additional_job_directory": ""
+      }
+    }
+  },
+  "worktree": {
+    "branch": "fix/earth-gm-conventions",
+    "head": "406294200eb808221fe430adc6b750b403a140b5",
+    "working_tree_diff_sha256": "b1be40a92f1574195e6ca36ddf08b8217438cb92502e7c13c061082cddb91d9c",
+    "files": {
+      "run.py": "4f0c44a7c03077161dbc3fc53286258eb5664b48cc06c721ddcdd477e08e47ee",
+      "comparison_10s.json": "7a41dcbb067711a47492fdafb809e7b2b9f48372c933895dfb3598af9a9fdf78",
+      "run_30s.py": "a0473a1e4bf21e94d8b289a11b94e3c38cc34642aec5ed27b57351974738e0cd",
+      "difference_10s.csv": "fa2f27a46dff675cb602b1cc73fa65c0526330cb17ec4a21a8e35975e98eebcb",
+      "comparison.json": "b5ec6ccdf6e9372c213183bf7e30f82732457dacc0ec6a09adea916c0b714f80",
+      "README.md": "ffd740065bdbe8d7a25c190ade3f185067c6467ffb6c331f0ef88b1420245489",
+      "run_10s.py": "2419ac3599c3731c15bc44c222a3e7b6725adf27255c61cf30f0d36e7ab882e1",
+      "step_check.json": "2e5e5028500fd4a37eaa0833d08d56041036f7be75fdd1a6efb92ac648288964",
+      "compare_10s.py": "83e7cec40e76a29b8bd515b10800a03e45d714e5ad0128047b8ddb1d85761fcc",
+      "check_step.py": "a1ae29c3f4692dacf54f4b9214e7d481189ec4cf34605110958a21e33dc7a12a",
+      "difference.csv": "829d7f0ce9977013aaefc4f2a91d8a865ef2a2823d45afe3af78415ec9029dba",
+      "compare.py": "38237a38d6d5c61df4e85e431b58a4e8b8e9b24eb2c03c2ed80a5beae70a1c1e",
+      "aster_30s/cart.txt": "02d7600aa9c11d4f2e8e38cad51bcc31605a35ba7df0bcbbdc0296f5742645ea",
+      "aster_30s/report.txt": "52a0fb322d3df7e05ac06f1bc9cdd05de6516e3208ba28064f844156e4e174eb",
+      "aster_30s/setting.txt": "4f5be0fe4ad16acb60ae7d1e38557a586593699df2584759a9375cea0a9760a6",
+      "aster_30s/console.txt": "3d214a955740e3db3494b44248bba26248e0ae1fb4e05d9bd6d0734c6b05203f",
+      "aster_30s/run.json": "db547d32011d47e3b735560a0f7721b525fb999ba59ddbb7139f2ae27ae8c074",
+      "nao/cart.txt": "182915caf4e87502155b82b5d83645693991233a57dcf370b0d0ad37f44aea4e",
+      "nao/setting.txt": "ee414fbd0a9e6350eaab7015343a7b78f2b149ffdf20e28a1d87e792eadb29f5",
+      "nao/console.txt": "87efbae208f3bb06f912721cf0cc311d700424687ee126c28b2eb5f63f19cf5f",
+      "nao/run.json": "75b56608788939cd66135d73b96089671db2dc04c6f141fa1edf1b98a2c07bb4",
+      "nao_30s/cart.txt": "44de93577f09bbf3c5d46bb4c1bf33374101c7d469a3175c9fee866b35641f01",
+      "nao_30s/setting.txt": "3ee4c66a3263e46d1d307d7a688e802eee2656860768c63c00ba8b0cf4f409ce",
+      "nao_30s/console.txt": "49aeb47e50db3229ff0db69f5b72bb0fa35aba4c0f2036887dd61841465e6562",
+      "nao_30s/run.json": "7d5d1860596a28f914e71800031514b1b8f35dac8caf0d6965601e9df736c3f6",
+      "aster/cart.txt": "5bb2e1788d5652598c495a4ac529407b921d7e1aae7613ce89dff5ff1421f6f6",
+      "aster/report.txt": "8e581a1001f10b62a729ac2531a1a60e63445350af1a7aa990d9b7d89f2476d0",
+      "aster/setting.txt": "55a20461dbd4b52ff4fb5d2040a2faca27bf4180435fd2da003ec27298b5bf21",
+      "aster/console.txt": "e09183d4b27bcff6c07a49af5a79036eb1786003caad79fef5c36af1f35c59f1",
+      "aster/run.json": "2ad8052dc80f59770480a231216ab1c55cad0dd3423684549a701fd623147ede",
+      "aster_10s/cart.txt": "43f81d7c28e31c2c1d4d474030c31ccd85ebb7874138ac7257eecc342e1cb6b6",
+      "aster_10s/report.txt": "e56089850ea1d7e98efaa4057a6345b77d8b1f9aa1c66a4008989f6167de59a5",
+      "aster_10s/setting.txt": "f6c8d66df16d979ae6adee7a7c5f047882fda6ecddff78e99c378d3cf0ba8b34",
+      "aster_10s/console.txt": "63cc0de54d7dad8a7ad1a673c29636abe6ae01c28b6c4741a430634ad730337c",
+      "aster_10s/run.json": "06d618335aa8a6085c0db1dd5b1a5772527a0975eea7a11e678d14fcb0bbdece",
+      "nao_10s/cart.txt": "f86056af518843a58ca2f0b5bd1475c5ad5a3689cfaf839ab0a03a457e739e62",
+      "nao_10s/setting.txt": "fff8ea49b6a97c3bee7e7f09af6d578631b4a66aef77676e54459117c199d55b",
+      "nao_10s/console.txt": "c0323b9c343eca2f767815dd72a63f12441649ef75e5481ab37ae5933c5ab326",
+      "nao_10s/run.json": "b7800b2d7b05ffc50881b769019168c826f169f88100cfb8d995059daf030c02"
+    }
+  },
+  "step_check": {
+    "aster_60s_vs_30s": {
+      "position_max_m": 3092.696497744082,
+      "position_final_m": 3076.9574420816034
+    },
+    "nao_60s_vs_30s": {
+      "position_max_m": 1194.2620567245835,
+      "position_final_m": 735.6435000097187
+    },
+    "aster_vs_nao_30s": {
+      "position_max_m": 101.00697101863742,
+      "position_final_m": 99.68893147567272
+    },
+    "final_difference_in_nao_RTN_m": [
+      10.623852231380397,
+      2242.1013060657733,
+      -7.844611749467049
+    ]
+  },
+  "ten_second_check": {
+    "aster_vs_nao_10s": {
+      "left": "aster_10s",
+      "right": "nao_10s",
+      "samples": 864001,
+      "position_max_m": 75.99351672442103,
+      "position_max_day": 83.70694444444445,
+      "position_final_m": 71.19552808741936,
+      "velocity_final_mps": 0.0806917112182335,
+      "max_grid_epoch_difference_s": 7.292255759239197e-05,
+      "sample_days_position_m": {
+        "1": 0.999414367669667,
+        "10": 8.11589813421951,
+        "30": 3.748433716423792,
+        "60": 36.66021906826465,
+        "100": 71.58902168203204
+      },
+      "extra_endpoint_rows": [
+        1,
+        0
+      ]
+    },
+    "aster_30s_vs_10s": {
+      "left": "aster_30s",
+      "right": "aster_10s",
+      "samples": 288001,
+      "position_max_m": 472.4342047080735,
+      "position_max_day": 99.98298611111112,
+      "position_final_m": 470.32850408922087,
+      "velocity_final_mps": 0.5367663236363428,
+      "max_grid_epoch_difference_s": 9.618233889341354e-05,
+      "sample_days_position_m": {
+        "1": 1.2631887053874098,
+        "10": 15.078163964103757,
+        "30": 60.7755912614825,
+        "60": 163.90579380292942,
+        "100": 470.3610543010945
+      },
+      "extra_endpoint_rows": [
+        1,
+        1
+      ]
+    },
+    "nao_30s_vs_10s": {
+      "left": "nao_30s",
+      "right": "nao_10s",
+      "samples": 288001,
+      "position_max_m": 501.22616751167084,
+      "position_max_day": 99.98333333333333,
+      "position_final_m": 499.02081472581216,
+      "velocity_final_mps": 0.5695115390113075,
+      "max_grid_epoch_difference_s": 0,
+      "sample_days_position_m": {
+        "1": 1.1534285812971472,
+        "10": 14.36166073583548,
+        "30": 61.10336037701132,
+        "60": 170.27215837230503,
+        "100": 499.02081472581216
+      },
+      "extra_endpoint_rows": [
+        0,
+        0
+      ]
+    }
+  },
+  "qa": {
+    "source": {
+      "source": "04_代码工作/实现观测量仿真/导师百天对照_014/plot_comparison.py",
+      "backend": "python",
+      "summary": {
+        "ready": true,
+        "strict": false,
+        "counts": {
+          "PASS": 18,
+          "WARN": 3,
+          "FAIL": 0
+        }
+      },
+      "findings": [
+        {
+          "check_id": "SOURCE-SYNTAX",
+          "level": "PASS",
+          "message": "Python source parses successfully",
+          "evidence": []
+        },
+        {
+          "check_id": "FONT-FAMILY",
+          "level": "PASS",
+          "message": "A publication-safe sans-serif family is configured",
+          "evidence": [
+            "Arial"
+          ]
+        },
+        {
+          "check_id": "FONT-SIZE",
+          "level": "PASS",
+          "message": "All detected text sizes are at least 5 pt (minimum 9 pt)",
+          "evidence": []
+        },
+        {
+          "check_id": "FONT-GLYPH-FLOOR",
+          "level": "PASS",
+          "message": "No mathtext superscript/subscript expression detected",
+          "evidence": []
+        },
+        {
+          "check_id": "LEGEND-LABEL-CASE",
+          "level": "PASS",
+          "message": "No auditable literal legend labels detected",
+          "evidence": []
+        },
+        {
+          "check_id": "COLOR-MAP",
+          "level": "PASS",
+          "message": "No rainbow/jet/hsv color mapping detected",
+          "evidence": []
+        },
+        {
+          "check_id": "EDITABLE-TEXT",
+          "level": "PASS",
+          "message": "SVG and PDF editable-text settings are configured",
+          "evidence": []
+        },
+        {
+          "check_id": "EXPORT-VECTOR",
+          "level": "PASS",
+          "message": "Both SVG and PDF exports are present",
+          "evidence": []
+        },
+        {
+          "check_id": "EXPORT-RASTER",
+          "level": "WARN",
+          "message": "PNG preview is present but no TIFF submission raster was found",
+          "evidence": []
+        },
+        {
+          "check_id": "RASTER-DPI",
+          "level": "WARN",
+          "message": "Raster export meets the 300 dpi floor but not the 600 dpi default",
+          "evidence": [
+            "450"
+          ]
+        },
+        {
+          "check_id": "FINAL-WIDTH",
+          "level": "WARN",
+          "message": "Detected width 233.7 mm is not near the common 89/183 mm defaults; verify the target journal",
+          "evidence": []
+        },
+        {
+          "check_id": "DATA-SAMPLING",
+          "level": "PASS",
+          "message": "No high-confidence row-sampling operation detected",
+          "evidence": []
+        },
+        {
+          "check_id": "DATA-EXCLUSION",
+          "level": "PASS",
+          "message": "No high-confidence missing-data exclusion detected",
+          "evidence": []
+        },
+        {
+          "check_id": "DEMO-DATA",
+          "level": "PASS",
+          "message": "No obvious simulated-data generator detected",
+          "evidence": []
+        },
+        {
+          "check_id": "LOG-GUARD",
+          "level": "PASS",
+          "message": "No logarithmic transform or axis detected",
+          "evidence": []
+        },
+        {
+          "check_id": "INTERP-MONOTONIC",
+          "level": "PASS",
+          "message": "No NumPy interpolation requiring an increasing x-grid detected",
+          "evidence": []
+        },
+        {
+          "check_id": "UNCERTAINTY-ENCODING",
+          "level": "PASS",
+          "message": "No stochastic aggregate requiring a variability audit was inferred",
+          "evidence": []
+        },
+        {
+          "check_id": "ROTATION-ANCHOR",
+          "level": "PASS",
+          "message": "No rotated Matplotlib text detected",
+          "evidence": []
+        },
+        {
+          "check_id": "ANNOTATION-WORKAROUND",
+          "level": "PASS",
+          "message": "No high-risk hard-coded label height or opaque white text mask detected",
+          "evidence": []
+        },
+        {
+          "check_id": "PANEL-ALIGNMENT-GATE",
+          "level": "PASS",
+          "message": "No statically auditable multi-panel construct detected",
+          "evidence": []
+        },
+        {
+          "check_id": "BACKEND-EXCLUSIVE",
+          "level": "PASS",
+          "message": "No obvious cross-backend plotting reference found for python",
+          "evidence": []
+        }
+      ]
+    },
+    "text": {
+      "pdf": "04_代码工作/实现观测量仿真/导师百天对照_014/figures/adams_100days_comparison.pdf",
+      "auditable": true,
+      "minimum_required_pt": 5.0,
+      "minimum_found_pt": 9.0,
+      "text_run_count": 27,
+      "below_minimum_count": 0,
+      "below_minimum": [],
+      "warnings": []
+    },
+    "collision": {
+      "pdf": "04_代码工作/实现观测量仿真/导师百天对照_014/figures/adams_100days_comparison.pdf",
+      "auditable": true,
+      "verdict": "PASS",
+      "page_count": 1,
+      "visible_text_box_count": 27,
+      "text_trace_count": 46,
+      "stroke_path_count": 30,
+      "filled_region_count": 20,
+      "image_region_count": 1,
+      "summary": {
+        "fail": 0,
+        "warn": 0,
+        "contained_fill_overlays": 0,
+        "contained_image_overlays": 0
+      },
+      "thresholds": {
+        "text_inset_pt": 0.6,
+        "min_overlap_ratio": 0.05,
+        "clipping_tolerance_pt": 0.5
+      },
+      "findings": []
+    },
+    "visual_review": "Single panel inspected: three curves, linear axes, no clipping or overlap. Release record figure, not a journal submission; TIFF and journal-width defaults do not apply."
+  },
+  "artifacts": {
+    "evidence/13_plot-adams-100days.py": "4affa5678269180973b3eb5a2efc11f3c3818228bd330c15aad73083b6b38187",
+    "figures/adams_100days_comparison.png": "ee9c5f20c9c063447fa8cbde1c01a20477699015dfc3f1dcfdb04eb4bed627aa",
+    "figures/adams_100days_comparison.pdf": "f523278f97a4c88564a81dea230da324aab31d9654c5de6eecaef659b6a0240a",
+    "figures/adams_100days_comparison.svg": "ae1271574e9d2f922f4395c9b5d2be8bbb435d3b9f6c4e3e8aae3066e6c83477"
+  }
+}

@@ -257,7 +257,7 @@ void ComputeGravityDelay(bastion::Overwatch& tracer, const std::array<double, 3>
     // 把发收位置作为三维向量使用，求两个事件之间的直线距离。
     const Eigen::Map<const Eigen::Vector3d> transmit(transmit_m.data()), receive(receive_m.data());
     const double distance = (receive - transmit).norm();
-    const double c = SPEED_OF_LIGHT_MPS;
+    const double c = constants::SPEED_OF_LIGHT_MPS;
     // 记录已经计入的天体，引力时延从零开始逐项累加。
     std::array<bool, 11> included{};
     delay_s = 0.0;
@@ -276,7 +276,7 @@ void ComputeGravityDelay(bastion::Overwatch& tracer, const std::array<double, 3>
         const Eigen::Map<const Eigen::Vector3d> position(body_positions_m[body - 1].data());
         const double radius_sum = (transmit - position).norm() + (receive - position).norm();
         // 取当前天体的 GM；太阳项在对数分子、分母中各加 2GM/c²。
-        const double gm = MAJOR_BODY_GM[body - 1];
+        const double gm = constants::DE440::GM_TDB[body - 1];
         const double correction = body == 11 ? 2.0 * gm / (c * c) : 0.0;
         const double denominator = radius_sum - distance + correction;
 
@@ -315,7 +315,7 @@ void ComputeOneWayRange(bastion::Overwatch& tracer, const StateRecord& receive,
     // 初始化本次计算记录，保存给定的真实接收事件。
     record = OneWayRangeRecord{};
     record.receive_state = receive;
-    const double c = SPEED_OF_LIGHT_MPS;
+    const double c = constants::SPEED_OF_LIGHT_MPS;
 
     // =================================== 01 准备接收事件及引力天体 ===================================
     // 查询接收时刻的地球位置，用于把接收端坐标平移到太阳系质心。

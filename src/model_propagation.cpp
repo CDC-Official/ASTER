@@ -7,6 +7,8 @@
 #include "model_propagation.hpp"
 #include <sstream>
 
+using namespace constants::Scale;
+
 /**
  * @brief 显示当前积分器的步长、误差控制与起步设置。
  * @param[in,out] tracer 记录显示过程和输出错误；已有错误时直接返回。
@@ -33,7 +35,7 @@ void OrbitPropagationSetting::Display(bastion::Overwatch& tracer, int integrator
          << std::left << std::setw(label_width) << "- Integrator" << ": " << integrator_id << " — " << name
          << '\n' << std::setw(label_width) << "  > Step mode" << ": " << (integrator_id == 101 ? "Adaptive" : "Fixed")
          << '\n' << std::setw(label_width) << (integrator_id == 101 ? "  > Initial step [s]" : "  > Step [s]")
-         << ": " << std::fixed << std::setprecision(2) << std::fabs(h0_norm * UNITTIME);
+         << ": " << std::fixed << std::setprecision(2) << std::fabs(h0_norm * UNIT_TIME_S);
 
     // Adams 的 TOL 用于 RKF78 起步及尾段；普通多步公式没有相应的单步误差估计。
     if (integrator_id == 201 || integrator_id == 202)
@@ -75,7 +77,7 @@ void OrbitPropagationSetting::Display(bastion::Overwatch& tracer, int integrator
  * @details 读取地月非球形开关及截断、日月历表模式、阻力和光压开关、sat 和密度表条件。
  * 面积乘 ae² 恢复为 m²，AMR 乘 ae²/MASS_OF_EARTH 恢复为 m²/kg。
  * 月球引力截断为 0 / 0 时注明仅考虑质点引力；缺少密度表头条件时显示 Not provided。
- * 光压使用 Cannonball 模型，当前加速度实现中地影衰减关闭。函数不修改动力学参数。
+ * 光压使用 Cannonball 模型，采用地球圆柱地影，进入阴影后光压为零。函数不修改动力学参数。
  */
 void OrbitPropagationNModel::Display(bastion::Overwatch& tracer, std::ostream& output, int precision, int label_width) const
 {
@@ -144,8 +146,8 @@ void OrbitPropagationNModel::Display(bastion::Overwatch& tracer, std::ostream& o
         }
 
         // UTF-8 的上标 ² 占两个字节、一个显示列，setw 相应多留一个字节。
-        text << '\n' << std::setw(label_width + 1) << "  > Cross-section [m²]" << ": " << sat.area_drag * ae * ae
-             << '\n' << std::setw(label_width + 1) << "  > AMR [m²/kg]" << ": " << sat.AMR_drag * ae * ae / MASS_OF_EARTH
+        text << '\n' << std::setw(label_width + 1) << "  > Cross-section [m²]" << ": " << sat.area_drag * UNIT_LENGTH_M * UNIT_LENGTH_M
+             << '\n' << std::setw(label_width + 1) << "  > AMR [m²/kg]" << ": " << sat.AMR_drag * UNIT_LENGTH_M * UNIT_LENGTH_M / UNIT_MASS_KG
              << '\n' << std::setw(label_width) << "  > Cd" << ": " << sat.Cd;
     }
 
@@ -154,10 +156,10 @@ void OrbitPropagationNModel::Display(bastion::Overwatch& tracer, std::ostream& o
 
     if (use_SRP)
     {
-        text << '\n' << std::setw(label_width + 1) << "  > Cross-section [m²]" << ": " << sat.area_SRP * ae * ae
-             << '\n' << std::setw(label_width + 1) << "  > AMR [m²/kg]" << ": " << sat.AMR_SRP * ae * ae / MASS_OF_EARTH
+        text << '\n' << std::setw(label_width + 1) << "  > Cross-section [m²]" << ": " << sat.area_SRP * UNIT_LENGTH_M * UNIT_LENGTH_M
+             << '\n' << std::setw(label_width + 1) << "  > AMR [m²/kg]" << ": " << sat.AMR_SRP * UNIT_LENGTH_M * UNIT_LENGTH_M / UNIT_MASS_KG
              << '\n' << std::setw(label_width) << "  > Reflectivity coefficient" << ": " << sat.eta_SRP
-             << '\n' << std::setw(label_width) << "  > Shadow attenuation" << ": OFF";
+             << '\n' << std::setw(label_width) << "  > Shadow attenuation" << ": ON (Earth cylindrical shadow)";
     }
 
     output << text.str() << '\n';
@@ -198,7 +200,7 @@ void OrbitPropagationSetting_EBCRS::Display(bastion::Overwatch& tracer, int inte
          << std::left << std::setw(label_width) << "- Integrator" << ": " << integrator_id << " — " << name
          << '\n' << std::setw(label_width) << "  > Step mode" << ": " << (integrator_id == 101 ? "Adaptive" : "Fixed")
          << '\n' << std::setw(label_width) << (integrator_id == 101 ? "  > Initial step [s]" : "  > Step [s]")
-         << ": " << std::fixed << std::setprecision(2) << std::fabs(h0_norm * UNITTIME);
+         << ": " << std::fixed << std::setprecision(2) << std::fabs(h0_norm * UNIT_TIME_S);
 
     // Adams 的 TOL 用于 RKF78 起步及尾段；普通多步公式没有相应的单步误差估计。
     if (integrator_id == 201 || integrator_id == 202)
@@ -242,7 +244,7 @@ void OrbitPropagationSetting_EBCRS::Display(bastion::Overwatch& tracer, int inte
  * 月球引力截断为 0 / 0 时注明仅考虑质点引力；缺少密度表头条件时显示 Not provided。
  * 日月与行星使用 JPL；摄动天体按 JPL 编号及英文名称显示，非法编号显示 Unknown。
  * 后牛顿开关对应当前 EIH 修正，使用 11 个 JPL 大天体，独立于经典行星摄动列表。
- * 光压采用 Cannonball 模型，地影衰减关闭；函数不修改动力学参数或转换轨道坐标。
+ * 光压采用 Cannonball 模型，采用地球圆柱地影，进入阴影后光压为零；函数不修改动力学参数或转换轨道坐标。
  */
 void OrbitPropagationNModel_EBCRS::Display(bastion::Overwatch& tracer, std::ostream& output, int precision, int label_width) const
 {
@@ -332,8 +334,8 @@ void OrbitPropagationNModel_EBCRS::Display(bastion::Overwatch& tracer, std::ostr
         }
 
         // UTF-8 的上标 ² 占两个字节、一个显示列，setw 相应多留一个字节。
-        text << '\n' << std::setw(label_width + 1) << "  > Cross-section [m²]" << ": " << sat.area_drag * ae * ae
-             << '\n' << std::setw(label_width + 1) << "  > AMR [m²/kg]" << ": " << sat.AMR_drag * ae * ae / MASS_OF_EARTH
+        text << '\n' << std::setw(label_width + 1) << "  > Cross-section [m²]" << ": " << sat.area_drag * UNIT_LENGTH_M * UNIT_LENGTH_M
+             << '\n' << std::setw(label_width + 1) << "  > AMR [m²/kg]" << ": " << sat.AMR_drag * UNIT_LENGTH_M * UNIT_LENGTH_M / UNIT_MASS_KG
              << '\n' << std::setw(label_width) << "  > Cd" << ": " << sat.Cd;
     }
 
@@ -342,10 +344,10 @@ void OrbitPropagationNModel_EBCRS::Display(bastion::Overwatch& tracer, std::ostr
 
     if (use_SRP)
     {
-        text << '\n' << std::setw(label_width + 1) << "  > Cross-section [m²]" << ": " << sat.area_SRP * ae * ae
-             << '\n' << std::setw(label_width + 1) << "  > AMR [m²/kg]" << ": " << sat.AMR_SRP * ae * ae / MASS_OF_EARTH
+        text << '\n' << std::setw(label_width + 1) << "  > Cross-section [m²]" << ": " << sat.area_SRP * UNIT_LENGTH_M * UNIT_LENGTH_M
+             << '\n' << std::setw(label_width + 1) << "  > AMR [m²/kg]" << ": " << sat.AMR_SRP * UNIT_LENGTH_M * UNIT_LENGTH_M / UNIT_MASS_KG
              << '\n' << std::setw(label_width) << "  > Reflectivity coefficient" << ": " << sat.eta_SRP
-             << '\n' << std::setw(label_width) << "  > Shadow attenuation" << ": OFF";
+             << '\n' << std::setw(label_width) << "  > Shadow attenuation" << ": ON (Earth cylindrical shadow)";
     }
 
     // 当前 EIH 实现只有启用开关，具体天体求和与地心相对加速度在动力学中计算。

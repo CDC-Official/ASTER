@@ -46,6 +46,9 @@
 #include <sys/resource.h>
 #endif
 
+using namespace constants::Scale;
+using constants::PI;
+
 using namespace determination;
 using namespace bastion;
 
@@ -746,14 +749,14 @@ int main(int argc, char **argv)
                 // 归一化 Keplerian 的半长轴恢复为 km，四个角度由 rad 转为 deg。
                 if (initial_is_keplerian)
                 {
-                    v[0] *= ae / 1000;
+                    v[0] *= UNIT_LENGTH_M / 1000;
 
-                    for (int j = 2; j < 6; ++j) v[j] *= 180 / pi;
+                    for (int j = 2; j < 6; ++j) v[j] *= 180 / PI;
                 }
                 else
                 {
                     // Cartesian 的位置乘 ae/1000，速度还需除以 UNITTIME，分别得到 km、km/s。
-                    for (int j = 0; j < 6; ++j) v[j] *= ae / 1000 / (j < 3 ? 1 : UNITTIME);
+                    for (int j = 0; j < 6; ++j) v[j] *= UNIT_LENGTH_M / 1000 / (j < 3 ? 1 : UNIT_TIME_S);
                 }
             }
             else if (orbit_state_units == 3)
@@ -842,7 +845,7 @@ int main(int argc, char **argv)
             job.initKep_norm.Set(v[0], v[1], v[2], v[3], v[4], v[5], false);
 
             // 将 a 从 km 转为以地球半径为尺度的归一化长度，角度从 deg 转为 rad。
-            job.initKep_norm.Normalize(tracer, ae / 1000);
+            job.initKep_norm.Normalize(tracer, UNIT_LENGTH_M / 1000);
             if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
             // 根据平近点角补齐其他近点角，然后转换为归一化的 Cartesian 位置和速度。
@@ -856,7 +859,7 @@ int main(int argc, char **argv)
         {
             // 位置和速度分别按地球半径、时间尺度归一化。
             job.initCart_norm.Set(v[0], v[1], v[2], v[3], v[4], v[5], false);
-            job.initCart_norm.Normalize(tracer, ae / 1000, UNITTIME);
+            job.initCart_norm.Normalize(tracer, UNIT_LENGTH_M / 1000, UNIT_TIME_S);
             if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
             job.initCart_norm.ToKeplerian(tracer, job.initKep_norm);
             if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
@@ -869,7 +872,7 @@ int main(int argc, char **argv)
         job.opn_setting.t0_MJD_UTC = apriori_epoch;
         job.opn_setting.t0_MJD_TT = UTC2TT(apriori_epoch);
 
-        job.opn_setting.h0_norm /= UNITTIME;
+        job.opn_setting.h0_norm /= UNIT_TIME_S;
 
         // 定轨过程中要多次传播轨道，这里先关闭传播进度条。每轮定轨的信息由后面的开关单独控制。
         job.opn_setting.display_progress = 0;
@@ -1022,9 +1025,9 @@ int main(int argc, char **argv)
         }
 
         // 质量以地球质量归一化，面积以地球半径平方归一化，供内部动力学使用。
-        model.sat.mass = mass / MASS_OF_EARTH;
-        model.sat.area_drag = drag_area / (ae * ae);
-        model.sat.area_SRP = srp_area / (ae * ae);
+        model.sat.mass = mass / UNIT_MASS_KG;
+        model.sat.area_drag = drag_area / (UNIT_LENGTH_M * UNIT_LENGTH_M);
+        model.sat.area_SRP = srp_area / (UNIT_LENGTH_M * UNIT_LENGTH_M);
 
         // 分别计算阻力和光压使用的归一化面积质量比。
         model.sat.AMR_drag = model.sat.area_drag / model.sat.mass;
@@ -1055,13 +1058,13 @@ int main(int argc, char **argv)
             // SI 提供有效阻力 AMR 时，只更新阻力面积质量比及相应面积。
             if (std::isfinite(apriori_drag_amr_si))
             {
-                model.sat.AMR_drag = apriori_drag_amr_si * MASS_OF_EARTH / (ae * ae);
+                model.sat.AMR_drag = apriori_drag_amr_si * UNIT_MASS_KG / (UNIT_LENGTH_M * UNIT_LENGTH_M);
                 model.sat.area_drag = model.sat.AMR_drag * model.sat.mass;
             }
             // SI 提供有效光压 AMR 时，只更新光压面积质量比及相应面积。
             if (std::isfinite(apriori_srp_amr_si))
             {
-                model.sat.AMR_SRP = apriori_srp_amr_si * MASS_OF_EARTH / (ae * ae);
+                model.sat.AMR_SRP = apriori_srp_amr_si * UNIT_MASS_KG / (UNIT_LENGTH_M * UNIT_LENGTH_M);
                 model.sat.area_SRP = model.sat.AMR_SRP * model.sat.mass;
             }
             tracer.LogEvent(__FILE__, __func__, __LINE__,
@@ -1154,8 +1157,8 @@ int main(int argc, char **argv)
                 for (int j = 0; j < 3; ++j) obs.value[j] = record.position_gcrs_m[j];
             else
             {
-                obs.value[0] = record.ra_deg * pi / 180;
-                obs.value[1] = record.dec_deg * pi / 180;
+                obs.value[0] = record.ra_deg * PI / 180;
+                obs.value[1] = record.dec_deg * PI / 180;
 
                 // 天基测角同时复制该条记录提供的平台 GCRS 位置，单位为 m。
                 if (record.type == 6)
@@ -1167,7 +1170,7 @@ int main(int argc, char **argv)
         }
 
         // 准备加权计算所需的观测标准差：测角标准差从 arcsec 转为 rad，位置标准差保持为 m。
-        sigma_angle = sigma_angle * pi / (180 * 3600);
+        sigma_angle = sigma_angle * PI / (180 * 3600);
 
         // 加权时需要用残差除以标准差，因此标准差必须大于零。
         if (sigma_angle <= 0 || sigma_xyz <= 0)
@@ -1223,10 +1226,10 @@ int main(int argc, char **argv)
                 {
                     // 纬度、经度(deg)、高度(m)转为归一化 ITRS，再恢复为 BODN 使用的 m。
                     frame::Geodetic site_geodetic(observer.geodetic_height_m, observer.geodetic_lambda_deg, observer.geodetic_phi_deg, false);
-                    site_geodetic.Normalize(tracer, ae);
+                    site_geodetic.Normalize(tracer, UNIT_LENGTH_M);
                     frame::ITRS site_itrs;
                     site_geodetic.ToITRS(tracer, site_itrs);
-                    site_itrs.Restore(tracer, ae);
+                    site_itrs.Restore(tracer, UNIT_LENGTH_M);
 
                     // 将恢复为 m 的 ITRS 坐标导出为三维向量。
                     double position_itrs_m_array[3];
@@ -1298,10 +1301,10 @@ int main(int argc, char **argv)
         const double fit_epoch = observations.front().mjd_utc;
 
         // 如果两个历元相差超过 10 微秒，就先传播初轨；差值更小时，直接使用给定初态。
-        if (std::abs(fit_epoch - apriori_epoch) * 86400 > 1e-5)
+        if (std::abs(fit_epoch - apriori_epoch) * constants::SECONDS_PER_DAY > 1e-5)
         {
             // 先把两个历元转为 TT，再将时间差归一化。正值表示向后续时刻传播，负值表示向更早时刻传播。
-            job.opn_setting.duration_norm = (UTC2TT(fit_epoch) - UTC2TT(apriori_epoch)) * 86400 / UNITTIME;
+            job.opn_setting.duration_norm = (UTC2TT(fit_epoch) - UTC2TT(apriori_epoch)) * constants::SECONDS_PER_DAY / UNIT_TIME_S;
 
             // 用 times 和 states 接收传播得到的时间节点与 NSG2 状态，随后取最后一个状态。
             std::vector<double> times;
@@ -1360,8 +1363,8 @@ int main(int argc, char **argv)
 
         for (int j = 0; j < 6; ++j)
         {
-            prior_cart_display[j] = prior_cart[j] * ae / 1000.0 / (j < 3 ? 1.0 : UNITTIME);
-            prior_kep_display[j] = prior_kep[j] * (j == 0 ? ae / 1000.0 : j == 1 ? 1.0 : 180.0 / pi);
+            prior_cart_display[j] = prior_cart[j] * UNIT_LENGTH_M / 1000.0 / (j < 3 ? 1.0 : UNIT_TIME_S);
+            prior_kep_display[j] = prior_kep[j] * (j == 0 ? UNIT_LENGTH_M / 1000.0 : j == 1 ? 1.0 : 180.0 / PI);
         }
 
         // General settings 保留本次输入的参考历元及初态；每种状态两行、每行三个分量。
@@ -1410,7 +1413,7 @@ int main(int argc, char **argv)
               << std::left << std::setw(label_width) << "- First / Last observation [UTC]" << ": "
               << std::fixed << std::setprecision(12) << fit_epoch << " / " << observations.back().mjd_utc
               << '\n' << std::setw(label_width) << "- Arc span [s]" << ": " << std::setprecision(2)
-              << (observations.back().mjd_utc - fit_epoch) * 86400
+              << (observations.back().mjd_utc - fit_epoch) * constants::SECONDS_PER_DAY
               << '\n' << std::setw(label_width) << "- Unique epochs" << ": " << observation_epochs.size()
               << "\n\n" << std::setw(label_width) << "- Observers" << ": " << observer_ids.size() << " (";
         bool first_observer = true;
@@ -1595,7 +1598,7 @@ int main(int argc, char **argv)
         orbit::Keplerian final_kep;
         result.fitted_cart_norm.ToKeplerian(tracer, final_kep);
         if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
-        final_kep.Restore(tracer, ae / 1000);
+        final_kep.Restore(tracer, UNIT_LENGTH_M / 1000);
         if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
         // 写入报告第 01、02 节；沿用已准备的后验 Keplerian，不为显示重复转换。
@@ -1608,12 +1611,12 @@ int main(int argc, char **argv)
                << "\n" << report_rule << "\n03  MODELS AND SOLVER SETTINGS\n" << table_rule
                << "\n[Computation settings]\nSTM method: " << setting.stm_method
                << "\nIntegrator: " << setting.integrator_id
-               << "\nStepsize (s): " << job.opn_setting.h0_norm * UNITTIME
+               << "\nStepsize (s): " << job.opn_setting.h0_norm * UNIT_TIME_S
                << "\nRKF maxTE (normalized): " << job.opn_setting.rkf.maxTE_norm
                << "\nAdams nodes: " << job.opn_setting.adams.steps
 
                // 测角标准差显示为 arcsec，位置标准差显示为 m；随后列出收敛与剔除门限。
-               << "\nAngular sigma (arcsec): " << sigma_angle * 180 * 3600 / pi
+               << "\nAngular sigma (arcsec): " << sigma_angle * 180 * 3600 / PI
                << "\nXYZ sigma (m): " << sigma_xyz
                << "\nConvergence: standardized RMS <= " << setting.rms_tolerance
                << " OR " << (setting.drms_relative ? "relative DRMS" : "absolute DRMS") << " <= " << setting.drms_tolerance
@@ -1625,7 +1628,7 @@ int main(int argc, char **argv)
                << "\nSun/Moon modes (0 off, 1 JPL, 2 analytical): " << model.solar_gravity_config << ' '
                << model.lunar_gravity_config << "\nDrag/SRP enabled: " << model.use_drag << ' ' << model.use_SRP
                << "\nMass (kg), prior drag/SRP area (m^2), Cd, eta: " << mass << ' '
-               << model.sat.area_drag * ae * ae << ' ' << model.sat.area_SRP * ae * ae
+               << model.sat.area_drag * UNIT_LENGTH_M * UNIT_LENGTH_M << ' ' << model.sat.area_SRP * UNIT_LENGTH_M * UNIT_LENGTH_M
                << ' ' << model.sat.Cd << ' ' << model.sat.eta_SRP
 
                // 解析 STM 的摄动开关仅在 stm_method=1 时参与偏导计算。
@@ -1649,7 +1652,7 @@ int main(int argc, char **argv)
         if (result.estimated_parameter)
         {
             const bool drag = result.estimated_parameter == 1;
-            const double amr_norm = result.parameter_amr_si * MASS_OF_EARTH / (ae * ae);
+            const double amr_norm = result.parameter_amr_si * UNIT_MASS_KG / (UNIT_LENGTH_M * UNIT_LENGTH_M);
             // 待估参数为阻力 AMR 时，同步输出任务副本的阻力面质比和面积。
             if (drag)
             {
@@ -1664,7 +1667,7 @@ int main(int argc, char **argv)
             }
 
             // 将面质比换算为报告中的阻力系数或光压加速度，并用相同因子换算形式标准差。
-            const double factor = drag ? model.sat.Cd * job.refDensity.rho * MASS_OF_EARTH / (ae * ae * ae) :
+            const double factor = drag ? model.sat.Cd * job.refDensity.rho * UNIT_MASS_KG / (UNIT_LENGTH_M * UNIT_LENGTH_M * UNIT_LENGTH_M) :
                                          (1 + model.sat.eta_SRP) * 4.5605e-6;
 
             // 同时列出 AMR 的先验、后验和形式标准差，单位均为 m²/kg。
@@ -1748,7 +1751,7 @@ int main(int argc, char **argv)
             }
 
             // 计算结果保持 rad/m，显示测角 RMS 时换算为 arcsec。
-            const double scale = xyz ? 1 : 180 * 3600 / pi;
+            const double scale = xyz ? 1 : 180 * 3600 / PI;
             const char* unit = xyz ? "m" : "arcsec";
 
             // 先写当前组的编号、类型与记录计数，再填写各分量 RMS。
@@ -1850,7 +1853,7 @@ int main(int argc, char **argv)
 
                 if (used > 0)
                 {
-                    const double scale = components == 2 ? 180.0 * 3600.0 / pi : 1.0;
+                    const double scale = components == 2 ? 180.0 * 3600.0 / PI : 1.0;
                     residual_summary << std::defaultfloat << std::setprecision(10) << std::sqrt(residual_square_sum[type][j] / used) * scale;
                 }
                 else
@@ -1886,7 +1889,7 @@ int main(int argc, char **argv)
                     }
                     else
                     {
-                        residual_file << ' ' << std::setw(24) << result.residuals[i][component] * (xyz ? 1 / ae : 1);
+                        residual_file << ' ' << std::setw(24) << result.residuals[i][component] * (xyz ? 1 / UNIT_LENGTH_M : 1);
                     }
                 }
 
@@ -1912,7 +1915,7 @@ int main(int argc, char **argv)
             {
                 const double first_epoch = observations.front().mjd_utc;
                 const double last_epoch = observations.back().mjd_utc;
-                const double span = (last_epoch - first_epoch) * 86400;
+                const double span = (last_epoch - first_epoch) * constants::SECONDS_PER_DAY;
 
                 // 采样区间数超过一千万时要求增大间隔。
                 if (span / ephemeris_interval > 10000000)
@@ -1926,7 +1929,7 @@ int main(int argc, char **argv)
 
                 for (std::size_t i = 1; i * ephemeris_interval < span; ++i)
                 {
-                    const double epoch = first_epoch + i * ephemeris_interval / 86400;
+                    const double epoch = first_epoch + i * ephemeris_interval / constants::SECONDS_PER_DAY;
 
                     // 到达终点时停止生成内部点，终点在循环后单独补入。
                     if (epoch >= last_epoch) break;
@@ -1960,7 +1963,7 @@ int main(int argc, char **argv)
                 if (eph.is_open())
                 {
                     orbit::Cartesian cart = output_cart[i];
-                    cart.Restore(tracer, ae / 1000, UNITTIME);
+                    cart.Restore(tracer, UNIT_LENGTH_M / 1000, UNIT_TIME_S);
                     if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
                     // Cartesian 行先写序号和 UTC MJD，再按 XYZ、VXYZ 顺序写六个物理量。
@@ -1991,7 +1994,7 @@ int main(int argc, char **argv)
                     }
 
                     // 恢复 NSG2 的半长轴和平均经度单位，保留共享的归一化节点不变。
-                    elements.Restore(tracer, ae / 1000);
+                    elements.Restore(tracer, UNIT_LENGTH_M / 1000);
                     if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
                     // 将平均经度归入 [0,360) deg，统一各星历行中的周期角表示。
@@ -2018,7 +2021,7 @@ int main(int argc, char **argv)
                     if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
                     // Keplerian 的半长轴恢复为 km，倾角、升交点、近地点角和平近点角恢复为 deg。
-                    elements.Restore(tracer, ae / 1000);
+                    elements.Restore(tracer, UNIT_LENGTH_M / 1000);
                     if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
                     // 按目标号、UTC MJD 和六个 Kepler 根数写出，所有表示使用相同采样历元。
@@ -2048,7 +2051,7 @@ int main(int argc, char **argv)
         {
             // 后验状态与输入先验采用同一 UTC 历元，轨道文件使用 km、km/s、deg。
             orbit::Cartesian output_cart = result.fitted_cart_norm;
-            output_cart.Restore(tracer, ae / 1000, UNITTIME);
+            output_cart.Restore(tracer, UNIT_LENGTH_M / 1000, UNIT_TIME_S);
             if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
             // 导出两种状态表示的六个分量，准备写入同一份 SimpleInput 轨道文件。
@@ -2099,7 +2102,7 @@ int main(int argc, char **argv)
             // 保存实际启用力项的后验面质比，包括固定的力参数，单位 m²/kg。
             if (model.use_drag)
             {
-                const double drag_amr_si = posterior.opn_model.sat.AMR_drag * ae * ae / MASS_OF_EARTH;
+                const double drag_amr_si = posterior.opn_model.sat.AMR_drag * UNIT_LENGTH_M * UNIT_LENGTH_M / UNIT_MASS_KG;
 
                 if (std::isfinite(drag_amr_si)) orbit_solution << "\ndrag_amr_m2_kg = " << drag_amr_si;
             }
@@ -2107,7 +2110,7 @@ int main(int argc, char **argv)
             // 光压面质比独立写出；启用但未估计时保存设置中的固定值。
             if (model.use_SRP)
             {
-                const double srp_amr_si = posterior.opn_model.sat.AMR_SRP * ae * ae / MASS_OF_EARTH;
+                const double srp_amr_si = posterior.opn_model.sat.AMR_SRP * UNIT_LENGTH_M * UNIT_LENGTH_M / UNIT_MASS_KG;
 
                 if (std::isfinite(srp_amr_si)) orbit_solution << "\nsrp_amr_m2_kg = " << srp_amr_si;
             }
@@ -2245,7 +2248,7 @@ int main(int argc, char **argv)
 
         for (int j = 0; j < 6; ++j)
         {
-            const double delta = (final[j] - prior_cart[j]) * ae / (j < 3 ? 1 : UNITTIME);
+            const double delta = (final[j] - prior_cart[j]) * UNIT_LENGTH_M / (j < 3 ? 1 : UNIT_TIME_S);
 
             if (j < 3)
             {

@@ -4,22 +4,26 @@
  */
 #pragma once
 #include "orbit_basic.hpp"
+#include "data_gravityfield.hpp"
+#include "model_ephemeris_analytic.hpp"
 
 namespace determination
 {
 struct AnalyticStmSetting
 {
-    // 导师解析近似：二体 + J2 长期项 + 日月平均项；不等于完整动力学变分方程。
-    // 默认仅二体；与导师默认对比时应明确打开两项，不能暗中跟随力模型。
+    // 二体、J2 长期项和日月平均项分别由设置启用。
     bool use_J2 = false, use_lunisolar = false;
-    // j2 是无量纲的地球 J2 系数，仅在启用 J2 长期项时使用。
-    double j2 = 0.00108263;
-    // 名称沿用来源公式；实际保存日月 GM 除以地球 GE 的比值，不是以 kg 表示的质量。
-    double lunar_mass = MOON_EARTH_MASS_RATIO, solar_mass = SUN_EARTH_MASS_RATIO;
-    // 平均距离除以地球半径 ae，成为归一化长度；与上面的 GM 比值组成 GM/r³ 强度。
-    double lunar_distance = 384747981.0 / ae, solar_distance = 1.495980225898274e11 / ae;
-    // 这里保存日月轨道倾角的正弦，不是角度；作为平均长期项的固定近似，不随历元更新。
-    double lunar_sin_i = 0.39777697, solar_sin_i = 0.39777697;
+
+    // J2 势项在程序尺度下的强度，包含配套 GM 比和参考半径平方比。
+    double j2 = constants::GGM03C::NORMALIZED_J2;
+
+    // 日月 GM 与距离都换算到积分尺度，组成平均项中的 GM/r³。
+    double lunar_mass = constants::Scale::NORMALIZED_MOON_GM_TT, solar_mass = constants::Scale::NORMALIZED_SUN_GM_TT;
+    double lunar_distance = constants::MeanOrbit::LUNAR_SEMIMAJOR_AXIS / constants::Scale::UNIT_LENGTH_M;
+    double solar_distance = constants::MeanOrbit::SOLAR_SEMIMAJOR_AXIS / constants::Scale::UNIT_LENGTH_M;
+
+    // 此平均近似将日月轨道面取为平黄道面，倾角采用同一个 J2000 平黄赤交角。
+    double lunar_sin_i = sin(constants::MeanOrbit::OBLIQUITY), solar_sin_i = sin(constants::MeanOrbit::OBLIQUITY);
 };
 
 StateMatrix AnalyticStmNSG2(const StateVector &state, double elapsed_norm, const AnalyticStmSetting &setting);

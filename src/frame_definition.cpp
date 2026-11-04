@@ -131,13 +131,13 @@ void frame::Geodetic::ToITRS(Overwatch& tracer, frame::ITRS& itrs_position) cons
 	}
 	else
 	{
-		// 以 constants 中现有常量为参考椭球，将大地经纬高变为 ITRS XYZ。
+		// 以 WGS84 参考椭球将测站的大地经纬高转换为 ITRS XYZ。
 		// height 和输出 XYZ 均以 ae 归一化，lambda、phi 为 rad；phi 是大地纬度。
 		double height = m_coord[0], lambda = m_coord[1], phi = m_coord[2];
-		double N = pow(1 - E_SQUARED * pow(sin(phi), 2), -0.5);    // N 为以 ae 归一化的卯酉圈曲率半径。
+		double N = constants::Wgs84::EQUATORIAL_RADIUS / constants::Scale::UNIT_LENGTH_M * pow(1 - constants::Wgs84::ECCENTRICITY_SQUARED * pow(sin(phi), 2), -0.5);    // N 为以 ae 归一化的卯酉圈曲率半径。
 		double X = (N + height) * cos(phi) * cos(lambda);
 		double Y = (N + height) * cos(phi) * sin(lambda);
-		double Z = (N * (1 - E_SQUARED) + height) * sin(phi);
+		double Z = (N * (1 - constants::Wgs84::ECCENTRICITY_SQUARED) + height) * sin(phi);
 
 		itrs_position.Set(X, Y, Z, true);
 	}
@@ -303,7 +303,7 @@ void frame::ITRS::ToGeodetic(Overwatch& tracer, frame::Geodetic& geodetic_positi
 		// p 是位置到地球自转轴的距离，以 ae 归一化。
 		double p = sqrt(X * X + Y * Y);
 		// 用椭球偏心率构造大地纬度的初始估计，再迭代求解。
-		double theta = atan2(Z, p * (1 - E_SQUARED));
+		double theta = atan2(Z, p * (1 - constants::Wgs84::ECCENTRICITY_SQUARED));
 		// phi 为大地纬度；每次按当前 phi 更新曲率半径 N。
 		double sin_phi, N;
 		double phi = theta;
@@ -311,9 +311,9 @@ void frame::ITRS::ToGeodetic(Overwatch& tracer, frame::Geodetic& geodetic_positi
 		while (true)
 		{
 			sin_phi = sin(phi);
-			N = 1.0 / sqrt(1 - E_SQUARED * sin_phi * sin_phi);  // 卯酉圈曲率半径，以 ae 归一化。
+			N = constants::Wgs84::EQUATORIAL_RADIUS / constants::Scale::UNIT_LENGTH_M / sqrt(1 - constants::Wgs84::ECCENTRICITY_SQUARED * sin_phi * sin_phi);  // 卯酉圈曲率半径，以 ae 归一化。
 
-			double phi_next = atan2(Z + E_SQUARED * N * sin_phi, p);
+			double phi_next = atan2(Z + constants::Wgs84::ECCENTRICITY_SQUARED * N * sin_phi, p);
 			if (fabs(phi_next - phi) < 1e-14)
 			{  // 收敛条件
 				break;

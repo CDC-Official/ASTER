@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <limits>
 
+using namespace constants::Conversion;
+
 // RKF78 是嵌入式单步法：在一个步长内依次计算 13 个阶段的状态导数，
 // 再用不同权重组合出七阶、八阶近似，以两者之差估计本步的局部截断误差 TE。
 // 自适应模式不满足容差就将步长减半重算；定步长模式仍计算 TE，但超限只警告。

@@ -7,6 +7,8 @@
 #include "accel_complete.hpp"
 #include "core_propagation.hpp"//hpp中向前声明OrbitPropagationJob结构体，此处需要引用所在头文件补充其定义
 
+using namespace constants::Scale;
+
 namespace
 {
 	constexpr int PN_BODY_COUNT = 11;
@@ -77,12 +79,12 @@ namespace
 				const double dr3 = dr * dr * dr;
 
 				// 经典牛顿加速度：a_i += -mu_j * (r_i - r_j) / |r_i - r_j|^3。
-				body_acc_norm[i][0] -= MAJOR_BODY_GM_NORMALIZED[j] * dx / dr3;
-				body_acc_norm[i][1] -= MAJOR_BODY_GM_NORMALIZED[j] * dy / dr3;
-				body_acc_norm[i][2] -= MAJOR_BODY_GM_NORMALIZED[j] * dz / dr3;
+				body_acc_norm[i][0] -= NORMALIZED_BODY_GM_TDB[j] * dx / dr3;
+				body_acc_norm[i][1] -= NORMALIZED_BODY_GM_TDB[j] * dy / dr3;
+				body_acc_norm[i][2] -= NORMALIZED_BODY_GM_TDB[j] * dz / dr3;
 
 				// EIH 公式中的势函数求和项 sum(mu_j / r_ij)。
-				body_potential_norm[i] += MAJOR_BODY_GM_NORMALIZED[j] / dr;
+				body_potential_norm[i] += NORMALIZED_BODY_GM_TDB[j] / dr;
 			}
 		}
 	}
@@ -128,7 +130,7 @@ namespace
 		double spacecraft_potential_norm = 0.0;
 		for (int j = 0; j < PN_BODY_COUNT; ++j)
 		{
-			spacecraft_potential_norm += MAJOR_BODY_GM_NORMALIZED[j] / relative_distance[j];
+			spacecraft_potential_norm += NORMALIZED_BODY_GM_TDB[j] / relative_distance[j];
 		}
 
 		// v^2，注意这是卫星 BCRS 速度平方，不是希腊字母 nu。
@@ -179,17 +181,17 @@ namespace
 				4.0 * vvi -
 				1.5 * rvi * rvi -
 				0.5 * rai;
-			temp1 = -MAJOR_BODY_GM_NORMALIZED[i] * temp1 / dr3 / cl2;
+			temp1 = -NORMALIZED_BODY_GM_TDB[i] * temp1 / dr3 / cl2;
 
 			// 第二组项：乘在相对速度 (v-v_i) 前面的系数。
 			const double sum3 =
 				(4.0 * target_bcrs_state_norm[3] - 3.0 * major_body_bcrs_state_norm[i][3]) * relative_state[i][0] +
 				(4.0 * target_bcrs_state_norm[4] - 3.0 * major_body_bcrs_state_norm[i][4]) * relative_state[i][1] +
 				(4.0 * target_bcrs_state_norm[5] - 3.0 * major_body_bcrs_state_norm[i][5]) * relative_state[i][2];
-			const double temp2 = MAJOR_BODY_GM_NORMALIZED[i] * sum3 / dr3 / cl2;
+			const double temp2 = NORMALIZED_BODY_GM_TDB[i] * sum3 / dr3 / cl2;
 
 			// 第三组项：乘在大天体牛顿加速度 ddot(r_i) 前面的系数。
-			const double temp3 = 3.5 * MAJOR_BODY_GM_NORMALIZED[i] / dr / cl2;
+			const double temp3 = 3.5 * NORMALIZED_BODY_GM_TDB[i] / dr / cl2;
 
 			fpn_bcrs_norm[0] += temp1 * relative_state[i][0] + temp2 * relative_state[i][3] + temp3 * body_acc_norm[i][0];
 			fpn_bcrs_norm[1] += temp1 * relative_state[i][1] + temp2 * relative_state[i][4] + temp3 * body_acc_norm[i][1];
@@ -246,7 +248,7 @@ namespace
 		for (int j = 0; j < PN_BODY_COUNT; ++j)
 		{
 			if (j == target_body_index) continue;
-			target_potential_norm += MAJOR_BODY_GM_NORMALIZED[j] / relative_distance[j];
+			target_potential_norm += NORMALIZED_BODY_GM_TDB[j] / relative_distance[j];
 		}
 
 		fpn_bcrs_norm[0] = 0.0;
@@ -288,14 +290,14 @@ namespace
 				4.0 * vvi -
 				1.5 * rvi * rvi -
 				0.5 * rai;
-			temp1 = -MAJOR_BODY_GM_NORMALIZED[i] * temp1 / dr3 / cl2;
+			temp1 = -NORMALIZED_BODY_GM_TDB[i] * temp1 / dr3 / cl2;
 
 			const double sum3 =
 				(4.0 * major_body_bcrs_state_norm[target_body_index][3] - 3.0 * major_body_bcrs_state_norm[i][3]) * relative_state[i][0] +
 				(4.0 * major_body_bcrs_state_norm[target_body_index][4] - 3.0 * major_body_bcrs_state_norm[i][4]) * relative_state[i][1] +
 				(4.0 * major_body_bcrs_state_norm[target_body_index][5] - 3.0 * major_body_bcrs_state_norm[i][5]) * relative_state[i][2];
-			const double temp2 = MAJOR_BODY_GM_NORMALIZED[i] * sum3 / dr3 / cl2;
-			const double temp3 = 3.5 * MAJOR_BODY_GM_NORMALIZED[i] / dr / cl2;
+			const double temp2 = NORMALIZED_BODY_GM_TDB[i] * sum3 / dr3 / cl2;
+			const double temp3 = 3.5 * NORMALIZED_BODY_GM_TDB[i] / dr / cl2;
 
 			fpn_bcrs_norm[0] += temp1 * relative_state[i][0] + temp2 * relative_state[i][3] + temp3 * body_acc_norm[i][0];
 			fpn_bcrs_norm[1] += temp1 * relative_state[i][1] + temp2 * relative_state[i][4] + temp3 * body_acc_norm[i][1];
@@ -351,7 +353,7 @@ void PostNewtonian_EIH_EBCRS(bastion::Overwatch& tracer,
 	double fpn_earth_bcrs_norm[3] = {0.0};
 
 	// 归一化光速 c_norm = c / (ae / UNITTIME)。
-	const double normalized_light_speed = SPEED_OF_LIGHT_MPS / NORMALIZED_VELOCITY_TO_MPS;
+	const double normalized_light_speed = constants::SPEED_OF_LIGHT_MPS / constants::Conversion::NORMALIZED_VELOCITY_TO_MPS;
 
 	// 正常的 JPL 星历不可能让两个大天体位置完全重合；如果出现这种情况，通常意味着输入数组没有正确填充。
 	if (HasInvalidMajorBodyDistance(major_body_bcrs_state_norm))
@@ -386,38 +388,19 @@ void PostNewtonian_EIH_EBCRS(bastion::Overwatch& tracer,
 	tracer.CheckOut(__func__);
 }
 
+/**
+ * @brief 计算 GCRS/TT 下 NonSingular2 状态的动力学右函数。
+ * @param[in,out] tracer 记录函数调用和模型计算中的错误。
+ * @param[in] thisjob 提供摄动开关、EOP、大气参考参数和卫星质量、面积、光学及阻力参数。
+ * @param[in] MJD_TT 当前右函数评估点的 TT 时刻，单位 MJD，由积分器传入。
+ * @param[in] n 状态维数，当前使用 6 维状态。
+ * @param[in] x 状态 [a,xi,eta,h,k,lambda]；a 以 Scale::UNIT_LENGTH_M 归一化，lambda 单位 rad，其余分量无量纲。
+ * @param[out] f 六维状态对归一化时间的导数，时间尺度为 Scale::UNIT_TIME_S。
+ * @details 将状态转为 Cartesian 后求各项摄动，投影到 RTN，再通过高斯行星方程得到根数导数。
+ *          月球非球形项采用卫星处与地心处的加速度之差；近地 JPL 查询以 TT 近似 TDB。
+ */
 void Acceleration_NSG2(bastion::Overwatch& tracer, const OrbitPropagationJob& thisjob, const double MJD_TT, int n, const double* x, double* f)
 {
-	/*
-	 * 函数用途：
-	 *   计算 GCRS/TT 框架下 NonSingular2 状态量的右函数 f = dX/dt。
-	 *   输入 x 是当前评估时刻的 6 维归一化 NonSingular2 状态，输出 f 是同一套变量的归一化导数。
-	 *   本函数本身不负责推进时间，也不关心调用者使用的是 RKF78、固定步长积分器还是单点动力学检查。
-	 *
-	 * 时间含义：
-	 *   MJD_TT 是当前右函数评估点的时刻，单位为 MJD(TT)。
-	 *   如果本函数由 RKF78 调用，那么这个时刻应当已经由积分器根据 Butcher 表计算好：
-	 *       MJD_TT = 当前单步起点 + 当前 stage 时间偏移
-	 *   因此，这里不再传入 t0_TT 和 dt_norm，也不在函数内部拼接中间时刻。
-	 *
-	 * 状态量 x 的含义：
-	 *   x 不是全局初始状态，也不一定是当前积分步起点状态。
-	 *   对 RKF78 来说，x 是当前 stage 递推出来的中间状态。
-	 *   本函数先把 NonSingular2 转换为 Cartesian，用 Cartesian 状态计算各种摄动加速度，
-	 *   再把总摄动加速度投影到 RTN/STW 坐标系，并通过高斯行星方程转换为 NonSingular2 导数。
-	 *
-	 * 动力学项：
-	 *   当前实现可按 thisjob.opn_model 的开关加入地球非球形引力、日月第三体、月球非球形引力、
-	 *   光压和大气阻力。地球姿态、地固系转换和大气相关模型通过 MJD_TT -> UTC/UT1 的时间链获取 EOP。
-	 *
-	 * 参数说明：
-	 *   tracer   运行日志和错误状态管理器。
-	 *   thisjob  GCRS 轨道预报任务设置，包括力模型、EOP、卫星参数、大气数据等。
-	 *   MJD_TT   当前评估点的 MJD(TT)。
-	 *   n        状态维数，目前应为 6，暂未实际使用。
-	 *   x        当前评估点的 6 维归一化 NonSingular2 状态。
-	 *   f        输出的 6 维归一化 NonSingular2 状态导数。
-	 */
 
 	tracer.CheckIn(__FILE__, __func__, __LINE__);
 
@@ -507,22 +490,22 @@ void Acceleration_NSG2(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 	if (thisjob.opn_model.solar_gravity_config == SOLAR_GRAVITY_JPL ||
 		thisjob.opn_model.solar_gravity_config == SOLAR_GRAVITY_ANALYTICAL)//1 调用数值历表 2分析
 	{
-		Thirdbody_Gravity_Acceleration(axyz_sunGravity, cart_array, rv_sun, SUN_EARTH_MASS_RATIO);
+		Thirdbody_Gravity_Acceleration(axyz_sunGravity, cart_array, rv_sun, NORMALIZED_SUN_GM_TT);
 	}
 
 	// 计算第三体摄动，月亮
 	if (thisjob.opn_model.lunar_gravity_config == LUNAR_GRAVITY_JPL)//1 调用数值历表
 	{
 		a = Get_JPLEPH(MJDs_t.TT, 10, 3, rv_moon);
-		Thirdbody_Gravity_Acceleration(axyz_moonGravity, cart_array, rv_moon, MOON_EARTH_MASS_RATIO);
+		Thirdbody_Gravity_Acceleration(axyz_moonGravity, cart_array, rv_moon, NORMALIZED_MOON_GM_TT);
 	}
 	if (thisjob.opn_model.lunar_gravity_config == LUNAR_GRAVITY_ANALYTICAL)//2 调用分析历表
 	{
 		Cart_MeanMoon(MJDs_t.UT1, rv_moon);
-		Thirdbody_Gravity_Acceleration(axyz_moonGravity, cart_array, rv_moon, MOON_EARTH_MASS_RATIO);
+		Thirdbody_Gravity_Acceleration(axyz_moonGravity, cart_array, rv_moon, NORMALIZED_MOON_GM_TT);
 	}
 
-	// 260210 新增计算月球非球形引力，必须要在调用数值历表的前提下才可以，因为月球天平动的欧拉角需要从JPL数值历表中读.必须要在外部确保加载了
+	// 月球非球形摄动采用卫星处与地心处的加速度之差，月球位置和天平动取自 JPL 历表。
 	if (thisjob.opn_model.use_lunar_NSG)
 	{
 		if (thisjob.opn_model.lunar_gravity_config != LUNAR_GRAVITY_JPL)
@@ -549,25 +532,39 @@ void Acceleration_NSG2(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 			// 第二步，计算卫星在月心固连系下的坐标，需要用到月球天平动的欧拉角，单位仍然是地球归一化
 			double Omega_p = 0, i_s = 0, Lambda = 0;//月球天平动的三个欧拉角，单位为弧度
 			// 按理来说应该传入TDB 偷个懒只传TT 差别不大
-			int ccc = Get_Libration(MJDs_t.TT, Omega_p, i_s, Lambda);
+			a = Get_Libration(MJDs_t.TT, Omega_p, i_s, Lambda);
 			Matrix3d moon_inertial_to_fixed_emat = Rz(Lambda) * Rx(i_s) * Rz(Omega_p);//月心惯性系到月心固连系的旋转矩阵
 			Vector3d r_moon_fixed_earth_norm = moon_inertial_to_fixed_emat * r_moon_inertial_earth_norm;
 
 			// 第三步，计算月球非球形引力加速度，得到月心固连系下的加速度，单位是月球归一化
 			//卫星在月心固连系下的坐标，单位是月球归一化
-			double r_moon_fixed_moon_norm[3] = {r_moon_fixed_earth_norm[0] * ae / moon_gravity_field.R_ref,
-												r_moon_fixed_earth_norm[1] * ae / moon_gravity_field.R_ref,
-												r_moon_fixed_earth_norm[2] * ae / moon_gravity_field.R_ref};
+			double r_moon_fixed_moon_norm[3] = {r_moon_fixed_earth_norm[0] * UNIT_LENGTH_M / moon_gravity_field.R_ref,
+												r_moon_fixed_earth_norm[1] * UNIT_LENGTH_M / moon_gravity_field.R_ref,
+												r_moon_fixed_earth_norm[2] * UNIT_LENGTH_M / moon_gravity_field.R_ref};
 
 			double a_nsg_moon_fixed_moon_norm[3] = {0};
 			Lunar_Nonspherical_Gravitational_Acceleration(a_nsg_moon_fixed_moon_norm, r_moon_fixed_moon_norm, thisjob.opn_model.lunar_zonal_order, thisjob.opn_model.lunar_tesseral_degree);
 
-			// 第四步，把月固系下的月球归一化加速度转换回地心惯性系下的加速度，单位是地球归一化（加速度不涉及平移，旋转即可）
-			Vector3d a_nsg_moon_fixed_moon_norm_evec(a_nsg_moon_fixed_moon_norm[0], a_nsg_moon_fixed_moon_norm[1], a_nsg_moon_fixed_moon_norm[2]);
+			// 第四步，计算同一月球非球形场对地心的加速度。地心相对月心的位置为 -rv_moon。
+			Vector3d r_earth_moon_fixed_earth_norm = -moon_inertial_to_fixed_emat *
+				Vector3d(rv_moon[0], rv_moon[1], rv_moon[2]);
+			double r_earth_moon_fixed_moon_norm[3] = {
+				r_earth_moon_fixed_earth_norm[0] * UNIT_LENGTH_M / moon_gravity_field.R_ref,
+				r_earth_moon_fixed_earth_norm[1] * UNIT_LENGTH_M / moon_gravity_field.R_ref,
+				r_earth_moon_fixed_earth_norm[2] * UNIT_LENGTH_M / moon_gravity_field.R_ref};
+			double a_indirect_moon_fixed_moon_norm[3] = {0};
+			Lunar_Nonspherical_Gravitational_Acceleration(a_indirect_moon_fixed_moon_norm,
+				r_earth_moon_fixed_moon_norm, thisjob.opn_model.lunar_zonal_order, thisjob.opn_model.lunar_tesseral_degree);
+
+			// 第五步，卫星处直接项减去地心项，再旋回 GCRS 并换成积分器的加速度单位。
+			Vector3d a_nsg_moon_fixed_moon_norm_evec(
+				a_nsg_moon_fixed_moon_norm[0] - a_indirect_moon_fixed_moon_norm[0],
+				a_nsg_moon_fixed_moon_norm[1] - a_indirect_moon_fixed_moon_norm[1],
+				a_nsg_moon_fixed_moon_norm[2] - a_indirect_moon_fixed_moon_norm[2]);
 			Vector3d a_nsg_moon_inertial_earth_norm_evec =
 				moon_inertial_to_fixed_emat.transpose() * a_nsg_moon_fixed_moon_norm_evec *
-				(moon_gravity_field.GM / GE) *
-				pow(ae / moon_gravity_field.R_ref, 2);//最后乘上单位转换和归一化的反函数，得到在GRCS的地球归一化的加速度
+				(moon_gravity_field.GM / UNIT_GM_M3_S2) *
+				pow(UNIT_LENGTH_M / moon_gravity_field.R_ref, 2);
 
 			axyz_nsGravity_moon[0] = a_nsg_moon_inertial_earth_norm_evec[0];
 			axyz_nsGravity_moon[1] = a_nsg_moon_inertial_earth_norm_evec[1];
@@ -614,39 +611,19 @@ void Acceleration_NSG2(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 	tracer.CheckOut(__func__);
 }
 
-void Acceleration_Cart(bastion::Overwatch& tracer, const OrbitPropagationJob& thisjob, const double MJD_TT,  int n, const double* x, double* f)
+/**
+ * @brief 计算 GCRS/TT 下 Cartesian 状态的动力学右函数。
+ * @param[in,out] tracer 记录函数调用和模型计算中的错误。
+ * @param[in] thisjob 提供摄动开关、EOP、大气参考参数和卫星质量、面积、光学及阻力参数。
+ * @param[in] MJD_TT 当前右函数评估点的 TT 时刻，单位 MJD，由积分器传入。
+ * @param[in] n 状态维数，当前使用 6 维状态。
+ * @param[in] x GCRS 状态 [x,y,z,vx,vy,vz]；位置尺度为 Scale::UNIT_LENGTH_M，速度尺度为 Scale::UNIT_LENGTH_M/Scale::UNIT_TIME_S。
+ * @param[out] f 状态对归一化时间的导数 [vx,vy,vz,ax,ay,az]，时间尺度为 Scale::UNIT_TIME_S。
+ * @details 在地球中心引力上按开关叠加各项摄动。
+ *          月球非球形项采用卫星处与地心处的加速度之差；近地 JPL 查询以 TT 近似 TDB。
+ */
+void Acceleration_Cart(bastion::Overwatch& tracer, const OrbitPropagationJob& thisjob, const double MJD_TT, int n, const double* x, double* f)
 {
-	/*
-	 * 函数用途：
-	 *   计算 GCRS/TT 框架下 Cartesian 状态量的右函数 f = dX/dt。
-	 *   输入 x 是当前评估时刻的 6 维归一化 Cartesian 状态：
-	 *       X = [x, y, z, vx, vy, vz]
-	 *   输出 f 的前三项是速度，后三项是归一化加速度：
-	 *       f = [vx, vy, vz, ax, ay, az]
-	 *
-	 * 时间含义：
-	 *   MJD_TT 是当前右函数评估点的时刻，单位为 MJD(TT)。
-	 *   如果本函数由 RKF78 调用，那么积分器应当在调用前已经算好当前 stage 的 MJD(TT)。
-	 *   因此，本函数只接收一个明确的当前时刻，不再接收 t0_TT 和 dt_norm。
-	 *
-	 * 状态量 x 的含义：
-	 *   x 是当前评估点的状态，不一定是全局初值，也不一定是当前积分步起点状态。
-	 *   对 RKF78 来说，x 是该 stage 根据前面斜率递推出来的中间状态。
-	 *   这使得动力学模型只依赖“当前时刻 + 当前状态”，不绑定某一种积分器的内部组织方式。
-	 *
-	 * 动力学项：
-	 *   本函数默认中心天体为地球，先计算归一化二体引力，再根据 thisjob.opn_model 的开关叠加
-	 *   地球非球形引力、日月第三体、月球非球形引力、光压和大气阻力。
-	 *   地球非球形引力和大气模型需要 EOP，因此会通过 MJD_TT -> UTC/UT1 的时间链获取地固系信息。
-	 *
-	 * 参数说明：
-	 *   tracer   运行日志和错误状态管理器。
-	 *   thisjob  GCRS 轨道预报任务设置，包括力模型、EOP、卫星参数、大气数据等。
-	 *   MJD_TT   当前评估点的 MJD(TT)。
-	 *   n        状态维数，目前应为 6，暂未实际使用。
-	 *   x        当前评估点的 6 维归一化 Cartesian 状态。
-	 *   f        输出的 6 维归一化 Cartesian 状态导数。
-	 */
 
 	tracer.CheckIn(__FILE__, __func__, __LINE__);
 
@@ -737,7 +714,7 @@ void Acceleration_Cart(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 	if (thisjob.opn_model.solar_gravity_config == SOLAR_GRAVITY_JPL ||
 		thisjob.opn_model.solar_gravity_config == SOLAR_GRAVITY_ANALYTICAL)//1 调用数值历表 2分析
 	{
-		Thirdbody_Gravity_Acceleration(axyz_sunGravity, cart_array, rv_sun, SUN_EARTH_MASS_RATIO);
+		Thirdbody_Gravity_Acceleration(axyz_sunGravity, cart_array, rv_sun, NORMALIZED_SUN_GM_TT);
 	}
 
 	// 计算第三体摄动，月亮
@@ -745,15 +722,15 @@ void Acceleration_Cart(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 	{
 		// 按理来说应该传入TDB 偷个懒只传TT 差别不大
 		a = Get_JPLEPH(MJDs_t.TT, 10, 3, rv_moon);
-		Thirdbody_Gravity_Acceleration(axyz_moonGravity, cart_array, rv_moon, MOON_EARTH_MASS_RATIO);
+		Thirdbody_Gravity_Acceleration(axyz_moonGravity, cart_array, rv_moon, NORMALIZED_MOON_GM_TT);
 	}
 	if (thisjob.opn_model.lunar_gravity_config == LUNAR_GRAVITY_ANALYTICAL)//2 调用分析历表
 	{
 		Cart_MeanMoon(MJDs_t.UT1, rv_moon);
-		Thirdbody_Gravity_Acceleration(axyz_moonGravity, cart_array, rv_moon, MOON_EARTH_MASS_RATIO);
+		Thirdbody_Gravity_Acceleration(axyz_moonGravity, cart_array, rv_moon, NORMALIZED_MOON_GM_TT);
 	}
 
-	// 260210 新增计算月球非球形引力，必须要在调用数值历表的前提下才可以，因为月球天平动的欧拉角需要从JPL数值历表中读.必须要在外部确保加载了
+	// 月球非球形摄动采用卫星处与地心处的加速度之差，月球位置和天平动取自 JPL 历表。
 	if (thisjob.opn_model.use_lunar_NSG)
 	{
 		if (thisjob.opn_model.lunar_gravity_config != LUNAR_GRAVITY_JPL)
@@ -780,25 +757,39 @@ void Acceleration_Cart(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 			// 第二步，计算卫星在月心固连系下的坐标，需要用到月球天平动的欧拉角，单位仍然是地球归一化
 			double Omega_p = 0, i_s = 0, Lambda = 0;//月球天平动的三个欧拉角，单位为弧度
 			// 按理来说应该传入TDB 偷个懒只传TT 差别不大
-			int ccc = Get_Libration(MJDs_t.TT, Omega_p, i_s, Lambda);
+			a = Get_Libration(MJDs_t.TT, Omega_p, i_s, Lambda);
 			Matrix3d moon_inertial_to_fixed_emat = Rz(Lambda) * Rx(i_s) * Rz(Omega_p);//月心惯性系到月心固连系的旋转矩阵
 			Vector3d r_moon_fixed_earth_norm = moon_inertial_to_fixed_emat * r_moon_inertial_earth_norm;
 
 			// 第三步，计算月球非球形引力加速度，得到月心固连系下的加速度，单位是月球归一化
 			//卫星在月心固连系下的坐标，单位是月球归一化
-			double r_moon_fixed_moon_norm[3] = {r_moon_fixed_earth_norm[0] * ae / moon_gravity_field.R_ref,
-												r_moon_fixed_earth_norm[1] * ae / moon_gravity_field.R_ref,
-												r_moon_fixed_earth_norm[2] * ae / moon_gravity_field.R_ref};
+			double r_moon_fixed_moon_norm[3] = {r_moon_fixed_earth_norm[0] * UNIT_LENGTH_M / moon_gravity_field.R_ref,
+												r_moon_fixed_earth_norm[1] * UNIT_LENGTH_M / moon_gravity_field.R_ref,
+												r_moon_fixed_earth_norm[2] * UNIT_LENGTH_M / moon_gravity_field.R_ref};
 
 			double a_nsg_moon_fixed_moon_norm[3] = {0};
 			Lunar_Nonspherical_Gravitational_Acceleration(a_nsg_moon_fixed_moon_norm, r_moon_fixed_moon_norm, thisjob.opn_model.lunar_zonal_order, thisjob.opn_model.lunar_tesseral_degree);
 
-			// 第四步，把月固系下的月球归一化加速度转换回地心惯性系下的加速度，单位是地球归一化（加速度不涉及平移，旋转即可）
-			Vector3d a_nsg_moon_fixed_moon_norm_evec(a_nsg_moon_fixed_moon_norm[0], a_nsg_moon_fixed_moon_norm[1], a_nsg_moon_fixed_moon_norm[2]);
+			// 第四步，计算同一月球非球形场对地心的加速度。地心相对月心的位置为 -rv_moon。
+			Vector3d r_earth_moon_fixed_earth_norm = -moon_inertial_to_fixed_emat *
+				Vector3d(rv_moon[0], rv_moon[1], rv_moon[2]);
+			double r_earth_moon_fixed_moon_norm[3] = {
+				r_earth_moon_fixed_earth_norm[0] * UNIT_LENGTH_M / moon_gravity_field.R_ref,
+				r_earth_moon_fixed_earth_norm[1] * UNIT_LENGTH_M / moon_gravity_field.R_ref,
+				r_earth_moon_fixed_earth_norm[2] * UNIT_LENGTH_M / moon_gravity_field.R_ref};
+			double a_indirect_moon_fixed_moon_norm[3] = {0};
+			Lunar_Nonspherical_Gravitational_Acceleration(a_indirect_moon_fixed_moon_norm,
+				r_earth_moon_fixed_moon_norm, thisjob.opn_model.lunar_zonal_order, thisjob.opn_model.lunar_tesseral_degree);
+
+			// 第五步，卫星处直接项减去地心项，再旋回 GCRS 并换成积分器的加速度单位。
+			Vector3d a_nsg_moon_fixed_moon_norm_evec(
+				a_nsg_moon_fixed_moon_norm[0] - a_indirect_moon_fixed_moon_norm[0],
+				a_nsg_moon_fixed_moon_norm[1] - a_indirect_moon_fixed_moon_norm[1],
+				a_nsg_moon_fixed_moon_norm[2] - a_indirect_moon_fixed_moon_norm[2]);
 			Vector3d a_nsg_moon_inertial_earth_norm_evec =
 				moon_inertial_to_fixed_emat.transpose() * a_nsg_moon_fixed_moon_norm_evec *
-				(moon_gravity_field.GM / GE) *
-				pow(ae / moon_gravity_field.R_ref, 2);//最后乘上单位转换和归一化的反函数，得到在GRCS的地球归一化的加速度
+				(moon_gravity_field.GM / UNIT_GM_M3_S2) *
+				pow(UNIT_LENGTH_M / moon_gravity_field.R_ref, 2);
 
 			axyz_nsGravity_moon[0] = a_nsg_moon_inertial_earth_norm_evec[0];
 			axyz_nsGravity_moon[1] = a_nsg_moon_inertial_earth_norm_evec[1];
@@ -861,7 +852,7 @@ void Acceleration_Cart_EBCRS(bastion::Overwatch& tracer, const OrbitPropagationJ
 	TimesMJD MJDs_t;
 
 	// x[0..2] 是当前评估点的 EBCRS 位置；转为米后用于 TDB -> TT 的位置项。
-	double t_TT = TDB2TT(MJD_TDB, x[0] * ae, x[1] * ae, x[2] * ae);    // 当前评估点的TT
+	double t_TT = TDB2TT(MJD_TDB, x[0] * UNIT_LENGTH_M, x[1] * UNIT_LENGTH_M, x[2] * UNIT_LENGTH_M);    // 当前评估点的TT
 	double t_UTC = TT2UTC(t_TT);    //当前评估时刻的UTC，用于获取EOP
 
 	// 获取t时刻的EOP，插值
@@ -898,7 +889,7 @@ void Acceleration_Cart_EBCRS(bastion::Overwatch& tracer, const OrbitPropagationJ
 	double major_body_bcrs_state_norm[11][6] = {{0.0}};//11个太阳系大天体相对太阳系质心的BCRS状态，用于后牛顿项
 
 	// TDB 地球 GM 按 GE 归一化，与后牛顿项中的地球参数一致。
-	const double earth_gm_norm = MAJOR_BODY_GM_NORMALIZED[2];
+	const double earth_gm_norm = NORMALIZED_BODY_GM_TDB[2];
 	axyz_tb[0] = -earth_gm_norm * cart_array[0] / r3;
 	axyz_tb[1] = -earth_gm_norm * cart_array[1] / r3;
 	axyz_tb[2] = -earth_gm_norm * cart_array[2] / r3;
@@ -924,7 +915,7 @@ void Acceleration_Cart_EBCRS(bastion::Overwatch& tracer, const OrbitPropagationJ
 		double a_nsGravity_terrestrial[3] = {0};
 		a = Earth_Nonspherical_Gravitational_Acceleration(a_nsGravity_terrestrial, R, 1,
 			thisjob.opn_model.earth_zonal_order, thisjob.opn_model.earth_tesseral_degree,
-			GGM03C_GM / TDB_TO_TT_SCALE, GGM03C_REFERENCE_RADIUS / TDB_TO_TT_SCALE);
+			constants::GGM03C::GM / constants::TDB_TO_TT_SCALE, constants::GGM03C::REFERENCE_RADIUS / constants::TDB_TO_TT_SCALE);
 		if (a < 0)
 		{
 			tracer.LogEvent(__FILE__, __func__, __LINE__, "Invalid Earth gravity truncation degree.", EventType::ERROR);
@@ -947,7 +938,7 @@ void Acceleration_Cart_EBCRS(bastion::Overwatch& tracer, const OrbitPropagationJ
 	// 计算第三体摄动，太阳
 	if (thisjob.opn_model.solar_gravity_config == SOLAR_GRAVITY_JPL)	//1 调用数值历表
 	{
-		Thirdbody_Gravity_Acceleration(axyz_sunGravity, cart_array, rv_sun, MAJOR_BODY_GM_NORMALIZED[10]);
+		Thirdbody_Gravity_Acceleration(axyz_sunGravity, cart_array, rv_sun, NORMALIZED_BODY_GM_TDB[10]);
 	}
 	else if (thisjob.opn_model.solar_gravity_config == SOLAR_GRAVITY_ANALYTICAL)	//2 调用分析历表，此处不支持，直接报错
 	{
@@ -972,7 +963,7 @@ void Acceleration_Cart_EBCRS(bastion::Overwatch& tracer, const OrbitPropagationJ
 	// 计算第三体摄动，月亮，理论上地月空间是必加的
 	if (thisjob.opn_model.lunar_gravity_config == LUNAR_GRAVITY_JPL)//1 调用数值历表
 	{
-		Thirdbody_Gravity_Acceleration(axyz_moonGravity, cart_array, rv_moon, MAJOR_BODY_GM_NORMALIZED[9]);
+		Thirdbody_Gravity_Acceleration(axyz_moonGravity, cart_array, rv_moon, NORMALIZED_BODY_GM_TDB[9]);
 	}
 	else if (thisjob.opn_model.lunar_gravity_config == LUNAR_GRAVITY_ANALYTICAL)	//2 调用分析历表，此处不支持，直接报错
 	{
@@ -1009,7 +1000,7 @@ void Acceleration_Cart_EBCRS(bastion::Overwatch& tracer, const OrbitPropagationJ
 			// Get_JPLEPH 的 n_center = 3 直接返回行星相对地球的 EBCRS 状态，不需要先取 BCRS 再手动作差。
 			a = Get_JPLEPH(MJDs_t.TDB, body_id, 3, planet_ebcrs_state_norm);
 
-			Thirdbody_Gravity_Acceleration(axyz_planet_single, cart_array, planet_ebcrs_state_norm, MAJOR_BODY_GM_NORMALIZED[body_index]);
+			Thirdbody_Gravity_Acceleration(axyz_planet_single, cart_array, planet_ebcrs_state_norm, NORMALIZED_BODY_GM_TDB[body_index]);
 			axyz_planetGravity[0] += axyz_planet_single[0];
 			axyz_planetGravity[1] += axyz_planet_single[1];
 			axyz_planetGravity[2] += axyz_planet_single[2];
@@ -1069,9 +1060,9 @@ void Acceleration_Cart_EBCRS(bastion::Overwatch& tracer, const OrbitPropagationJ
 
 			// 第三步，计算月球非球形引力加速度，得到月心固连系下的加速度，单位是月球归一化
 			//卫星在月心固连系下的坐标，单位是月球归一化
-			double r_moon_fixed_moon_norm[3] = {r_moon_fixed_earth_norm[0] * ae / moon_gravity_field.R_ref,
-												r_moon_fixed_earth_norm[1] * ae / moon_gravity_field.R_ref,
-												r_moon_fixed_earth_norm[2] * ae / moon_gravity_field.R_ref};
+			double r_moon_fixed_moon_norm[3] = {r_moon_fixed_earth_norm[0] * UNIT_LENGTH_M / moon_gravity_field.R_ref,
+												r_moon_fixed_earth_norm[1] * UNIT_LENGTH_M / moon_gravity_field.R_ref,
+												r_moon_fixed_earth_norm[2] * UNIT_LENGTH_M / moon_gravity_field.R_ref};
 
 			double a_nsg_moon_fixed_moon_norm[3] = {0};
 			Lunar_Nonspherical_Gravitational_Acceleration(a_nsg_moon_fixed_moon_norm, r_moon_fixed_moon_norm, thisjob.opn_model.lunar_zonal_order, thisjob.opn_model.lunar_tesseral_degree);
@@ -1081,9 +1072,9 @@ void Acceleration_Cart_EBCRS(bastion::Overwatch& tracer, const OrbitPropagationJ
 			Vector3d r_earth_moon_fixed_earth_norm = -moon_inertial_to_fixed_emat *
 				Vector3d(rv_moon[0], rv_moon[1], rv_moon[2]);
 			double r_earth_moon_fixed_moon_norm[3] = {
-				r_earth_moon_fixed_earth_norm[0] * ae / moon_gravity_field.R_ref,
-				r_earth_moon_fixed_earth_norm[1] * ae / moon_gravity_field.R_ref,
-				r_earth_moon_fixed_earth_norm[2] * ae / moon_gravity_field.R_ref};
+				r_earth_moon_fixed_earth_norm[0] * UNIT_LENGTH_M / moon_gravity_field.R_ref,
+				r_earth_moon_fixed_earth_norm[1] * UNIT_LENGTH_M / moon_gravity_field.R_ref,
+				r_earth_moon_fixed_earth_norm[2] * UNIT_LENGTH_M / moon_gravity_field.R_ref};
 			double a_indirect_moon_fixed_moon_norm[3] = {0};
 			Lunar_Nonspherical_Gravitational_Acceleration(a_indirect_moon_fixed_moon_norm,
 				r_earth_moon_fixed_moon_norm, thisjob.opn_model.lunar_zonal_order, thisjob.opn_model.lunar_tesseral_degree);
@@ -1095,8 +1086,8 @@ void Acceleration_Cart_EBCRS(bastion::Overwatch& tracer, const OrbitPropagationJ
 				a_nsg_moon_fixed_moon_norm[2] - a_indirect_moon_fixed_moon_norm[2]);
 			Vector3d a_nsg_moon_inertial_earth_norm_evec =
 				moon_inertial_to_fixed_emat.transpose() * a_nsg_moon_fixed_moon_norm_evec *
-				(moon_gravity_field.GM / GE) *
-				pow(ae / moon_gravity_field.R_ref, 2);
+				(moon_gravity_field.GM / UNIT_GM_M3_S2) *
+				pow(UNIT_LENGTH_M / moon_gravity_field.R_ref, 2);
 
 			axyz_nsGravity_moon[0] = a_nsg_moon_inertial_earth_norm_evec[0];
 			axyz_nsGravity_moon[1] = a_nsg_moon_inertial_earth_norm_evec[1];

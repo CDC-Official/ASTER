@@ -49,6 +49,7 @@ flowchart LR
 - [根 README](../README.md)：项目简介和常用入口。
 - [CHANGELOG](../CHANGELOG.md)：统一的版本变更记录。
 - [tests/README.md](../tests/README.md)：检查命令、比较方式和参考结果来源。
+- [物理常数与模型参数](11_constants.md)：参数来源、分组和各计算场景的选用方式。
 - [data/README.md](../data/README.md)：公共科学数据的用途、覆盖时间和校验清单。
 - [third_party/README.md](../third_party/README.md)：固定第三方源码及其许可。
 - [AGENTS.md](../AGENTS.md)：修改科研代码时遵循的规则。

@@ -126,10 +126,10 @@ int main(int argc, char **argv)
                         const int n = 20;
                         bastion::Overwatch geometry;
                         // 各轨道近地点半径均为 7000 km，e 改变时同步调整半长轴。
-                        const double a = 7000.0 / (1.0 - truth_e) / (ae / 1000.0);
-                        const double inclination = 50.0 * DEGREE_TO_RAD,
-                                     node = 40.0 * DEGREE_TO_RAD;
-                        const double argument = 20.0 * DEGREE_TO_RAD, mean0 = 30.0 * DEGREE_TO_RAD;
+                        const double a = 7000.0 / (1.0 - truth_e) / (constants::Scale::UNIT_LENGTH_M / 1000.0);
+                        const double inclination = 50.0 * constants::Conversion::DEGREE_TO_RAD,
+                                     node = 40.0 * constants::Conversion::DEGREE_TO_RAD;
+                        const double argument = 20.0 * constants::Conversion::DEGREE_TO_RAD, mean0 = 30.0 * constants::Conversion::DEGREE_TO_RAD;
                         orbit::Keplerian truth_kep(a, truth_e, inclination, node, argument, mean0,
                                                    true);
                         double truth_array[6];
@@ -151,12 +151,12 @@ int main(int argc, char **argv)
                         base.printIterInfo = false;
                         base.initValue.type = IOD_INITIAL_VALUE_SPECIFIED;
                         VectorXd initial = truth;
-                        initial(0) += 1000.0 / ae;
-                        initial(1) -= 700.0 / ae;
-                        initial(2) += 400.0 / ae;
-                        initial(3) += 1.0 / (ae / UNITTIME);
-                        initial(4) -= 0.7 / (ae / UNITTIME);
-                        initial(5) += 0.4 / (ae / UNITTIME);
+                        initial(0) += 1000.0 / constants::Scale::UNIT_LENGTH_M;
+                        initial(1) -= 700.0 / constants::Scale::UNIT_LENGTH_M;
+                        initial(2) += 400.0 / constants::Scale::UNIT_LENGTH_M;
+                        initial(3) += 1.0 / (constants::Scale::UNIT_LENGTH_M / constants::Scale::UNIT_TIME_S);
+                        initial(4) -= 0.7 / (constants::Scale::UNIT_LENGTH_M / constants::Scale::UNIT_TIME_S);
+                        initial(5) += 0.4 / (constants::Scale::UNIT_LENGTH_M / constants::Scale::UNIT_TIME_S);
                         base.initValue.initCart.Set(initial(0), initial(1), initial(2), initial(3),
                                                     initial(4), initial(5), true);
                         std::mt19937 generator(20261028 + dataset);
@@ -168,11 +168,11 @@ int main(int argc, char **argv)
                             base.obs.time_MJDUTC(k) =
                                 base.epochMJDUTC + duration * k / (n - 1) / DAYSEC;
                             base.obs.tau(k) = (base.obs.time_MJDUTC(k) - base.epochMJDUTC) *
-                                              DAY_TO_NORMALIZED_TIME;
+                                              constants::Conversion::DAY_TO_NORMALIZED_TIME;
                             const bool second = stations == 2 && k >= n / 2;
                             frame::Geodetic site(second ? 500.0 : 943.0, second ? 100.0 : 86.174633,
                                                  second ? 35.0 : 41.725892, false);
-                            site.Normalize(geometry, ae);
+                            site.Normalize(geometry, constants::Scale::UNIT_LENGTH_M);
                             frame::GCRS gcrs;
                             site.ToGCRS(geometry, base.obs.time_MJDUTC(k), eop, gcrs);
                             double station[3];
@@ -188,10 +188,10 @@ int main(int argc, char **argv)
                             const Vector3d relative = Vector3d(target[0], target[1], target[2]) -
                                                       base.observer.positions_gcrs_norm_emat.col(k);
                             base.obs.ra_rad(k) = std::atan2(relative(1), relative(0)) +
-                                                 noise * ARCSEC_TO_RAD * standard_normal(generator);
+                                                 noise * constants::Conversion::ARCSEC_TO_RAD * standard_normal(generator);
                             base.obs.dec_rad(k) =
                                 std::atan2(relative(2), std::hypot(relative(0), relative(1))) +
-                                noise * ARCSEC_TO_RAD * standard_normal(generator);
+                                noise * constants::Conversion::ARCSEC_TO_RAD * standard_normal(generator);
                         }
                         base.observer.position_gcrs_epoch_norm =
                             base.observer.positions_gcrs_norm_emat.col(0);
@@ -218,9 +218,9 @@ int main(int argc, char **argv)
                                 job.solution.cart.ToArray(result);
                                 const VectorXd state = Map<VectorXd>(result, 6);
                                 Compute_Constraint(state, target, actual_e, value);
-                                position_error = (state.head<3>() - truth.head<3>()).norm() * ae;
+                                position_error = (state.head<3>() - truth.head<3>()).norm() * constants::Scale::UNIT_LENGTH_M;
                                 velocity_error =
-                                    (state.tail<3>() - truth.tail<3>()).norm() * ae / UNITTIME;
+                                    (state.tail<3>() - truth.tail<3>()).norm() * constants::Scale::UNIT_LENGTH_M / constants::Scale::UNIT_TIME_S;
                                 if (job.solution.flag > 0)
                                     ++completed;
                                 else

@@ -58,6 +58,8 @@
 
 #include "model_ephemeris_jpl.hpp"
 
+using namespace constants::Conversion;
+
 // 240924 使用TZB时期的cpp版本覆盖掉原本的c版本，并且增加了对多种编译器的支持，对比之前的c版本没问题。
 // 定义全局变量
 JPLEPH_R1_Struct JPLEPH_R1;
@@ -100,7 +102,7 @@ int Get_JPLEPH(const double MJD_TDB, int n_target, int n_center, double* r_v_Nor
 	// 260209 严格来说，JPL是太阳系的历表，因此应该用太阳系的质心动力学时，TDB
 	// 之前传入的MJD_TT 严格来说是错误的，但是在实际使用中，TT和TDB的差异非常小（通常在1.6毫秒范围内），对于大多数应用来说，这种差异是可以忽略的，因此之前传入MJD_TT虽然不完全正确，但在实际应用中不会导致显著的误差。
 	// 现已经修改为传入MJD_TDB，确保使用正确的时间标准。
-	pleph(MJD_TDB + START_OF_MJD, n_target, n_center, r_v_Norm);
+	pleph(MJD_TDB + constants::MJD_OFFSET, n_target, n_center, r_v_Norm);
 	r_v_Norm[0] *= KM_TO_NORMALIZED_LENGTH;
 	r_v_Norm[1] *= KM_TO_NORMALIZED_LENGTH;
 	r_v_Norm[2] *= KM_TO_NORMALIZED_LENGTH;
@@ -117,7 +119,7 @@ int Get_JPLEPH_ronly(double MJD_TDB, int n_target, int n_center, double* r_Norm)
 	// 之前传入的MJD_TT 严格来说是错误的，但是在实际使用中，TT和TDB的差异非常小（通常在1.6毫秒范围内），对于大多数应用来说，这种差异是可以忽略的，因此之前传入MJD_TT虽然不完全正确，但在实际应用中不会导致显著的误差。
 	// 现已经修改为传入MJD_TDB，确保使用正确的时间标准。
 	double temp_r_v_Norm[6];
-	pleph(MJD_TDB + START_OF_MJD, n_target, n_center, temp_r_v_Norm);
+	pleph(MJD_TDB + constants::MJD_OFFSET, n_target, n_center, temp_r_v_Norm);
 	r_Norm[0] = temp_r_v_Norm[0] * KM_TO_NORMALIZED_LENGTH;
 	r_Norm[1] = temp_r_v_Norm[1] * KM_TO_NORMALIZED_LENGTH;
 	r_Norm[2] = temp_r_v_Norm[2] * KM_TO_NORMALIZED_LENGTH;
@@ -132,7 +134,7 @@ int Get_Libration(const double MJD_TDB, double& Omega_p, double& i_s, double& La
 	// euler angles are interpreted in the order of 0~2: Omega', i_s, Lambda
 	double rrd[6];
 	// 设定ntar=15，ncent=0，获取月球天平动的三个欧拉角
-	pleph(MJD_TDB + START_OF_MJD, 15, 0, rrd);
+	pleph(MJD_TDB + constants::MJD_OFFSET, 15, 0, rrd);
 
 	Omega_p = rrd[0];
 	i_s = rrd[1];
@@ -573,7 +575,7 @@ void state(double et2[2], int list[12], double pv[][6], double nut[4])
 
 	if (JPLEPH_KM)
 	{
-		t[1] = JPLEPH_R1.r1.ss[2] * 86400.0;
+		t[1] = JPLEPH_R1.r1.ss[2] * constants::SECONDS_PER_DAY;
 		aufac = 1.0;
 	}
 	else

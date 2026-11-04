@@ -31,6 +31,8 @@
 #include <string>
 #include <vector>
 
+using namespace constants::Scale;
+
 namespace {
 // 历元与对应的状态一起保存；values 保持输入所选的 m 或 km 单位。
 struct CartesianRecord {
@@ -79,7 +81,7 @@ int main(int argc, const char* argv[]) {
         }
         if (unit != "m" && unit != "km")
             throw std::runtime_error("Input unit must be m or km");
-        const double input_length = unit == "m" ? ae : ae / 1000.0;
+        const double input_length = unit == "m" ? UNIT_LENGTH_M : UNIT_LENGTH_M / 1000.0;
 
         // 二、按行读取历元及六维状态。允许空行，每个非空行须为七个有限数值。
         std::ifstream input_file(input_path);
@@ -121,7 +123,7 @@ int main(int argc, const char* argv[]) {
             orbit::Cartesian state(x[0], x[1], x[2], x[3], x[4], x[5], false);
             orbit::Keplerian elements;
             // 位置除以所选长度尺度，速度除以该尺度/UNITTIME，转为归一化状态。
-            state.Normalize(tracer, input_length, UNITTIME);
+            state.Normalize(tracer, input_length, UNIT_TIME_S);
             if (tracer.Code() != ERR_NOERROR) throw std::runtime_error("Cartesian normalization failed");
 
             // 转换为 Keplerian 六根数，结果仍为归一化量和 rad。
@@ -129,7 +131,7 @@ int main(int argc, const char* argv[]) {
             if (tracer.Code() != ERR_NOERROR) throw std::runtime_error("Cartesian conversion failed");
 
             // 半长轴恢复为 km，轨道角度由 rad 转为 deg。
-            elements.Restore(tracer, ae / 1000.0);
+            elements.Restore(tracer, UNIT_LENGTH_M / 1000.0);
             if (tracer.Code() != ERR_NOERROR) throw std::runtime_error("Keplerian unit restoration failed");
             std::array<double, 6> values;
             elements.ToArray(values.data());

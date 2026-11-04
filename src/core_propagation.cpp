@@ -12,6 +12,8 @@
 #include <array>
 #include <cmath>
 
+using namespace constants::Conversion;
+
 // =============================================================================
 // 用于 GCRS / TT 下的结构和函数
 // =============================================================================
@@ -259,7 +261,7 @@ void OrbitPropagationKep_2Body(Overwatch& tracer, const double MJD_t0, const dou
 	// 计算M1
 	double dt_norm = (MJD_t1 - MJD_t0) * DAY_TO_NORMALIZED_TIME;
 	double n0 = pow(a0, -1.5); // 归一化均角速度
-	M1 = fmod(M0 + n0 * dt_norm, 2 * pi);
+	M1 = fmod(M0 + n0 * dt_norm, 2 * constants::PI);
 
 	// 设置kep1
 	kep1.Set(a0, e0, i0, OMEGA0, omega0, M1, true);
@@ -948,7 +950,7 @@ std::vector<orbit::Cartesian> Interpolate_CartesianOrbit(bastion::Overwatch& tra
     // 以 TT 归一化时间做插值，避免在大数 MJD 上构建多项式。
     std::vector<double> t(node_epochs_utc.size());
 
-    for (size_t i = 0; i < t.size(); ++i) t[i] = (UTC2TT(node_epochs_utc[i]) - epoch0_tt) * 86400 / UNITTIME;
+    for (size_t i = 0; i < t.size(); ++i) t[i] = (UTC2TT(node_epochs_utc[i]) - epoch0_tt) * constants::SECONDS_PER_DAY / constants::Scale::UNIT_TIME_S;
 
     std::vector<orbit::Cartesian> output;
 
@@ -966,7 +968,7 @@ std::vector<orbit::Cartesian> Interpolate_CartesianOrbit(bastion::Overwatch& tra
 
         // 先确认资料顺序，再转换为相对初始 TT 的归一化时间，供 Hermite 插值使用。
         previous = epoch;
-        double x = (UTC2TT(epoch) - epoch0_tt) * 86400 / UNITTIME;
+        double x = (UTC2TT(epoch) - epoch0_tt) * constants::SECONDS_PER_DAY / constants::Scale::UNIT_TIME_S;
 
         if (!(x >= t.front() - 2e-8 && x <= t.back() + 2e-8))
         {

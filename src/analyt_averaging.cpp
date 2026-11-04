@@ -22,13 +22,20 @@
 #include <iomanip>
 #include <sstream>
 
+using namespace constants::Scale;
+using namespace constants::Conversion;
+using constants::PI;
+
 namespace orbit {
 namespace {
 using namespace averaging_detail;
 using SixElements = std::array<double, 6>;
 
-// 地球自转角速度，单位为归一化时间的倒数；归一化地球引力参数为 1。
-const double RotationRate = 360.985647365 * DEGREE_TO_RAD * UNITTIME / 86400.;
+// 田谐解析模型使用 IAU 1982 平恒星时角速度，按下方 GMST 多项式在 J2000 的斜率计算。
+// 系数可对照 SOFA gmst82；每儒略世纪的转角包含日周项和平均恒星时进动项。
+// 该角速度包含平春分点运动，单位为每归一化时间的 rad。
+const double GmstRatePerCentury = 230121.675315368986346;
+const double RotationRate = GmstRatePerCentury * UNIT_TIME_S / (constants::DAYS_PER_CENTURY * constants::SECONDS_PER_DAY);
 
 // 两表同一槽位给出 alpha=omega_E/n 的有理数分子和分母，槽位 0 不参与搜索。
 // 槽位 2 对应同步共振 alpha=1，其余槽位给出各组地球自转/卫星轨道频率比。
@@ -44,11 +51,11 @@ constexpr std::array<int, 15> ResonanceDenominator{1, 2, 1, 2, 3, 3, 4, 4, 7, 9,
 double Wrap_Angle(double angle)
 {
     // fmod 允许负余数，因此负值还需补一个整周。
-    angle = fmod(angle, 2 * pi);
+    angle = fmod(angle, 2 * PI);
 
     if (angle < 0)
     {
-        return angle + 2 * pi;
+        return angle + 2 * PI;
     }
 
     // 余数非负时已经落入目标角度区间。
@@ -99,8 +106,8 @@ int Find_Resonance(double a)
  */
 double GravityAmplitudeAndPhase(int l, int m, double& phase)
 {
-    // GGM03C_arr 从二次项开始按三角形下标存放，每槽依次为 C_lm、S_lm。
-    const auto& cs = GGM03C_arr[l * (l + 1) / 2 - 3 + m];
+    // GGM03C 系数从二次项开始按三角形下标存放，每槽依次为 C_lm、S_lm。
+    const auto& cs = constants::GGM03C::COEFFICIENTS[l * (l + 1) / 2 - 3 + m];
     double order_factor = 2.;
 
     // 带谐没有独立正弦系数，归一化因子中不采用田谐的倍数 2。
@@ -112,16 +119,20 @@ double GravityAmplitudeAndPhase(int l, int m, double& phase)
     // 归一化因子由次数、阶数及阶乘比构成。
     const double normalization = sqrt(order_factor * (2 * l + 1) * Factorial(l - m) / Factorial(l + m));
 
+    // 球谐势项包含配套 GM 和参考半径的 l 次幂，统一换成程序积分尺度。
+    const double field_scale = (constants::GGM03C::GM / UNIT_GM_M3_S2) *
+        pow(constants::GGM03C::REFERENCE_RADIUS / UNIT_LENGTH_M, l);
+
     if (m == 0)
     {
         // m=0 直接保留有符号 C_l0，不取幅值绝对值。
         phase = 0;
-        return cs[0] * normalization;
+        return cs[0] * normalization * field_scale;
     }
 
     // 田谐系数将正弦、余弦两部分合成幅值与相位，后面统一参与 Kaula 相角。
     phase = atan2(cs[1], cs[0]);
-    return hypot(cs[0], cs[1]) * normalization;
+    return hypot(cs[0], cs[1]) * normalization * field_scale;
 }
 
 /**
@@ -167,7 +178,7 @@ ThirdBodyArguments Prepare_ThirdBody(bastion::Overwatch& tracer, double mjd_ut1,
     body.r = elements[0] * (1 - elements[1] * cos(E));
 
     // 日月 GM 与数值传播共用 DE440 参数，先除以地球 GM，再按距离构成摄动强度。
-    const double normalized_gm = moon ? MOON_EARTH_MASS_RATIO : SUN_EARTH_MASS_RATIO;
+    const double normalized_gm = moon ? NORMALIZED_MOON_GM_TT : NORMALIZED_SUN_GM_TT;
 
     // beta2 是归一化 GM 除以当前距离三次幂。
     body.beta2 = normalized_gm / pow(body.r, 3);
@@ -184,12 +195,12 @@ ThirdBodyArguments Prepare_ThirdBody(bastion::Overwatch& tracer, double mjd_ut1,
     // 第三体平运动以归一化时间的倒数表示；双快变量月球公式会读取它。
     if (moon)
     {
-        body.n = 13.065 * DEGREE_TO_RAD * UNITTIME / 86400.;
+        body.n = 13.065 * DEGREE_TO_RAD * UNIT_TIME_S / constants::SECONDS_PER_DAY;
     }
     else
     {
         // 太阳平运动取 365.25 日周期，再转为归一化时间单位。
-        body.n = 2 * pi * UNITTIME / (365.25 * 86400.);
+        body.n = 2 * PI * UNIT_TIME_S / (365.25 * constants::SECONDS_PER_DAY);
     }
 
     // 后面的方向组合直接使用 sin(i)、1+cos(i)、1-cos(i)。
@@ -500,10 +511,10 @@ bool Check_OrbitEclipse(bastion::Overwatch& tracer, const ThirdBodyArguments& su
     B = -.25 * ((1 - ci) * (sun.cip1 * sun.s_mp + sun.cim1 * sun.s_mm) +
         (1 + ci) * (sun.cip1 * sun.s_pm + sun.cim1 * sun.s_pp) + 2 * si * sun.si * (sun.s_m - sun.s_p));
 
-    // K 和方向相角确定太阳在轨道面的投影，rp2 是归一化半通径平方的倒数。
+    // K 和方向相角确定太阳在轨道面的投影，rp2 是地球半径与半通径之比的平方。
     const double K = hypot(A, B);
     const double angle = atan2(A, B);
-    const double rp2 = 1 / pow(a * (1 - e * e), 2);
+    const double rp2 = pow(constants::Wgs84::EQUATORIAL_RADIUS / UNIT_LENGTH_M / (a * (1 - e * e)), 2);
 
     // 投影退化时判无影；半通径落入地球时警告并判无影。
     if (K < 1e-15)
@@ -525,14 +536,14 @@ bool Check_OrbitEclipse(bastion::Overwatch& tracer, const ThirdBodyArguments& su
 
     if (sq <= -1)
     {
-        f1 = 1.5 * pi - angle;
+        f1 = 1.5 * PI - angle;
         f2 = f1;
     }
     else
     {
         // 两端分别取反正弦对应的进入和离开方向初值。
-        f1 = pi - asin(sq) - angle;
-        f2 = 2 * pi + asin(sq) - angle;
+        f1 = PI - asin(sq) - angle;
+        f2 = 2 * PI + asin(sq) - angle;
     }
 
     // 最多迭代 100 次，依当前边界处半径更新圆柱地影方程。
@@ -559,8 +570,8 @@ bool Check_OrbitEclipse(bastion::Overwatch& tracer, const ThirdBodyArguments& su
         }
 
         // 两端变化均不超过 1 rad 时判有影；本函数只判断有无地影，边界角不作为输出。
-        const double next1 = pi - asin(s1) - angle;
-        const double next2 = 2 * pi + asin(s2) - angle;
+        const double next1 = PI - asin(s1) - angle;
+        const double next2 = 2 * PI + asin(s2) - angle;
 
         if (std::abs(next1 - f1) <= 1 && std::abs(next2 - f2) <= 1)
         {
@@ -640,13 +651,13 @@ void OsculatingToMean(bastion::Overwatch& tracer, double mjd_utc,
         }
 
         // 半长轴由 ae 归一化量恢复为 km 后检查；超过硬上限时不进入解析展开。
-        if (original[0] * ae / 1000 > 90000)
+        if (original[0] * UNIT_LENGTH_M / 1000 > 90000)
         {
             tracer.LogEvent(__FILE__, __func__, __LINE__, "Semimajor axis exceeds 90000 km O2M limit", bastion::ERROR);
             return;
         }
 
-        if (original[0] * ae / 1000 > 43000)
+        if (original[0] * UNIT_LENGTH_M / 1000 > 43000)
         {
             tracer.LogEvent(__FILE__, __func__, __LINE__,
                 "Semimajor axis exceeds 43000 km; short-period accuracy may deteriorate.", bastion::WARNING);
@@ -682,12 +693,12 @@ void OsculatingToMean(bastion::Overwatch& tracer, double mjd_utc,
         // 本模型取 DUT1=0，即 UT1=UTC；日月平位置函数接收 UT1，不将 TT 代入其参数。
         // TT 用于下面的简化岁差章动。
         const double mjd_tt = UTC2TT(mjd_utc);
-        const double ut1_centuries = (mjd_utc - 51544.5) / 36525.;
-        const double tt_centuries = (mjd_tt - 51544.5) / 36525.;
+        const double ut1_centuries = (mjd_utc - constants::J2000_MJD) / constants::DAYS_PER_CENTURY;
+        const double tt_centuries = (mjd_tt - constants::J2000_MJD) / constants::DAYS_PER_CENTURY;
 
         // 格林尼治角由 UT1 世纪数给出，回绕后为 [0,2pi) rad。
         const double greenwich_angle = Wrap_Angle(
-            4.894961223731367 + 230121.675315368986346 * ut1_centuries +
+            4.894961223731367 + GmstRatePerCentury * ut1_centuries +
             .000006770713945 * ut1_centuries * ut1_centuries -
             .000450876723432e-6 * ut1_centuries * ut1_centuries * ut1_centuries);
 
@@ -802,7 +813,7 @@ void OsculatingToMean(bastion::Overwatch& tracer, double mjd_utc,
             const double cwo = cos(omega + Omega);
 
             // fm 是回绕到 [-pi,pi) 的 f-M；fmesf 再加 e*sin(f)，保持原公式定义。
-            const double fm = Wrap_Angle(f - M + pi) - pi;
+            const double fm = Wrap_Angle(f - M + PI) - PI;
             const double fmesf = fm + e * sin(f);
 
             // apow[j]=a^j、epow[j]=e^j，各自从零次幂 1 递推，供第三体及光压公式读取。
@@ -980,10 +991,12 @@ void OsculatingToMean(bastion::Overwatch& tracer, double mjd_utc,
                 {
                     SixElements term{};
 
-                    // beta 包含 Cr、物理 AMR 到归一化面积质量比的转换和太阳距离平方因子。
+                    // 压力乘物理面质比得到 m/s²，再除以程序加速度尺度。
+                    // beta 的负号表示光压方向与地心指向太阳的方向相反。
                     const double beta = -active_options.radiation_coefficient *
-                        active_options.srp_area_mass_m2_kg * IAM_TO_NORMALIZED_AM *
-                        .3166e-17 * pow(149597870700. / ae / sun.r, 2);
+                        active_options.srp_area_mass_m2_kg * constants::SolarRadiation::REFERENCE_PRESSURE /
+                        (UNIT_GM_M3_S2 / UNIT_LENGTH_M / UNIT_LENGTH_M) *
+                        pow(constants::SolarRadiation::REFERENCE_DISTANCE / UNIT_LENGTH_M / sun.r, 2);
 
                     // Combined 分支直接输出 NSG2 组合改正，使用第一轮得到的 eclipse_A/B。
                     RadiationShort(tracer, beta, apow, epow, xe, si, ci, cih, so, co, swo, cwo,

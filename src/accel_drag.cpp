@@ -26,11 +26,8 @@ int AtmosphereDrag_Acceleration(double* a_celestial,
 	double vy = rv_celestial[4];
 	double vz = rv_celestial[5];
 
-	//地球自传速度，可以设置为static避免重复计算
-	// FIXME:地球自转速度，要定义好
-	// deg/day (TT), Liu's book is consistent with IAU recommended value (not to be confused with per UT1 value)
-	const double earthMeanRotationRate = 360.985647365;
-	static double omega_a = earthMeanRotationRate * DEGREE_TO_RAD / (1.0 * DAY_TO_NORMALIZED_TIME);
+	// 大气按 IERS 名义平均角速度共转，先换成每归一化时间的转角。
+	const double omega_a = constants::IERS2010::EARTH_ROTATION_RATE * constants::Scale::UNIT_TIME_S;
 
 	Vector3d v_vec(vx, vy, vz);
 	Vector3d va_vec(-y * omega_a, x * omega_a, 0);//(1.217)

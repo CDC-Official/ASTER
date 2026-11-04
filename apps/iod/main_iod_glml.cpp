@@ -57,6 +57,10 @@
 #include "core_iod.hpp"
 #include "time_transform.hpp"
 
+using namespace constants::Scale;
+using namespace constants::Conversion;
+using constants::PI;
+
 namespace fs = std::filesystem;
 
 using namespace std;
@@ -411,7 +415,7 @@ int main(int argc, char* argv[])
 		// 似然公式需要计算方差的倒数和对数，换算后的 rad 方差应能表示为有限正数。
 		thisJob.obs.sigma_RaDec = noiseLevelAs * ARCSEC_TO_RAD;
 
-		if (!std::isfinite(2 * pi * thisJob.obs.sigma_RaDec * thisJob.obs.sigma_RaDec) ||
+		if (!std::isfinite(2 * PI * thisJob.obs.sigma_RaDec * thisJob.obs.sigma_RaDec) ||
 			thisJob.obs.sigma_RaDec * thisJob.obs.sigma_RaDec == 0.0)
 		{
 			tracer.LogEvent(__FILE__, __func__, __LINE__, "noise_sigma_arcsecond must yield a finite positive radian variance.", EventType::ERROR);
@@ -632,9 +636,9 @@ int main(int argc, char* argv[])
 			thisJob.obs.time_MJDUTC(k) = record.mjd_utc;
 
 			// 将赤经、赤纬从 deg 换算为 rad；赤经归入 [0,2π)。
-			double ra_rad = std::fmod(record.ra_deg * DEGREE_TO_RAD, 2 * pi);
+			double ra_rad = std::fmod(record.ra_deg * DEGREE_TO_RAD, 2 * PI);
 
-			if (ra_rad < 0.0) ra_rad += 2 * pi;
+			if (ra_rad < 0.0) ra_rad += 2 * PI;
 
 			thisJob.obs.ra_rad(k) = ra_rad;
 			thisJob.obs.dec_rad(k) = record.dec_deg * DEGREE_TO_RAD;
@@ -698,7 +702,7 @@ int main(int argc, char* argv[])
 				// 大地站址为高度(m)、lambda(deg)、phi(deg)；先转换为归一化 ITRS XYZ。
 				frame::Geodetic site_geodetic(ground_observer.geodetic_height_m, ground_observer.geodetic_lambda_deg,
 					ground_observer.geodetic_phi_deg, false);
-				site_geodetic.Normalize(tracer, ae);
+				site_geodetic.Normalize(tracer, UNIT_LENGTH_M);
 				site_geodetic.ToITRS(tracer, site_itrs);
 			}
 			else
@@ -706,7 +710,7 @@ int main(int argc, char* argv[])
 				// 类型 2 直接提供 ITRS XYZ(m)，以 ae 归一化后用于地固到天球的变换。
 				site_itrs.Set(ground_observer.position_itrs_m[0], ground_observer.position_itrs_m[1],
 					ground_observer.position_itrs_m[2], false);
-				site_itrs.Normalize(tracer, ae);
+				site_itrs.Normalize(tracer, UNIT_LENGTH_M);
 			}
 
 			if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
@@ -773,7 +777,7 @@ int main(int argc, char* argv[])
 							<< std::left << std::setw(label_width) << "- First / Last observation [UTC]" << ": "
 							<< std::fixed << std::setprecision(12) << records[0].mjd_utc << " / " << records[used_count - 1].mjd_utc
 							<< '\n' << std::setw(label_width) << "- Arc span [s]" << ": " << std::setprecision(2)
-							<< (records[used_count - 1].mjd_utc - records[0].mjd_utc) * 86400.0
+							<< (records[used_count - 1].mjd_utc - records[0].mjd_utc) * constants::SECONDS_PER_DAY
 							<< '\n' << std::setw(label_width) << "- Unique epochs" << ": " << unique_epochs
 							<< "\n\n" << std::setw(label_width) << "- Observers" << ": " << station_ids.size() << " (";
 
@@ -1042,21 +1046,21 @@ int main(int argc, char* argv[])
 			// 倾角为 NaN 时在 [0,pi) rad 内均匀抽样补全。
 			if (std::isnan(kep_norm[2]))
 			{
-				std::uniform_real_distribution<double> distribution(0.0, pi);
+				std::uniform_real_distribution<double> distribution(0.0, PI);
 				kep_norm[2] = distribution(generator);
 			}
 
 			// 升交点赤经为 NaN 时在 [0,2pi) rad 内均匀抽样补全。
 			if (std::isnan(kep_norm[3]))
 			{
-				std::uniform_real_distribution<double> distribution(0.0, 2 * pi);
+				std::uniform_real_distribution<double> distribution(0.0, 2 * PI);
 				kep_norm[3] = distribution(generator);
 			}
 
 			// 近地点幅角或平近点角存在 NaN 时，分别在 [0,2pi) rad 内均匀抽样补全两者。
 			if (std::isnan(kep_norm[4]) || std::isnan(kep_norm[5]))
 			{
-				std::uniform_real_distribution<double> distribution(0.0, 2 * pi);
+				std::uniform_real_distribution<double> distribution(0.0, 2 * PI);
 				kep_norm[4] = distribution(generator);
 				kep_norm[5] = distribution(generator);
 			}
@@ -1089,7 +1093,7 @@ int main(int argc, char* argv[])
 
 			// N 条观测共含 2N 个角度分量，J=N*ln(2*pi*sigma^2)+sum(r_E^2+r_N^2)/(2*sigma^2)。
 			// 两个分量直接共用 sigma，resRa 不再乘 cos，标准差也不另乘 cos。
-			candidates[k].j = num * std::log(2 * pi * sigma * sigma) +
+			candidates[k].j = num * std::log(2 * PI * sigma * sigma) +
 				(candidates[k].resRa.square().sum() + candidates[k].resDec.square().sum()) / (2 * sigma * sigma);
 		}
 
@@ -1236,8 +1240,8 @@ int main(int argc, char* argv[])
 		// 单位码 1 保留归一化状态；2、3 分别以 km、m 恢复长度，根数角度均恢复为 deg。
 		if (thisJob.solutionUnit != IOD_SOLUTION_NORMALIZE)
 		{
-			const double length_scale = thisJob.solutionUnit == IOD_SOLUTION_KMDEG ? ae / 1000.0 : ae;
-			output_cart.Restore(tracer, length_scale, UNITTIME);
+			const double length_scale = thisJob.solutionUnit == IOD_SOLUTION_KMDEG ? UNIT_LENGTH_M / 1000.0 : UNIT_LENGTH_M;
+			output_cart.Restore(tracer, length_scale, UNIT_TIME_S);
 			output_kep.Restore(tracer, length_scale);
 
 			if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);

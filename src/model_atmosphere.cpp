@@ -5,6 +5,9 @@
 #include "model_atmosphere.hpp"
 #include <limits>
 
+using namespace constants::Scale;
+using namespace constants::Conversion;
+
 /**
  * @brief 读取分层大气密度表及表头注明的空间天气条件。
  * @param[in] atm_path 密度表文件路径；数值记录依次为参考高度 km、密度 kg/m³、标高 km。
@@ -107,7 +110,10 @@ void Set_ReferenceDensity(const std::vector<AtmosphereData>& atm_list,
 	double sin_i0 = sin(kep[2]);
 	double sin_w0 = sin(kep[4]);
 	double rp0_norm = kep[0] * (1.0 - kep[1]);    //a(1-e)
-	double rRefEllipsoid_norm = 1.0 - EARTH_FLATTENING * pow(sin_i0 * sin_w0, 2);//当前轨道决定的参考椭球面，归一化单位
+
+	// 参考椭球的物理半径固定，转成积分器使用的长度单位后计算近地点高度。
+	const double ellipsoid_shape = 1.0 - constants::Wgs84::FLATTENING * pow(sin_i0 * sin_w0, 2);
+	double rRefEllipsoid_norm = constants::Wgs84::EQUATORIAL_RADIUS / UNIT_LENGTH_M * ellipsoid_shape;
 	double hp0_km = (rp0_norm - rRefEllipsoid_norm) * NORMALIZED_LENGTH_TO_KM;//当前计算的初始近地点距离参考椭球面的高度km 1.225
 
 	//refdensity赋值，都是归一化
@@ -116,7 +122,9 @@ void Set_ReferenceDensity(const std::vector<AtmosphereData>& atm_list,
 	refDnesity.cos_i0 = cos(kep[2]);
 	refDnesity.rp0 = rp0_norm;//参考点的地心距r
 	refDnesity.hp0 = hp0_km * KM_TO_NORMALIZED_LENGTH;
-	refDnesity.sigma0 = refDnesity.rp0 / rRefEllipsoid_norm;//1.223手写式，并不是sigma(p0)
+
+	// 密度参考面的赤道半径；乘当前纬度的形状因子后得到该处的参考地心距。
+	refDnesity.sigma0 = refDnesity.rp0 / ellipsoid_shape;
 
 	if (hp0_km < atm_list[0].h_km)//初始近地点高度已经小于表格中的最小值
 	{
@@ -152,7 +160,7 @@ void Set_ReferenceDensity(const std::vector<AtmosphereData>& atm_list,
 
 	// 密度和标高的归一化
 	refDnesity.H *= KM_TO_NORMALIZED_LENGTH;
-	refDnesity.rho *= ae * ae * ae / MASS_OF_EARTH;//kg/m^3的归一化！
+	refDnesity.rho *= UNIT_LENGTH_M * UNIT_LENGTH_M * UNIT_LENGTH_M / UNIT_MASS_KG;//kg/m^3的归一化！
 
 }
 
@@ -193,7 +201,7 @@ double Get_AtmosphereDensity(const double* cart_norm,
 	// sin(phi)=sin(i)sin(omega+f)，是相对于输入赤道平面的地心纬度正弦。
 	// 此处用它修正参考密度面的半径，没有求大地纬度或另转瞬时地固轴系。
 	double sin_phi = sin(kep[2]) * sin(f + kep[4]);
-	double sigma_p0 = refDensity.sigma0 * (1.0 - EARTH_FLATTENING * sin_phi * sin_phi);
+	double sigma_p0 = refDensity.sigma0 * (1.0 - constants::Wgs84::FLATTENING * sin_phi * sin_phi);
 
 	//1.220,参考密度*周日变化系数*高度衰减系数
 	rho_norm = refDensity.rho * (1.0 + F_star * cos_psi_star) * exp(-(r - sigma_p0) / refDensity.H);
@@ -225,7 +233,7 @@ double Get_AtmosphereDensity(const double* rv_Norm,
 
 	double h_p0_km_temp;//当前计算的初始近地点高度km 1.225
 	h_p0_km_temp = initKepArray_norm[0] * (1.0 - initKepArray_norm[1])
-		- (1.0 - EARTH_FLATTENING * pow(sin(initKepArray_norm[2]) * sin(initKepArray_norm[4]), 2));
+		- constants::Wgs84::EQUATORIAL_RADIUS / UNIT_LENGTH_M * (1.0 - constants::Wgs84::FLATTENING * pow(sin(initKepArray_norm[2]) * sin(initKepArray_norm[4]), 2));
 	h_p0_km_temp *= NORMALIZED_LENGTH_TO_KM;//转化为km
 
 	//初始时刻static高度为0，按理说会进入下面的块
@@ -280,7 +288,7 @@ double Get_AtmosphereDensity(const double* rv_Norm,
 		H_p0_static = atm_list[index].H_km;
 
 		h_p0_static_Norm = h_p0_static * KM_TO_NORMALIZED_LENGTH;
-		rho_p0_static_Norm = rho_p0_static * ae * ae * ae / MASS_OF_EARTH;//kg/m^3的归一化！
+		rho_p0_static_Norm = rho_p0_static * UNIT_LENGTH_M * UNIT_LENGTH_M * UNIT_LENGTH_M / UNIT_MASS_KG;//kg/m^3的归一化！
 		H_p0_static_Norm = H_p0_static * KM_TO_NORMALIZED_LENGTH;
 
 	}
@@ -316,7 +324,7 @@ double Get_AtmosphereDensity(const double* rv_Norm,
 	double sin_phi0 = sin(initKepArray_norm[2]) * sin(initKepArray_norm[4]);
 	double r_p0 = initKepArray_norm[0] * (1 - initKepArray_norm[1]);//a0(1-e0)
 	double
-		sigma_p0 = r_p0 * (1.0 - EARTH_FLATTENING * sin_phi * sin_phi) / (1.0 - EARTH_FLATTENING * sin_phi0 * sin_phi0);
+		sigma_p0 = r_p0 * (1.0 - constants::Wgs84::FLATTENING * sin_phi * sin_phi) / (1.0 - constants::Wgs84::FLATTENING * sin_phi0 * sin_phi0);
 	double mu = 0.1;
 	double H_r = H_p0_static_Norm + mu / 2.0 * (r - r_p0);//1.224
 	double coeff2 = exp(-(r - sigma_p0) / H_r);//高度变化系数
@@ -352,7 +360,7 @@ double Get_AtmosphereDensity(const double* rv_Norm,
 
 	double h_p0_km_temp;//当前计算的初始近地点高度km 1.225
 	h_p0_km_temp = initKepArray_norm[0] * (1.0 - initKepArray_norm[1])
-		- (1.0 - EARTH_FLATTENING * pow(sin(initKepArray_norm[2]) * sin(initKepArray_norm[4]), 2));
+		- constants::Wgs84::EQUATORIAL_RADIUS / UNIT_LENGTH_M * (1.0 - constants::Wgs84::FLATTENING * pow(sin(initKepArray_norm[2]) * sin(initKepArray_norm[4]), 2));
 	h_p0_km_temp *= NORMALIZED_LENGTH_TO_KM;//转化为km
 
 	//初始时刻static高度为0，按理说会进入下面的块
@@ -407,7 +415,7 @@ double Get_AtmosphereDensity(const double* rv_Norm,
 		H_p0_static = atm_list[index].H_km;
 
 		h_p0_static_Norm = h_p0_static * KM_TO_NORMALIZED_LENGTH;
-		rho_p0_static_Norm = rho_p0_static * ae * ae * ae / MASS_OF_EARTH;//kg/m^3的归一化！
+		rho_p0_static_Norm = rho_p0_static * UNIT_LENGTH_M * UNIT_LENGTH_M * UNIT_LENGTH_M / UNIT_MASS_KG;//kg/m^3的归一化！
 		H_p0_static_Norm = H_p0_static * KM_TO_NORMALIZED_LENGTH;
 
 	}
@@ -450,7 +458,7 @@ double Get_AtmosphereDensity(const double* rv_Norm,
 	double sin_phi0 = sin(initKepArray_norm[2]) * sin(initKepArray_norm[4]);
 	double r_p0 = initKepArray_norm[0] * (1 - initKepArray_norm[1]);//a0(1-e0)
 	double
-		sigma_p0 = r_p0 * (1.0 - EARTH_FLATTENING * sin_phi * sin_phi) / (1.0 - EARTH_FLATTENING * sin_phi0 * sin_phi0);
+		sigma_p0 = r_p0 * (1.0 - constants::Wgs84::FLATTENING * sin_phi * sin_phi) / (1.0 - constants::Wgs84::FLATTENING * sin_phi0 * sin_phi0);
 	double mu = 0.1;
 	double H_r = H_p0_static_Norm + mu / 2.0 * (r - r_p0);//1.224
 	double coeff2 = exp(-(r - sigma_p0) / H_r);//高度变化系数

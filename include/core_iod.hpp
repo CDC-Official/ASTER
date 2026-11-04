@@ -82,7 +82,7 @@ namespace iod
 		ArrayXd X, Y, Z;    // 点位资料
 
 		//FIXME: hardcode
-		double sigma_RaDec = 3.0 * ARCSEC_TO_RAD; // 光学测角的噪声标准差，弧度制，默认3角秒
+		double sigma_RaDec = 3.0 * constants::Conversion::ARCSEC_TO_RAD; // 光学测角的噪声标准差，弧度制，默认3角秒
 	};
 
 	struct IodObserver

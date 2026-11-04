@@ -6,6 +6,9 @@
 //
 
 #include "orbit_statedef.hpp"
+using namespace constants::Conversion;
+using constants::PI;
+
 typedef bool b;
 using namespace Identifier;
 
@@ -346,17 +349,17 @@ orbit::Keplerian::Keplerian(double a, double e, double i,
 	if (is_normalized)
 	{
 		//转换为0-2pi
-		m_O = fmod(OMEGA, 2 * pi);
+		m_O = fmod(OMEGA, 2 * PI);
 		if (m_O < 0)
-			m_O += 2 * pi;
+			m_O += 2 * PI;
 
-		m_o = fmod(omega, 2 * pi);
+		m_o = fmod(omega, 2 * PI);
 		if (m_o < 0)
-			m_o += 2 * pi;
+			m_o += 2 * PI;
 
-		m_M = fmod(M, 2 * pi);
+		m_M = fmod(M, 2 * PI);
 		if (m_M < 0)
-			m_M += 2 * pi;
+			m_M += 2 * PI;
 	}
 
 	m_is_normalized = is_normalized;
@@ -381,17 +384,17 @@ void orbit::Keplerian::Set(double a, double e, double i, double OMEGA, double om
 	if (m_is_normalized)
 	{
 		//转换为0-2pi
-		m_O = fmod(OMEGA, 2 * pi);
+		m_O = fmod(OMEGA, 2 * PI);
 		if (m_O < 0)
-			m_O += 2 * pi;
+			m_O += 2 * PI;
 
-		m_o = fmod(omega, 2 * pi);
+		m_o = fmod(omega, 2 * PI);
 		if (m_o < 0)
-			m_o += 2 * pi;
+			m_o += 2 * PI;
 
-		m_M = fmod(M, 2 * pi);
+		m_M = fmod(M, 2 * PI);
 		if (m_M < 0)
-			m_M += 2 * pi;
+			m_M += 2 * PI;
 	}
 
 }
@@ -684,7 +687,7 @@ bool orbit::Keplerian::ToNonSingular2Array(Overwatch& tracer, double* nsg2_array
 	// 260204 修复m_O和m_o写反的bug
 	nsg2_array[3] = sini2 * cos(m_O);
 	nsg2_array[4] = sini2 * sin(m_O);
-	nsg2_array[5] = fmod(ow + m_M + 2 * pi, 2 * pi);
+	nsg2_array[5] = fmod(ow + m_M + 2 * PI, 2 * PI);
 
 	return true;
 }
@@ -727,10 +730,10 @@ void orbit::Keplerian::SyncAnomaly(Overwatch& tracer)
 	{
 		m_E = MeanAnomaly2EccentricAnomaly(m_M, m_e);
 		m_f = EccentricAnomaly2TrueAnomaly(m_E, m_e);
-		m_u = fmod(m_o + m_f, 2 * pi);
+		m_u = fmod(m_o + m_f, 2 * PI);
 		if (m_u < 0)
 		{
-			m_u += 2 * pi;
+			m_u += 2 * PI;
 		}
 
 		m_r = m_a * (1.0 - m_e * cos(m_E));
@@ -846,8 +849,8 @@ void orbit::NonSingular2::SyncAnomaly(Overwatch& tracer)
 			// uTilde 可能已归入一周，lambda 则保留累计角度；须按 2π 而非 π 还原角度差。
 			// 保留小角差原值，避免改变未跨圈算例的正常计算路径。
 			double delta_angle = m_uTilde - m_lambda;
-			while (delta_angle > pi) delta_angle -= 2.0 * pi;
-			while (delta_angle < -pi) delta_angle += 2.0 * pi;
+			while (delta_angle > PI) delta_angle -= 2.0 * PI;
+			while (delta_angle < -PI) delta_angle += 2.0 * PI;
 
 			double xces = m_xi * cos(m_uTilde) + m_eta * sin(m_uTilde);
 			double ra = 1.0 - xces;
@@ -1180,7 +1183,7 @@ bool orbit::NonSingular2::ToKeplerianArray(Overwatch& tracer, double* kep_array,
 		tracer.LogEvent(__FILE__, "ToKeplerian", __LINE__, msg, EventType::WARNING);
 	}
 
-	if (m_strict_check && (i < 0.0 || i >= pi))
+	if (m_strict_check && (i < 0.0 || i >= PI))
 	{
 
 		/* in practice, only PI will be found */
@@ -1197,10 +1200,10 @@ bool orbit::NonSingular2::ToKeplerianArray(Overwatch& tracer, double* kep_array,
 	if ((e > epsZeroEcc) && (i > epsZeroInc))
 	{
 		// NEITHER small e NOR small i, process o, w and m normally
-		double ow = fmod(atan2(m_eta / e, m_xi / e) + 2 * pi, 2 * pi);   // o+w 先转到(pi,3pi]再mod！
-		kep_array[3] = fmod(atan2(m_k / sini2, m_h / sini2) + 2 * pi, 2 * pi);    // o
-		kep_array[4] = fmod(ow - kep_array[3] + 2 * pi, 2 * pi);                  // w
-		kep_array[5] = fmod(m_lambda - ow + 2 * pi, 2 * pi);                // lambda-(o+w)
+		double ow = fmod(atan2(m_eta / e, m_xi / e) + 2 * PI, 2 * PI);   // o+w 先转到(pi,3pi]再mod！
+		kep_array[3] = fmod(atan2(m_k / sini2, m_h / sini2) + 2 * PI, 2 * PI);    // o
+		kep_array[4] = fmod(ow - kep_array[3] + 2 * PI, 2 * PI);                  // w
+		kep_array[5] = fmod(m_lambda - ow + 2 * PI, 2 * PI);                // lambda-(o+w)
 	}
 	else if ((e <= epsZeroEcc) && (i <= epsZeroInc))
 	{
@@ -1214,9 +1217,9 @@ bool orbit::NonSingular2::ToKeplerianArray(Overwatch& tracer, double* kep_array,
 	else if ((e <= epsZeroEcc) && (i > epsZeroInc))
 	{
 		// small e but NOT small i, process o normally but w=0
-		kep_array[3] = fmod(atan2(m_k / sini2, m_h / sini2) + 2 * pi, 2 * pi);
+		kep_array[3] = fmod(atan2(m_k / sini2, m_h / sini2) + 2 * PI, 2 * PI);
 		kep_array[4] = 0.0;
-		kep_array[5] = fmod(m_lambda - kep_array[3] + 2 * pi, 2 * pi);
+		kep_array[5] = fmod(m_lambda - kep_array[3] + 2 * PI, 2 * PI);
 		std::string msg = "For zero eccentricity, countermeasures are taken.";
 		tracer.LogEvent(__FILE__, "ToKeplerian", __LINE__, msg, EventType::WARNING);
 	}
@@ -1224,8 +1227,8 @@ bool orbit::NonSingular2::ToKeplerianArray(Overwatch& tracer, double* kep_array,
 	{
 		// NOT small e but small i, process w normally but o=0
 		kep_array[3] = 0.0;
-		kep_array[4] = fmod(atan2(m_eta / e, m_xi / e) + 2 * pi, 2 * pi);
-		kep_array[5] = fmod(m_lambda - kep_array[4] + 2 * pi, 2 * pi);
+		kep_array[4] = fmod(atan2(m_eta / e, m_xi / e) + 2 * PI, 2 * PI);
+		kep_array[5] = fmod(m_lambda - kep_array[4] + 2 * PI, 2 * PI);
 		std::string msg = "For zero inclination, countermeasures are taken.";
 		tracer.LogEvent(__FILE__, "ToKeplerian", __LINE__, msg, EventType::WARNING);
 	}

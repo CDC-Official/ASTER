@@ -13,6 +13,8 @@
 #include <limits>
 #include <stdexcept>
 
+using constants::PI;
+
 EquatorialCoordinates LOS_to_Equatorial(const Eigen::Vector3d& line_of_sight)
 {
     const double xy = std::hypot(line_of_sight[0], line_of_sight[1]);
@@ -24,9 +26,9 @@ EquatorialCoordinates LOS_to_Equatorial(const Eigen::Vector3d& line_of_sight)
     }
     double alpha = xy == 0 ? 0 : std::atan2(line_of_sight[1], line_of_sight[0]);
     if (alpha < 0)
-        alpha += 2 * pi;
+        alpha += 2 * PI;
     // 极小负角加一周后可能舍入成 2π，将其归回零以保持半开区间。
-    if (alpha >= 2 * pi)
+    if (alpha >= 2 * PI)
         alpha = 0;
     return {rho, alpha, std::atan2(line_of_sight[2], xy)};
 }
@@ -57,7 +59,7 @@ void RelativePosition_to_Horizontal(Matrix3d& r, double x, double y, double z, d
 	H_c = r * L_c;       // 旋转得到北—西—天地平系中的单位视线。
 	A = atan2(-H_c[1], H_c[0]);
 	if (A < 0)
-		A += 2 * pi;  //(0,2pi)
+		A += 2 * PI;  //(0,2pi)
 	h = asin(H_c[2]);
 
 	rAh[0] = rho;

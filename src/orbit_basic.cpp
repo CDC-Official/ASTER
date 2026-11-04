@@ -9,6 +9,8 @@
 #include <algorithm>
 #include <limits>
 
+using constants::PI;
+
 double MeanAnomaly2EccentricAnomaly(double M, double e, double keplerTOL)
 {
 	//平近点角->偏近点角，求解开普勒方程，keplerTOL默认 1E-16 最大迭代次数20
@@ -23,11 +25,11 @@ double EccentricAnomaly2MeanAnomaly(double E, double e)
 	//由偏近点角->平近点角 rad 仅适用于椭圆
 	//M在0-2pi
 	double M = E - e * sin(E);
-	M = fmod(M, 2 * pi);
+	M = fmod(M, 2 * PI);
 	if (M >= 0)
 		return M;  //换为(0, 2pi)
 	else
-		return M + 2 * pi;
+		return M + 2 * PI;
 }
 
 double EccentricAnomaly2TrueAnomaly(double E, double e)
@@ -36,7 +38,7 @@ double EccentricAnomaly2TrueAnomaly(double E, double e)
 	double f = atan2(sqrt(1 - e * e) * sin(E), cos(E) - e);
 	if (f < 0)
 	{
-		f += 2 * pi;
+		f += 2 * PI;
 	}
 	return f;
 }
@@ -60,7 +62,7 @@ double TrueAnomaly2EccentricAnomaly(double f, double e)
 	double E = atan2(sin_E, cos_E);
 	if (E < 0)
 	{
-		E += 2 * pi;
+		E += 2 * PI;
 	}
 	return E;
 }
@@ -92,7 +94,7 @@ double SolveKepler(double e, double M, double x0, double TOL,
 		return p;  //换为(0, 2pi)
 
 	else
-		return p + 2 * pi;
+		return p + 2 * PI;
 }
 
 double SolveGeneralizedKepler(double xi, double eta, double lambda, double TOL, int m)  //离心率e, 平近点角M, 初值x0, TOL, 最大迭代次数
@@ -137,7 +139,7 @@ double SolveGeneralizedKepler(double xi, double eta, double lambda, double TOL, 
 		return uTilde;  //换为(0, 2pi)
 
 	else
-		return uTilde + 2 * pi;
+		return uTilde + 2 * PI;
 
 }
 
@@ -186,11 +188,11 @@ void CartesianToKeplerian(double x, double y, double z, double vx, double vy,
 
 	E0 = atan2(r0v0 / sqrt(1.0 * a), 1 - r0 / a);     //(-pi, pi)换为(0, 2pi)
 	if (E0 < 0)
-		E0 += 2 * pi;
+		E0 += 2 * PI;
 
 	M0 = E0 - e * sin(E0);
 	if (M0 < 0)
-		M0 += 2 * pi;
+		M0 += 2 * PI;
 
 	Pz = cos(E0) / r0 * z - sqrt(a / 1) * sin(E0) * vz;
 	Qz = (sin(E0) / r0 * z + sqrt(a / 1) * (cos(E0) - e) * vz) /
@@ -203,11 +205,11 @@ void CartesianToKeplerian(double x, double y, double z, double vx, double vy,
 
 	omega = atan2(Pz, Qz);
 	if (omega < 0)
-		omega += 2 * pi;
+		omega += 2 * PI;
 
 	OMEGA = atan2(Rx, -Ry);
 	if (OMEGA < 0)
-		OMEGA += 2 * pi;
+		OMEGA += 2 * PI;
 	i = acos(Rz);  //(0, pi)
 	ele[0] = a;
 	ele[1] = e;

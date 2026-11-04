@@ -56,6 +56,9 @@
 #include "core_iod.hpp"
 #include "time_transform.hpp"
 
+using namespace constants::Scale;
+using namespace constants::Conversion;
+
 namespace fs = std::filesystem;
 
 using namespace std;
@@ -622,7 +625,7 @@ int main(int argc, char* argv[])
 			// 将赤经、赤纬从 deg 换算为 rad；赤经为负值时加上 2π。
 			double ra_rad = record.ra_deg * DEGREE_TO_RAD;
 
-			if (ra_rad < 0.0) ra_rad += 2 * pi;
+			if (ra_rad < 0.0) ra_rad += 2 * constants::PI;
 
 			thisJob.obs.ra_rad(k) = ra_rad;
 			thisJob.obs.dec_rad(k) = record.dec_deg * DEGREE_TO_RAD;
@@ -685,7 +688,7 @@ int main(int argc, char* argv[])
 				// 大地站址为高度(m)、lambda(deg)、phi(deg)；先转换为归一化 ITRS XYZ。
 				frame::Geodetic site_geodetic(ground_observer.geodetic_height_m, ground_observer.geodetic_lambda_deg,
 					ground_observer.geodetic_phi_deg, false);
-				site_geodetic.Normalize(tracer, ae);
+				site_geodetic.Normalize(tracer, UNIT_LENGTH_M);
 				site_geodetic.ToITRS(tracer, site_itrs);
 			}
 			else
@@ -693,7 +696,7 @@ int main(int argc, char* argv[])
 				// 类型 2 直接提供 ITRS XYZ(m)，以 ae 归一化后用于地固到天球的变换。
 				site_itrs.Set(ground_observer.position_itrs_m[0], ground_observer.position_itrs_m[1],
 					ground_observer.position_itrs_m[2], false);
-				site_itrs.Normalize(tracer, ae);
+				site_itrs.Normalize(tracer, UNIT_LENGTH_M);
 			}
 
 			if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
@@ -796,7 +799,7 @@ int main(int argc, char* argv[])
 			}
 
 			const bool is_normalized = initial_units == IOD_SOLUTION_NORMALIZE;
-			const double length_unit = initial_units == IOD_SOLUTION_KMDEG ? ae / 1000.0 : ae;
+			const double length_unit = initial_units == IOD_SOLUTION_KMDEG ? UNIT_LENGTH_M / 1000.0 : UNIT_LENGTH_M;
 
 			if (initial_is_cartesian)
 			{
@@ -805,7 +808,7 @@ int main(int argc, char* argv[])
 
 				if (!is_normalized)
 				{
-					thisJob.initValue.initCart.Normalize(tracer, length_unit, UNITTIME);
+					thisJob.initValue.initCart.Normalize(tracer, length_unit, UNIT_TIME_S);
 					if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 				}
 			}
@@ -866,7 +869,7 @@ int main(int argc, char* argv[])
 							<< std::left << std::setw(label_width) << "- First / Last observation [UTC]" << ": "
 							<< std::fixed << std::setprecision(12) << records[0].mjd_utc << " / " << records[used_count - 1].mjd_utc
 							<< '\n' << std::setw(label_width) << "- Arc span [s]" << ": " << std::setprecision(2)
-							<< (records[used_count - 1].mjd_utc - records[0].mjd_utc) * 86400.0
+							<< (records[used_count - 1].mjd_utc - records[0].mjd_utc) * constants::SECONDS_PER_DAY
 							<< '\n' << std::setw(label_width) << "- Unique epochs" << ": " << unique_epochs
 							<< "\n\n" << std::setw(label_width) << "- Observers" << ": " << station_ids.size() << " (";
 
@@ -955,8 +958,8 @@ int main(int argc, char* argv[])
 		// 单位码 1 保留归一化量和 rad；2 恢复为 km、km/s、deg；3 恢复为 m、m/s、deg。
 		if (thisJob.solutionUnit != IOD_SOLUTION_NORMALIZE)
 		{
-			const double length_scale = thisJob.solutionUnit == IOD_SOLUTION_KMDEG ? ae / 1000 : ae;
-			output_cart.Restore(tracer, length_scale, UNITTIME);
+			const double length_scale = thisJob.solutionUnit == IOD_SOLUTION_KMDEG ? UNIT_LENGTH_M / 1000 : UNIT_LENGTH_M;
+			output_cart.Restore(tracer, length_scale, UNIT_TIME_S);
 			if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
 			output_kep.Restore(tracer, length_scale);

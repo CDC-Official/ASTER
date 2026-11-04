@@ -34,44 +34,30 @@ struct OrbitPropagationJob;
 struct OrbitPropagationJob_EBCRS;
 
 /**
- * @brief Compute the GCRS/TT right-hand side for a normalized nonsingular-2 state.
- *
- * @param tracer Runtime event logger and error-state carrier.
- * @param thisjob Orbit propagation job containing the GCRS force-model switches,
- *                EOP data, atmosphere data, reference density, and satellite model.
- * @param MJD_TT Current right-hand-side evaluation epoch, expressed as MJD(TT).
- * @param n State dimension. The current implementation expects n = 6.
- * @param x Input normalized nonsingular-2 state at MJD_TT.
- * @param f Output normalized time derivative of the nonsingular-2 state.
- *
- * @note The caller, usually an integrator, is responsible for passing the
- *       actual evaluation epoch for the current stage. This function no longer
- *       reconstructs the epoch from an integration-step start time and a stage
- *       offset.
- * @note The perturbing Cartesian acceleration is first computed in the inertial
- *       frame, then projected to RTN/STW and converted to nonsingular-2 element
- *       derivatives through the Gauss planetary equations.
+ * @brief 计算 GCRS/TT 下 NonSingular2 状态的动力学右函数。
+ * @param[in,out] tracer 记录函数调用和模型计算中的错误。
+ * @param[in] thisjob 提供摄动开关、EOP、大气参考参数和卫星质量、面积、光学及阻力参数。
+ * @param[in] MJD_TT 当前右函数评估点的 TT 时刻，单位 MJD，由积分器传入。
+ * @param[in] n 状态维数，当前使用 6 维状态。
+ * @param[in] x 状态 [a,xi,eta,h,k,lambda]；a 以 Scale::UNIT_LENGTH_M 归一化，lambda 单位 rad，其余分量无量纲。
+ * @param[out] f 六维状态对归一化时间的导数，时间尺度为 Scale::UNIT_TIME_S。
+ * @details 将状态转为 Cartesian 后求各项摄动，投影到 RTN，再通过高斯行星方程得到根数导数。
+ *          月球非球形项采用卫星处与地心处的加速度之差；近地 JPL 查询以 TT 近似 TDB。
  */
 void Acceleration_NSG2(bastion::Overwatch& tracer, const OrbitPropagationJob& thisjob, const double MJD_TT, int n, const double* x, double* f);
 
 /**
- * @brief Compute the GCRS/TT right-hand side for a normalized Cartesian state.
- *
- * @param tracer Runtime event logger and error-state carrier.
- * @param thisjob Orbit propagation job containing the GCRS force-model switches,
- *                EOP data, atmosphere data, reference density, and satellite model.
- * @param MJD_TT Current right-hand-side evaluation epoch, expressed as MJD(TT).
- * @param n State dimension. The current implementation expects n = 6.
- * @param x Input normalized Cartesian state at MJD_TT.
- * @param f Output normalized Cartesian state derivative, [vx, vy, vz, ax, ay, az].
- *
- * @note The state is interpreted in the geocentric inertial frame used by the
- *       existing GCRS/TT propagator. Position and velocity use the project's
- *       normalized Earth units.
- * @note The caller must pass the actual stage epoch. This keeps the dynamics
- *       interface independent of the particular integrator implementation.
+ * @brief 计算 GCRS/TT 下 Cartesian 状态的动力学右函数。
+ * @param[in,out] tracer 记录函数调用和模型计算中的错误。
+ * @param[in] thisjob 提供摄动开关、EOP、大气参考参数和卫星质量、面积、光学及阻力参数。
+ * @param[in] MJD_TT 当前右函数评估点的 TT 时刻，单位 MJD，由积分器传入。
+ * @param[in] n 状态维数，当前使用 6 维状态。
+ * @param[in] x GCRS 状态 [x,y,z,vx,vy,vz]；位置尺度为 Scale::UNIT_LENGTH_M，速度尺度为 Scale::UNIT_LENGTH_M/Scale::UNIT_TIME_S。
+ * @param[out] f 状态对归一化时间的导数 [vx,vy,vz,ax,ay,az]，时间尺度为 Scale::UNIT_TIME_S。
+ * @details 在地球中心引力上按开关叠加各项摄动。
+ *          月球非球形项采用卫星处与地心处的加速度之差；近地 JPL 查询以 TT 近似 TDB。
  */
-void Acceleration_Cart(bastion::Overwatch& tracer, const OrbitPropagationJob& thisjob, const double MJD_TT,  int n, const double* x, double* f);
+void Acceleration_Cart(bastion::Overwatch& tracer, const OrbitPropagationJob& thisjob, const double MJD_TT, int n, const double* x, double* f);
 
 /**
  * @brief Compute the EBCRS post-Newtonian correction from the EIH N-body equations.

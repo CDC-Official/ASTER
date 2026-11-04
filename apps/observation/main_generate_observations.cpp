@@ -32,6 +32,9 @@
 #include <stdexcept>
 #include <vector>
 
+using namespace constants::Scale;
+using namespace constants::Conversion;
+
 using namespace std;
 using namespace Eigen;
 using namespace io;
@@ -360,7 +363,7 @@ int main(int argc, char* argv[])
 
                 Keplerian state(values[0], values[1], values[2], values[3], values[4], values[5], normalized != 0);
 
-                if (!normalized) state.Normalize(tracer, ae / 1000.0);
+                if (!normalized) state.Normalize(tracer, UNIT_LENGTH_M / 1000.0);
 
                 if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
@@ -423,14 +426,14 @@ int main(int argc, char* argv[])
 
             frame::Geodetic site_geodetic(ground_observer.geodetic_height_m, ground_observer.geodetic_lambda_deg,
                                  ground_observer.geodetic_phi_deg, false);
-            site_geodetic.Normalize(tracer, ae); // 高度 m→ae，经纬度 deg→rad。
+            site_geodetic.Normalize(tracer, UNIT_LENGTH_M); // 高度 m→ae，经纬度 deg→rad。
             site_geodetic.ToITRS(tracer, site_itrs);
         }
         else
         {
             site_itrs.Set(ground_observer.position_itrs_m[0], ground_observer.position_itrs_m[1],
                           ground_observer.position_itrs_m[2], false);
-            site_itrs.Normalize(tracer, ae); // 地固 XYZ 从 m 变成 ae。
+            site_itrs.Normalize(tracer, UNIT_LENGTH_M); // 地固 XYZ 从 m 变成 ae。
         }
 
         if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
@@ -461,7 +464,7 @@ int main(int argc, char* argv[])
             if (need_sun)
             {
                 // 太阳均取同历元的地心几何方向；沿用 JPL/解析星历轴向与 GCRS 近似一致的处理。
-                const double ut1 = MJD[k] + eop_at_time.dut1 / 86400.0;
+                const double ut1 = MJD[k] + eop_at_time.dut1 / constants::SECONDS_PER_DAY;
                 double sun[6] = {};
 
                 if (solar_ephemeris == SOLAR_GRAVITY_ANALYTICAL)
@@ -472,11 +475,11 @@ int main(int argc, char* argv[])
                 {
                     // 当前 EOP 的 TAI-UTC 给出 TT；SOFA 地心 TDB-TT 项用于 JPL 查询。
                     double tt1, tt2, tdb1, tdb2;
-                    iauTaitt(START_OF_MJD, MJD[k] + eop_at_time.dat / 86400.0, &tt1, &tt2);
+                    iauTaitt(constants::MJD_OFFSET, MJD[k] + eop_at_time.dat / constants::SECONDS_PER_DAY, &tt1, &tt2);
                     const double dtr = iauDtdb(tt1, tt2, ut1 - floor(ut1), 0.0, 0.0, 0.0);
                     iauTttdb(tt1, tt2, dtr, &tdb1, &tdb2);
-                    const double tdb = (tdb1 - START_OF_MJD) + tdb2;
-                    const double jd = tdb + START_OF_MJD;
+                    const double tdb = (tdb1 - constants::MJD_OFFSET) + tdb2;
+                    const double jd = tdb + constants::MJD_OFFSET;
 
                     if (jd < JPLEPH_R1.r1.ss[0] || jd > JPLEPH_R1.r1.ss[1])
                         throw runtime_error("Observation epoch is outside JPL coverage at input row " + to_string(k + 1));

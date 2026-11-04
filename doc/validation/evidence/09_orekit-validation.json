@@ -1,0 +1,399 @@
+{
+  "comparison": {
+    "comparison_parties": "当前 ASTER 工作区与 Orekit 13.1；并另列各自收敛及姿态控制结果",
+    "duration_s": 86400,
+    "output_interval_s": 10,
+    "rows": 8641,
+    "comparisons": {
+      "two_body_aster_vs_orekit": {
+        "left": "当前 ASTER：RKF78，步长 10 s，门限 1e-12",
+        "right": "Orekit 数值二体",
+        "max_position_m": 7.319712167342491e-06,
+        "final_position_m": 7.319712167342491e-06,
+        "rms_position_m": 3.047965960021472e-06,
+        "max_velocity_mps": 8.119185228963576e-09,
+        "final_velocity_mps": 8.119185228963576e-09
+      },
+      "two_body_aster_vs_analytic": {
+        "left": "当前 ASTER：RKF78，步长 10 s，门限 1e-12",
+        "right": "Orekit 二体解析解",
+        "max_position_m": 2.409102723098574e-06,
+        "final_position_m": 2.321565556220861e-06,
+        "rms_position_m": 1.306753398810227e-06,
+        "max_velocity_mps": 2.644946325414624e-09,
+        "final_velocity_mps": 2.536818154165493e-09
+      },
+      "two_body_aster_fine_vs_analytic": {
+        "left": "当前 ASTER：RKF78，步长 5 s，门限 1e-14",
+        "right": "Orekit 二体解析解",
+        "max_position_m": 0.00015373987623867197,
+        "final_position_m": 0.00015373987623867197,
+        "rms_position_m": 5.7479994107985505e-06,
+        "max_velocity_mps": 1.714640141073364e-07,
+        "final_velocity_mps": 1.714640141073364e-07
+      },
+      "two_body_orekit_vs_analytic": {
+        "left": "Orekit 数值二体",
+        "right": "Orekit 二体解析解",
+        "max_position_m": 9.717624439578033e-06,
+        "final_position_m": 9.64121580412858e-06,
+        "rms_position_m": 4.33139856659692e-06,
+        "max_velocity_mps": 1.074377102467323e-08,
+        "final_velocity_mps": 1.065594411834148e-08
+      },
+      "earth80_shared": {
+        "left": "当前 ASTER：RKF78，步长 10 s，门限 1e-12",
+        "right": "Orekit，共用 ASTER 姿态",
+        "max_position_m": 1.734514375542359e-05,
+        "final_position_m": 1.7307135740668748e-05,
+        "rms_position_m": 9.25129515862647e-06,
+        "max_velocity_mps": 1.9362537667211225e-08,
+        "final_velocity_mps": 1.931305395355426e-08
+      },
+      "earth80_shared_fine": {
+        "left": "当前 ASTER：RKF78，步长 5 s，门限 1e-14",
+        "right": "Orekit，共用 ASTER 姿态",
+        "max_position_m": 0.00014824138113248825,
+        "final_position_m": 0.00014824138113248825,
+        "rms_position_m": 9.654168674820794e-06,
+        "max_velocity_mps": 1.658467949887591e-07,
+        "final_velocity_mps": 1.658467949887591e-07
+      },
+      "aster_gravity_convergence": {
+        "left": "当前 ASTER：RKF78，步长 10 s，门限 1e-12",
+        "right": "当前 ASTER：RKF78，步长 5 s，门限 1e-14",
+        "max_position_m": 0.000165548516293262,
+        "final_position_m": 0.000165548516293262,
+        "rms_position_m": 1.8482480511477254e-06,
+        "max_velocity_mps": 1.851596502949872e-07,
+        "final_velocity_mps": 1.851596502949872e-07
+      },
+      "orekit_gravity_convergence": {
+        "left": "Orekit 原门限",
+        "right": "Orekit 收紧门限/步长上限",
+        "max_position_m": 0.0025624472503974513,
+        "final_position_m": 0.0025624472503974513,
+        "rms_position_m": 0.0008610161772163342,
+        "max_velocity_mps": 2.911134211996623e-06,
+        "final_velocity_mps": 2.911134211996623e-06
+      },
+      "earth80_separate_frames": {
+        "left": "当前 ASTER 收紧门限，ASTER 姿态",
+        "right": "Orekit 收紧门限，Orekit IERS2010 姿态",
+        "max_position_m": 0.005998675093600612,
+        "final_position_m": 0.0058362000943876485,
+        "rms_position_m": 0.003347344912503184,
+        "max_velocity_mps": 6.757383141159194e-06,
+        "final_velocity_mps": 6.575885693652735e-06
+      },
+      "orientation_effect_orekit_only": {
+        "left": "Orekit，共用 ASTER 姿态",
+        "right": "Orekit，自己的 IERS2010 姿态",
+        "max_position_m": 0.00598388689133143,
+        "final_position_m": 0.00598388689133143,
+        "rms_position_m": 0.0033379957099748526,
+        "max_velocity_mps": 6.738793240074818e-06,
+        "final_velocity_mps": 6.738793240074818e-06
+      },
+      "earth80_shared_converged": {
+        "left": "当前 ASTER：10 s、1e-12",
+        "right": "Orekit：7.5 s 步长上限，共用 ASTER 姿态",
+        "max_position_m": 6.740511264443445e-06,
+        "final_position_m": 6.740511264443445e-06,
+        "rms_position_m": 3.480286515111117e-06,
+        "max_velocity_mps": 7.539832868367213e-09,
+        "final_velocity_mps": 7.539832868367213e-09
+      },
+      "earth80_independent_orientation": {
+        "left": "当前 ASTER：10 s、1e-12，ASTER 姿态",
+        "right": "Orekit：15 s 步长上限，IERS2010 姿态",
+        "max_position_m": 0.005997216895245232,
+        "final_position_m": 0.005997216895245232,
+        "rms_position_m": 0.0033448625572790507,
+        "max_velocity_mps": 6.7534904193354275e-06,
+        "final_velocity_mps": 6.7534904193354275e-06
+      },
+      "orekit_refine_30_15": {
+        "left": "Orekit：30 s 上限",
+        "right": "Orekit：15 s 上限",
+        "max_position_m": 1.2433856936170118e-05,
+        "final_position_m": 1.23137899788705e-05,
+        "rms_position_m": 6.6085715632997955e-06,
+        "max_velocity_mps": 1.3962352000214277e-08,
+        "final_velocity_mps": 1.374066022166978e-08
+      },
+      "orekit_refine_15_7_5": {
+        "left": "Orekit：15 s 上限",
+        "right": "Orekit：7.5 s 上限",
+        "max_position_m": 1.886051063690275e-06,
+        "final_position_m": 1.7471699617771518e-06,
+        "rms_position_m": 8.398864017936277e-07,
+        "max_velocity_mps": 2.0770057942219895e-09,
+        "final_velocity_mps": 1.9684577303791193e-09
+      },
+      "orekit_frame_change_converged": {
+        "left": "Orekit：15 s 上限，共用 ASTER 姿态",
+        "right": "Orekit：15 s 上限，自己的 IERS2010 姿态",
+        "max_position_m": 0.005992239228602021,
+        "final_position_m": 0.005992239228602021,
+        "rms_position_m": 0.00334223877604733,
+        "max_velocity_mps": 6.748010738446247e-06,
+        "final_velocity_mps": 6.748010738446247e-06
+      },
+      "two_body_orekit_fine_vs_analytic": {
+        "left": "Orekit 数值二体：15 s 上限",
+        "right": "Orekit 二体解析解",
+        "max_position_m": 9.118657329321369e-06,
+        "final_position_m": 9.039744223931933e-06,
+        "rms_position_m": 3.546364850596188e-06,
+        "max_velocity_mps": 1.011868102440568e-08,
+        "final_velocity_mps": 1.0029433813261185e-08
+      }
+    },
+    "fixed_ecef": {
+      "10": {
+        "max_component_difference_mps2": 6.938893903907228e-18,
+        "max_vector_difference_mps2": 6.990371961754431e-18
+      },
+      "80": {
+        "max_component_difference_mps2": 1.214306433183765e-17,
+        "max_vector_difference_mps2": 1.216724120507845e-17
+      }
+    },
+    "orientation": {
+      "max_angle_rad": 2.529567041945928e-09,
+      "max_angle_mas": 0.5217606557960176,
+      "shared_adapter_max_angle_rad": 0.0
+    }
+  },
+  "step_time_roundoff": {
+    "10": {
+      "integrator_steps": 8640,
+      "last_step_s": 10.000000000000002,
+      "double_accumulated_elapsed_error_s": -6.766640581190586e-09,
+      "sum_of_step_durations_error_s": 1.134379618689264e-11
+    },
+    "5": {
+      "integrator_steps": 17280,
+      "last_step_s": 4.9999999782081685,
+      "double_accumulated_elapsed_error_s": 0.0,
+      "sum_of_step_durations_error_s": -2.1780488229946807e-08
+    },
+    "earth80_endpoint": {
+      "actual_position_difference_m": 0.00016554836369118438,
+      "predicted_from_step_duration_difference_m": 0.00016546357983512915,
+      "remaining_difference_after_linear_time_correction_m": 8.493096385673818e-08,
+      "explanation": "仅诊断最后一步的时间累加舍入。原始结果保留，不修改生产代码，也不替代正式对照结果。"
+    }
+  },
+  "aster_snapshot": {
+    "branch": "fix/earth-gm-conventions",
+    "head": "406294200eb808221fe430adc6b750b403a140b5",
+    "comparison": "当前 ASTER 工作区 vs Orekit 13.1",
+    "aster_source_sha256": {
+      "src/accel_drag.cpp": "ae1e9895c9f8163fab870f4fbae5251e5db05ffc163ea498908b86293f7aa3d0",
+      "src/accel_complete.cpp": "2722ac474df8e1df6a15addd0ab844c602e9db6bfceb40c4c0adb1c0f44f52cc",
+      "src/integrator_adams.cpp": "7426b97b6c0cc8a0033f08639c1e9a6f1f2cfc89f5a62634a0fa38b865da263e",
+      "src/accel_solar_radiation.cpp": "3e43830a71a7e720488c5f97bda82c8159b625d5f602d8f65ce77354659ef583",
+      "src/model_observation.cpp": "15e14b349aa1949b22ad480d9a9dd03404655eb377a893ce7bb2580159908621",
+      "src/io_settings.cpp": "ad4166cb1e531e3e68ac22d3fa1e4a53598b026411e62ab62753909479a78a64",
+      "src/frame_definition.cpp": "843a2c59b6d5155033a0c42fa9ce8d7ce255c1a23fd6884e209a4f91adf987ff",
+      "src/earth_eop.cpp": "47d238f91c2977eb2da4a630ea17fd52fd260b83a0f95a442f76e0fa8e263de9",
+      "src/time_transform.cpp": "f8019b26fc7ee57f391003df9576c19330b1fea56f72034233139ba6f3f4996b",
+      "src/model_cislunar_observation.cpp": "09259ad25ccf9b652696e2cf042c7847c12f52db20d89d9e0cc9ff0958727e75",
+      "src/core_iod.cpp": "89ac1050eb20f29f90509b025d9081304c40b7464f322e22f55a52bb1180949b",
+      "src/analyt_lunisolar.cpp": "d3e874e03e208a9f3b491bc9701148f51a9e56d2667ce2caec69dacdfb29666a",
+      "src/core_bodn.cpp": "de9ba36822d24953700fb7d8d6c11c7a300cde53f2b6d36f4938eb4d22129388",
+      "src/core_iod_solver.cpp": "b270c18a5df2e00a775ec59d2f1d94b8091b3a671175eada868c137f1a23d22b",
+      "src/model_atmosphere.cpp": "e590c8c95ace7d01e15e1b30313fbf6a42329ffdd98625def98ec64f3ebf08ab",
+      "src/io_common.cpp": "6a7ec7c8be2f5ca35f2825ba7acd4d9417e44207a064be29033b3566fc43275f",
+      "src/frame_earth.cpp": "d235209a38af4cdf71b16f15439cf39fa9af39a7c8c01555a41fdddb81ae1375",
+      "src/accel_gravity.cpp": "1a4bade40a38bfd8e49d491edc7e4a735143f059088c0412d17324d75164c4aa",
+      "src/model_satellite.cpp": "66e6c34e33c3d8df4cbf75c9872f04d7c61a6bfb74c783e8a323e0146535825f",
+      "src/integrator_rkf78.cpp": "b08c0942d2a4324e7e20ffe75a43a035550184471dfb4a4a029dd531e7f39d61",
+      "src/utils_overwatch.cpp": "eea7be13281a6a1a6438e1c19f070525d396202cc13b51451451b7649a6cf681",
+      "src/model_propagation.cpp": "81f09f06921ca4da8620df7305b96d787a8a7dea7b0cc6e81a71cee48339e5e3",
+      "src/math_backend.cpp": "ba518bd233ed2d5c69e2e02c1462189a106eb850a07637d34073374d221e3e3b",
+      "src/orbit_geometry.cpp": "eaa75467dc6e186caf1d0f56836df15ce198c03e23d5e8ad383d24c528d14422",
+      "src/orbit_expansion.cpp": "7ae468223e33eb205f4a2beace14873ff4e63265711c717fe001643dfcd9a79d",
+      "src/model_ephemeris_analytic.cpp": "6fc30ad1dd977a104c7300be7bd197fabc73e1623f4159941809923c389786a8",
+      "src/io_observation_arc.cpp": "6ffd526fd79991e9e093a59135e6ae3b80e2964a139833300ad8d182eb182b4d",
+      "src/analyt_averaging.cpp": "fae1af623769806843c954ee2c9b2229f950cad7b7ae170a8006e0a89ded8b7b",
+      "src/data_gravityfield.cpp": "e056923c06c2271904a4daaacf620a5d4e49a96111d5f21fea05c017b7c944cf",
+      "src/math_statistics.cpp": "9e39df30f7df0bbb5b80de4abe98e6bb5df6cbba45f6f67156f5ef4dada8df9a",
+      "src/math_basic.cpp": "b7455ab6f84ad465aaa5c53a1cfb9d5d677889ec1970ccae7d24e28dc4c9843c",
+      "src/orbit_statedef.cpp": "0f02cfdc6e0b1010e8a10174a443f59fd60bde72fcd167bdb42ce0577182236b",
+      "src/utils_constants.cpp": "0306f21c05e3e371673e6ebe830c9df415406474176b27254cec0a279e5b48dd",
+      "src/model_ephemeris_jpl.cpp": "abb90f4652c0ba6528a1412f00c9b42c10838323d937ab9d9c1a5772b371c649",
+      "src/core_propagation.cpp": "b9ccbb1f297fb4447242586173e4f7ca5ee653beae78c5e741f0c77c53c146c9",
+      "src/orbit_basic.cpp": "e9fbadc93430415321a73a095a06ce7c1dfda50c527041428be5215ed99d0cae",
+      "src/orbit_stm.cpp": "ec9a3198c1e2cea31771bab1b8db407e5ad66ed0ad1b36b50e721464bc572ccb",
+      "src/analyt_solar_radiation.cpp": "cdca0e08c5c2f7f5443b1f08b288b7fef9589129989411aab455539bf4c446c9",
+      "src/analyt_gravity.cpp": "069e34fad0eb78f6956fa2895aae986b648cbfb94fa2c266c1a78756492e0900",
+      "src/accel_thirdbody.cpp": "4948a798541b4caa1a489b30461b21a5018d33e579396f2262768a8277ae43d9",
+      "src/orbit_equation.cpp": "b260d76bf78f0d288171a0ec7eba31656e0c631a94be497cdfa081f0819d38b7",
+      "include/math_basic.hpp": "7067f6665ab140ee89347dcb0cbaa0a075195fce0df34843b57fe578a671f164",
+      "include/orbit_statedef.hpp": "da0cca669a04b26d2c692b287447640793eec478824bf22b16822df1cf708a3d",
+      "include/utils_constants.hpp": "89050cafef8bde7ad466511b27581ac3477eb3c97f9d8c76e6d2dd472a389e84",
+      "include/core_propagation.hpp": "1a3f9604a00533786dcc21d05b267e4d7724770fd287ce37d1feb3367ed6a2b8",
+      "include/model_ephemeris_jpl.hpp": "12fb9fa33a7b69b833ea0af92814b9c52e036f2a2e7056413466b3f3a4d979db",
+      "include/analyt_terms.hpp": "8209ea2dc92213cff22f07bbe80dee59147564c13f79b8a096462c8d3ff03d17",
+      "include/orbit_basic.hpp": "b19ae37cf1070b73155f71d0dc09014aef3422406a695cbde680048acab4e682",
+      "include/orbit_stm.hpp": "7b5be92db32f3da7077cfa8baf3fe60478430a1f3499ac914e94e1ceca0510a5",
+      "include/orbit_typedef.hpp": "dd3eb90bb37d85ea00494de384f61a285bf4285ea010d234be228527a10dd5b4",
+      "include/accel_thirdbody.hpp": "93abf9cc2473e992e004bf0232312d84661534d2b61349389f11d7d9906d747e",
+      "include/orbit_equation.hpp": "4eb5ed3981d8d1ae860fc2fee983fafb4c8316be8b0f53a32670e29efee09dda",
+      "include/accel_gravity.hpp": "78dbf4e5275de806131e293481d968dd1d42883c958a8e457e0b49dd40fb0604",
+      "include/model_satellite.hpp": "8e8c4dfd078eddb7fb7089ce8e6627de5c73530ef0a1a86f8dddf1c5c32d11b7",
+      "include/integrator_rkf78.hpp": "28ae7e4e81c883a6224f0dc44a145fc87681f3cea4502b9f4217beb4cf6f747d",
+      "include/utils_overwatch.hpp": "fa31ae68c38b297d0fc8a129646f77f3e2e7171ac2938c2f550a80c421a72516",
+      "include/model_propagation.hpp": "0bbb057c052309667c8f193332d3978a288872a40f13d286a920d4e3169acbb9",
+      "include/math_backend.hpp": "5c99c68a17644b5921c2e00d319a80501a1536a9a17670c25c860b65507a764b",
+      "include/io_observation_arc.hpp": "e9cfdf675b091ea08957df1b56668fe4fadad7194f1808f5a143c0e210e1f6cb",
+      "include/orbit_geometry.hpp": "11a6c3fa435f09f933d997fae166db0f875ac38cb766125ff400a30fe6eaef6f",
+      "include/orbit_expansion.hpp": "6276caa5fad366db8c86eeb1588dc48d5aae28979a19e2a2e82993926baed5a8",
+      "include/model_ephemeris_analytic.hpp": "389eb0899b51422380a1ce52ae06e8bbd3ef8fe38a704e0a753f17a0e87d23d7",
+      "include/analyt_averaging.hpp": "add8601bd6957d4466bd392a49536f5bdf345726446f4ff1359bc5c31ce6fa4a",
+      "include/data_gravityfield.hpp": "d06aad20a8c6d33d1266dddecba440e77c4ea239956903e7bbaf124f3cf6b054",
+      "include/math_statistics.hpp": "317b8cc9967411c25d8fd945d8470844d3a8a919761974ea97080f213a8e492e",
+      "include/earth_eop.hpp": "853f9ba87d040e7f6277e90d40b7b101ad16675cc5493a23b6d036dcfe8661cc",
+      "include/frame_definition.hpp": "9e497498491fec94137a3ce62d49212cdd4416cfca196b5570259df5cf3ddfad",
+      "include/time_transform.hpp": "2f03e677298d755add97d6a92777c9bc6bc4fcfa2dbe1d7771d93697f95e49cd",
+      "include/model_cislunar_observation.hpp": "28f3f904a38e6163ea87352b4972bbdf9f24fc16f8e1098eb8944b1ff615bbf8",
+      "include/core_iod.hpp": "4b91722c49154dd4e46394a5b9236eae2a58f3a3ed641fe652d5934036d1d03d",
+      "include/core_iod_solver.hpp": "9366af48b07a52f00bce8a21b053a7b8858118d2e137c9d2d1ad489f5a5e66be",
+      "include/model_atmosphere.hpp": "0fdd0ed116781b93c01b84de9ce48e037e6e3efa8fce63ba4ed5a9f74f5cc43d",
+      "include/core_bodn.hpp": "e812446e546252641c5174788feab655590bf90278107e90f41dc1cd3ddb5fb9",
+      "include/io_common.hpp": "75449d522ae4a2cc6d34e1957eaf14a97691ef5c63efb95dd35d9e2c57daefc6",
+      "include/frame_earth.hpp": "cee7554fce41d906bbcc7ae4e00138bdfa0dedf86e0871503f620681269f8df6",
+      "include/accel_drag.hpp": "264216106bce1d2a5a34b098253468a5d433fcb487386214274f90c5d50202f8",
+      "include/accel_complete.hpp": "d8a6d63c23e421b308713fd643b81b986f3519efe5d72749853cf2260d722511",
+      "include/accel_solar_radiation.hpp": "4c1e37ac1460661a245f5ad99c04127abbee2597d19e1b184a4ad6924ed12b1e",
+      "include/integrator_adams.hpp": "5e6cfd9b374edadaf3cb21d0fd20c31af75be4a7238735ce1c73060f00745745",
+      "include/model_observation.hpp": "11f7f565160a905afe410024af2a89b1f6213cc99de64c49d5e8bd3128ce5db6",
+      "include/io_settings.hpp": "7f2c993931854a1bd32ca5e1a079b4c880ce0a1b632a459f27a02e4951a72779",
+      "apps/odn/main_odn_batch.cpp": "197261ac93d4057682b0c057c52b149c0f0e71f5babff69e8eac26c63f5085f2",
+      "apps/opn/cislunar/main_opn_cislunar.cpp": "e12b9b5fac111073adf9ca46c4ebc540d6bbee76807a901f48035dfec715a7d9",
+      "apps/opn/earth/main_opn_cartesian.cpp": "467c6d53122b2421a57c3bc5b09015cc73565080c7e32669cc9de73da7e48346",
+      "apps/opn/earth/main_opn_nonsingular2.cpp": "370e918b9f75374f7ce9996494d8b276c9d7f145a943ef5840fda3bb9aa2a67d",
+      "apps/conversion/main_convert_cartesian_to_keplerian.cpp": "e8f2b72b39f6523cf35d49f1fdadb74bfff708901b5c469b4366b2bbdffd9d4f",
+      "apps/conversion/main_convert_osculating_to_mean.cpp": "67085fe72ac875d71bdce6a57a9340f164eb039f3201691593112ff117f7d887",
+      "apps/conversion/main_convert_keplerian_to_cartesian.cpp": "2e04e0e980c42aea9417ddafa1d6bd82bde2172c5a9d28acae510e8bd635d5ff",
+      "apps/iod/main_iod_gl.cpp": "0f915f71410911a3f9e304d941c63c99d405d37353d9812832c6f0a834378923",
+      "apps/iod/main_iod_glml.cpp": "c74d70bf74487fb3acea283a980bb0eae10c94b16b7b58f588f70514df610053",
+      "apps/observation/main_generate_observations.cpp": "6971f9b59004958993299f79d49e6f75a574a609e3c48abba6adb2f5f8939897",
+      "apps/observation/main_generate_cislunar_observations.cpp": "254ac4f8cb6e8d6e1c844cd485add65e739267dc351596b7a2d9db81dd51ca24"
+    },
+    "coefficients_sha256": "abb99df55ce67d0668b669ffe46b740148b7be8258963fd682eac32c6460705a",
+    "eop": "/Users/chendingcun/CLionProjects/ASTER/data/eop/EOP-All_250516.txt"
+  },
+  "dependencies": [
+    {
+      "file": "orekit-13.1.jar",
+      "url": "https://repo.maven.apache.org/maven2/org/orekit/orekit/13.1/orekit-13.1.jar",
+      "sha256": "bbda7dae7ddaf6b5b4464548ee2519c545b59f24117ef790fc34d5bbef3f7407"
+    },
+    {
+      "file": "orekit-13.1-sources.jar",
+      "url": "https://repo.maven.apache.org/maven2/org/orekit/orekit/13.1/orekit-13.1-sources.jar",
+      "sha256": "3c501a851e7312c44e1b920f901c26914d00b23e3c1e630406b2e09d8d8da52c"
+    },
+    {
+      "file": "hipparchus-core-4.0.1.jar",
+      "url": "https://repo.maven.apache.org/maven2/org/hipparchus/hipparchus-core/4.0.1/hipparchus-core-4.0.1.jar",
+      "sha256": "944a55c3a1b13b0a0c9c4db6dbb79c33b1b49511ab7430b6cdc69dc046154a87"
+    },
+    {
+      "file": "hipparchus-geometry-4.0.1.jar",
+      "url": "https://repo.maven.apache.org/maven2/org/hipparchus/hipparchus-geometry/4.0.1/hipparchus-geometry-4.0.1.jar",
+      "sha256": "75eb277e4dbb59f981ad26eb56ba32a9a13420dd83d2ee7796d9b1f49c05f516"
+    },
+    {
+      "file": "hipparchus-ode-4.0.1.jar",
+      "url": "https://repo.maven.apache.org/maven2/org/hipparchus/hipparchus-ode/4.0.1/hipparchus-ode-4.0.1.jar",
+      "sha256": "ae1266fc1c1570a7ca8879a98cb44ccabf43692e411c1310226d87f6163d0f44"
+    },
+    {
+      "file": "hipparchus-fitting-4.0.1.jar",
+      "url": "https://repo.maven.apache.org/maven2/org/hipparchus/hipparchus-fitting/4.0.1/hipparchus-fitting-4.0.1.jar",
+      "sha256": "5c57a879eaec6adc05034d6e301def260abaef6291a6b65b621321266c3bb6cf"
+    },
+    {
+      "file": "hipparchus-optim-4.0.1.jar",
+      "url": "https://repo.maven.apache.org/maven2/org/hipparchus/hipparchus-optim/4.0.1/hipparchus-optim-4.0.1.jar",
+      "sha256": "a5af8e00aed1623a1f39340aa291de8ab586f8875ffd74e8a305dd4516ad43cf"
+    },
+    {
+      "file": "hipparchus-filtering-4.0.1.jar",
+      "url": "https://repo.maven.apache.org/maven2/org/hipparchus/hipparchus-filtering/4.0.1/hipparchus-filtering-4.0.1.jar",
+      "sha256": "d15bf8a00f9b2b434028b498ed7c453b1f1c9fe5109e33475a49cac786fadc6c"
+    },
+    {
+      "file": "hipparchus-stat-4.0.1.jar",
+      "url": "https://repo.maven.apache.org/maven2/org/hipparchus/hipparchus-stat/4.0.1/hipparchus-stat-4.0.1.jar",
+      "sha256": "fda3097a7840e5db86d822a79d89947639f13d0832863a6d135be427cf6e3bd4"
+    }
+  ],
+  "directory": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/Orekit对照_010",
+  "runtime": "Amazon Corretto 8, macOS arm64",
+  "successful_logs": [
+    "native_build.log",
+    "aster_run.log",
+    "orekit_run.log",
+    "orekit_refine.log"
+  ],
+  "result_sha256": {
+    "aster_setting.txt": "c86d1e030b96dca005aa4b886252106eb821a1fbf766b1ac8192fbd183d7f89c",
+    "math_backend_java.cpp": "5d9b2dbd7943a7559de6c360ef67f74e7de3b44545c5bbec4febf1a4bb3854e5",
+    "two_body_orekit_vs_analytic.csv": "b0a83939a09dfeae1fcfbf0cfaec71e87294939136529f82520502536fffca51",
+    "orekit_gravity_convergence.csv": "3a0b7cc1d1a0c0ecbfd2814a5817dab771e0dfb7ebcee6bff13492b165c55896",
+    "earth80_shared.csv": "65dff55c5a633aab61130c0116051abcfae14afbb3b3f6d5eaf7c2d224083ce1",
+    "orientation_effect_orekit_only.csv": "5350ae1887175a921790c42bec9dc6042bd4739592f443c12d0fef13c6f165b2",
+    "two_body_orekit_fine_vs_analytic.csv": "cd49def168eac5aedb57302e1422a74b5377ac63b2820cf9b8e716379ab015cf",
+    "earth80_independent_orientation.csv": "504a91070a4cfbc69c001126af78b735386adebe90ca5cd005cc1ce4f40df481",
+    "orekit_frame_change_converged.csv": "cf3ac1f07eee137ed04f8566a2d863f7bce702d3e1ffa74083acc806b98162b7",
+    "two_body_aster_fine_vs_analytic.csv": "7a04f5861346869b37f9f862c5cace8e2fab48683c0104303e77efda6e3bad02",
+    "two_body_aster_vs_analytic.csv": "bdec69537278461eb9696841feb786f91347c37bfa7fa0eabb1f59ac701412db",
+    "OrekitComparison.java": "16ef6fab9a3b8ba8e24641855e8df1bead0745ad1a6b48151f06859d79f92ba3",
+    "run_aster.py": "c64ce8956ab2e060e8b3dfc874ca79e7f884bd9dd9cb78843106dcec8f9a9a6d",
+    "AsterNative.cpp": "a1fa8fb0b61e88ba3b8a89cc1486f9152f48b69583382d03e9dfd9f119d05ae1",
+    "aster_gravity_convergence.csv": "f782b314ded02955259d3db8928781e543441edeb0737f4cc6d260c22b976465",
+    "earth80_shared_fine.csv": "c89d9b6a5e1d19c0ca57939b6de9981d5310cd6fbf4465b4f79a3677d926a91e",
+    "comparison_console.txt": "d91897796ff1f61de98f6c7fc428dace3b153e4da424f33ae86edab10ee9dede",
+    "ggm03c80.txt": "abb99df55ce67d0668b669ffe46b740148b7be8258963fd682eac32c6460705a",
+    "fixed_ecef.txt": "9eff2f4949661bdda07b4fdb1442c28efd5ed5b767be080b9fc015d41b4f2d7d",
+    "earth80_shared_converged.csv": "65d9e59e8a9b17351688e88aabd36c6f487b0b42351c85c0ef2d31709a5c7117",
+    "orekit_refine_15_7_5.csv": "11382b167be5f52936c82f58275a6e44a9c3cf12b1477bb20b4e7758b70542f7",
+    "earth80_separate_frames.csv": "500e8500e0a3173b79dd0c1e2d29753ae82ad042bc7778545a0e1884fd254b73",
+    "orekit_refine_30_15.csv": "c80fbd3ca23399b12306ce1462de74eab4bcd0e82e1119374df7ef2b501468a1",
+    "two_body_aster_vs_orekit.csv": "9d0542e4b81c6e93a24df439026e2e4e6a27f42924d0945f51e74ee1fb26bb61",
+    "orientation.txt": "97ca7148e2df5e91bc8cda33ea8de5d6679d1a72733b90da17381fb040ae63ae",
+    "epoch_tt.txt": "1593d1731f5282792a501d6a606ced70cb391f7dcb9223f7816d4ddd579bfc8d",
+    "compare.py": "80d4780468306691367e3a4631aa0df6eeda1383b27872f7d9390ef462e2dc2c",
+    "runs/two_body_analytic.txt": "b050d4d9df2a1a37980a6a4e54312a99b603b0b006243dd8d098471d0978b9d5",
+    "runs/earth80_shared_finest.txt": "306ccbe0f3e724c5f96ce0c41d8c957b3f539460a7a0aa30032aa126ed4a8fc2",
+    "runs/two_body_fine.txt": "6915f03fa6402bc16de06be45261eb409456f048476a7b58f0c6745025ccef60",
+    "runs/earth80_orekit_frame_finer.txt": "74aed6461afb6c2fa373b4be958d3086ece8eaaabc5d422fd07f270ddc6190fd",
+    "runs/two_body.txt": "17ba1bdedc952ac62831abdcc9e2b30cad5018e31757bf6c85900ddfd5fc1efa",
+    "runs/earth80_shared.txt": "ca2842f846d5d1033fdaeab177d4392bfc5d3b90db22f991ee59064d50103b17",
+    "runs/earth80_orekit_frame.txt": "6cfab79396c3530ac9f66505265c16fb13d8f01e720e6c8af07e7faf1d662742",
+    "runs/earth80_shared_finer.txt": "89cbd7b50fdc92fd3ca89d817480149cd8d03501d579f48429ef8abd1a728703",
+    "runs/earth80_shared_fine.txt": "595a3505b0222111edbbbefd33d92c2688cb6c83f799aaef3fef958c0166de05",
+    "runs/aster_two_body_fine/cart.txt": "2805ae732f3bc0d4065c78dcba0f1bd14f45bf10d1c1c9d03a6e9bb04d9b4a73",
+    "runs/aster_two_body_fine/report.txt": "49898523b7846b246234287698c2b1d05aaa74b6f0fa594b8e436d45a07fe1ce",
+    "runs/aster_two_body_fine/setting.txt": "3b9f14081bfdfcbae6a562885ea05a765e2806d5f32c44041bf2c9b1c62c69a1",
+    "runs/aster_two_body_fine/console.txt": "a74c626e1b3b6875fe289158128c44c5976fdedb5bf5d0df72cfc1fcf84a74d2",
+    "runs/aster_earth80_fine/cart.txt": "fbb427eea60a5fbc67bd5e1a8ac52e958fff592404a50776a9466f735e58c7c7",
+    "runs/aster_earth80_fine/report.txt": "e16cf9187323db3b7156d211fc09c72fd1ad4a4a121f6201eb6ec170cfccb894",
+    "runs/aster_earth80_fine/setting.txt": "6e356d7357037cafa1d7a0e174c9ce6d24eb1aa0f9ce215f08c21417c79ccb1e",
+    "runs/aster_earth80_fine/console.txt": "00cf8914cf5d57b62ce7e3ccccdc3275758b985ad474074150ebed0a4f4cbfca",
+    "runs/aster_two_body/cart.txt": "dd1e58fdb0b7b00f446a57c24bb6e65324de39016befdcf69b873bc25c479fe7",
+    "runs/aster_two_body/report.txt": "584495aa739aafb39f1169838537ed9eb2fac35d428b7a7aac79563c7059b7d1",
+    "runs/aster_two_body/setting.txt": "1f0268b4076b290c991612535e9df074b4321832643f198d5bffaeb95601c12f",
+    "runs/aster_two_body/console.txt": "dd12683a5e66be5880b9780dddc152f89eee5e8b62fcefe773796d147ef110db",
+    "runs/aster_earth80/cart.txt": "a154fbcd55e77a13c88a030a4a88c621575450ae0dd29b24377d8f7214181f4c",
+    "runs/aster_earth80/report.txt": "aa68394ecc7912596f1d25f9f6b4ca533548d3e77401d9c6ebe5879d3c565d55",
+    "runs/aster_earth80/setting.txt": "c86d1e030b96dca005aa4b886252106eb821a1fbf766b1ac8192fbd183d7f89c",
+    "runs/aster_earth80/console.txt": "e1ec2242d2c9b6f63750e4d5a172c3a972b5f0fdef95fdc1fe5a29bf6fefae86"
+  }
+}

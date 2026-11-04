@@ -145,7 +145,7 @@ struct OrbitPropagationNModel
 	 * @details 读取地月非球形开关及截断、日月历表模式、阻力和光压开关、sat 和密度表条件。
 	 * 面积乘 ae² 恢复为 m²，AMR 乘 ae²/MASS_OF_EARTH 恢复为 m²/kg。
 	 * 月球引力截断为 0 / 0 时注明仅考虑质点引力；缺少密度表头条件时显示 Not provided。
-	 * 光压使用 Cannonball 模型，当前加速度实现中地影衰减关闭。函数不修改动力学参数。
+	 * 光压使用 Cannonball 模型，采用地球圆柱地影，进入阴影后光压为零。函数不修改动力学参数。
 	 */
 	void Display(bastion::Overwatch& tracer, std::ostream& output = std::cerr, int precision = 14, int label_width = 31) const;
 };    //预报动力学模型设定，用于GCRS/TT
@@ -342,7 +342,7 @@ struct OrbitPropagationNModel_EBCRS
 	 * 月球引力截断为 0 / 0 时注明仅考虑质点引力；缺少密度表头条件时显示 Not provided。
 	 * 日月与行星使用 JPL；摄动天体按 JPL 编号及英文名称显示，非法编号显示 Unknown。
 	 * 后牛顿开关对应当前 EIH 修正，使用 11 个 JPL 大天体，独立于经典行星摄动列表。
-	 * 光压采用 Cannonball 模型，地影衰减关闭；函数不修改动力学参数或转换轨道坐标。
+	 * 光压采用 Cannonball 模型，采用地球圆柱地影，进入阴影后光压为零；函数不修改动力学参数或转换轨道坐标。
 	 */
 	void Display(bastion::Overwatch& tracer, std::ostream& output = std::cerr, int precision = 14, int label_width = 31) const;
 };

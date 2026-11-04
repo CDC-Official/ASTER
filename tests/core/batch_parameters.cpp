@@ -1,6 +1,7 @@
 #include <array>
 // 附加力参数验证：Cartesian 独立步进生成资料，NSG2 批处理同时恢复轨道和面质比。
 #include "core_bodn.hpp"
+#include "accel_solar_radiation.hpp"
 #include <Eigen/Cholesky>
 #include <filesystem>
 #include <fstream>
@@ -16,13 +17,15 @@ OrbitPropagationJob make_job(bastion::Overwatch& t, bool drag) {
     OrbitPropagationJob j{};
     std::string eop = "data/eop/EOP-All_250516.txt";
     j.opn_EOP.Read_EOP(t, eop);
-    j.initKep_norm.Set(drag ? 6800 : 42164, drag ? 0.005 : 0.03, drag ? 55 : 15, 20, 40, 10, false);
-    j.initKep_norm.Normalize(t, ae / 1000);
+
+    // 光压参数算例采用冬季 5° 倾角高轨，在连续受光条件下核对轨道与面质比估计。
+    j.initKep_norm.Set(drag ? 6800 : 42164, drag ? 0.005 : 0.03, drag ? 55 : 5, 20, 40, 10, false);
+    j.initKep_norm.Normalize(t, constants::Scale::UNIT_LENGTH_M / 1000);
     j.initKep_norm.SyncAnomaly(t);
     j.initKep_norm.ToCartesian(t, j.initCart_norm);
     j.opn_setting.t0_MJD_UTC = 59215;
     j.opn_setting.t0_MJD_TT = UTC2TT(59215);
-    j.opn_setting.h0_norm = (drag ? 15 : 120) / UNITTIME;
+    j.opn_setting.h0_norm = (drag ? 15 : 120) / constants::Scale::UNIT_TIME_S;
     j.opn_setting.rkf.maxTE_norm = 1e-13;
     j.opn_setting.display_progress = 0;
     j.opn_model.use_earth_NSG = true;
@@ -31,11 +34,11 @@ OrbitPropagationJob make_job(bastion::Overwatch& t, bool drag) {
     j.opn_model.use_drag = drag;
     j.opn_model.use_SRP = !drag;
     auto& s = j.opn_model.sat;
-    s.mass = 100 / MASS_OF_EARTH;
+    s.mass = 100 / constants::Scale::UNIT_MASS_KG;
     s.Cd = 2.2;
     s.eta_SRP = 0.3;
-    s.AMR_drag = 0.02 * MASS_OF_EARTH / (ae * ae);
-    s.AMR_SRP = 0.05 * MASS_OF_EARTH / (ae * ae);
+    s.AMR_drag = 0.02 * constants::Scale::UNIT_MASS_KG / (constants::Scale::UNIT_LENGTH_M * constants::Scale::UNIT_LENGTH_M);
+    s.AMR_SRP = 0.05 * constants::Scale::UNIT_MASS_KG / (constants::Scale::UNIT_LENGTH_M * constants::Scale::UNIT_LENGTH_M);
     s.area_drag = s.AMR_drag * s.mass;
     s.area_SRP = s.AMR_SRP * s.mass;
     if (drag) {
@@ -50,7 +53,7 @@ std::vector<Observation> truth(bastion::Overwatch& t, OrbitPropagationJob j, boo
     // 每一步直接到达资料时刻，未调用 NSG2 传播与 Hermite 插值；同一力模型下检查接口闭合。
     j.opn_setting.rkf.fixed_step = true;
     std::array<double, 6> exported_values_1; j.initKep_norm.ToArray(exported_values_1.data());
-    const double period = 2 * pi * std::pow(exported_values_1[0], 1.5) * UNITTIME;
+    const double period = 2 * constants::PI * std::pow(exported_values_1[0], 1.5) * constants::Scale::UNIT_TIME_S;
     std::array<double, 6> exported_values_2; j.initCart_norm.ToArray(exported_values_2.data());
     auto x = exported_values_2;
     double elapsed = 0;
@@ -62,14 +65,27 @@ std::vector<Observation> truth(bastion::Overwatch& t, OrbitPropagationJob j, boo
         o.object_id = drag ? "DRAG" : "SRP";
         o.observer_id = "XYZ";
         o.sigma.setConstant(1);
-        double target = (UTC2TT(o.mjd_utc) - UTC2TT(59215)) * 86400 / UNITTIME;
+        double target = (UTC2TT(o.mjd_utc) - UTC2TT(59215)) * 86400 / constants::Scale::UNIT_TIME_S;
         while (target - elapsed > 1e-13) {
-            double accepted = 0, step = std::min((drag ? 2 : 20) / UNITTIME, target - elapsed);
-            RKF78_Cart(t, j, UTC2TT(59215) + elapsed * UNITTIME / 86400, x.data(), step, accepted);
+            double accepted = 0, step = std::min((drag ? 2 : 20) / constants::Scale::UNIT_TIME_S, target - elapsed);
+            RKF78_Cart(t, j, UTC2TT(59215) + elapsed * constants::Scale::UNIT_TIME_S / 86400, x.data(), step, accepted);
             require(accepted > 0 && t.Code() == bastion::ERR_NOERROR, "Cartesian truth propagation failed");
             elapsed += accepted;
         }
-        for (int k = 0; k < 3; ++k) o.value[k] = x[k] * ae;
+
+        // 按传播函数使用的 UT1 解析太阳位置，确认每个光压观测时刻均处于受光区。
+        if (!drag)
+        {
+            aEOP eop;
+            j.opn_EOP.Get_EOP(t, o.mjd_utc, eop, 1);
+            require(t.Code() == bastion::ERR_NOERROR, "Cannot query EOP for the SRP fixture.");
+
+            double sun[3];
+            Cart_MeanSun(o.mjd_utc + eop.dut1 / 86400.0, sun);
+            require(!in_shadow(x.data(), sun), "SRP parameter fixture must remain sunlit.");
+        }
+
+        for (int k = 0; k < 3; ++k) o.value[k] = x[k] * constants::Scale::UNIT_LENGTH_M;
         obs.push_back(o);
     }
     return obs;
@@ -109,8 +125,8 @@ int main(int argc, char** argv) {
                 output_cart.ToKeplerian(t, output_kep);
                 require(t.Code() == bastion::ERR_NOERROR, "Cannot convert the orbit fixture.");
 
-                output_cart.Restore(t, ae / 1000, UNITTIME);
-                output_kep.Restore(t, ae / 1000);
+                output_cart.Restore(t, constants::Scale::UNIT_LENGTH_M / 1000, constants::Scale::UNIT_TIME_S);
+                output_kep.Restore(t, constants::Scale::UNIT_LENGTH_M / 1000);
                 require(t.Code() == bastion::ERR_NOERROR, "Cannot restore orbit fixture units.");
 
                 double cart_values[6], kep_values[6];
@@ -160,7 +176,7 @@ int main(int argc, char** argv) {
                 std::array<double, 6> exported_values_5; r.fitted_cart_norm.ToArray(exported_values_5.data());
                 auto x = exported_values_5, target = exported_values_4;
                 double distance = 0;
-                for (int k = 0; k < 3; ++k) distance += std::pow((x[k] - target[k]) * ae, 2);
+                for (int k = 0; k < 3; ++k) distance += std::pow((x[k] - target[k]) * constants::Scale::UNIT_LENGTH_M, 2);
                 std::cout << "position_error_m " << std::sqrt(distance) << " rounds " << r.iterations.size() << '\n';
                 require(std::sqrt(distance) < 0.02, "Joint orbit recovery inaccurate");
                 require(r.covariance_full.rows() == 7 && r.covariance_full.allFinite(), "Missing joint covariance");

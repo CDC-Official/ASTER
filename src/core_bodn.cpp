@@ -16,6 +16,9 @@
 #include <exception>
 #include <utility>
 
+using namespace constants::Scale;
+using constants::PI;
+
 namespace determination
 {
 namespace
@@ -157,7 +160,7 @@ void Compute_OrbitResiduals(bastion::Overwatch& tracer, const OrbitPropagationJo
         else
         {
             // 赤经差归入 [-pi,pi] 后乘 cos(观测Dec)，得到东西方向残差；赤纬差为南北方向残差。
-            residuals[i][0] = std::remainder(observations[i].value[0] - calc_obs[0], 2 * pi) * std::cos(observations[i].value[1]);
+            residuals[i][0] = std::remainder(observations[i].value[0] - calc_obs[0], 2 * PI) * std::cos(observations[i].value[1]);
             residuals[i][1] = observations[i].value[1] - calc_obs[1];
         }
 
@@ -222,7 +225,7 @@ void Build_DesignMatrix(bastion::Overwatch& tracer, const OrbitPropagationJob& i
             states[i].ToNonSingular2(tracer, current);
             if (tracer.Code() != bastion::ERR_NOERROR) return;
 
-            const double elapsed_norm = (UTC2TT(epochs[i]) - input.opn_setting.t0_MJD_TT) * 86400 / UNITTIME;
+            const double elapsed_norm = (UTC2TT(epochs[i]) - input.opn_setting.t0_MJD_TT) * constants::SECONDS_PER_DAY / UNIT_TIME_S;
             const StateMatrix geometry_partials = GeometryPartialsNSG2(tracer, current);
             if (tracer.Code() != bastion::ERR_NOERROR) return;
 
@@ -357,7 +360,7 @@ void Propagate_Endpoint(bastion::Overwatch& tracer, OrbitPropagationJob job, con
     Set_InitialOrbit(tracer, job, initial);
     if (tracer.Code() != bastion::ERR_NOERROR) return;
 
-    job.opn_setting.duration_norm = (UTC2TT(target_epoch_utc) - job.opn_setting.t0_MJD_TT) * 86400 / UNITTIME;
+    job.opn_setting.duration_norm = (UTC2TT(target_epoch_utc) - job.opn_setting.t0_MJD_TT) * constants::SECONDS_PER_DAY / UNIT_TIME_S;
     job.opn_setting.display_progress = 0;
     job.opn_setting.rkf.fixed_step = integrator == 102;
     job.opn_setting.adams.use_correction = integrator == 202;
@@ -518,7 +521,7 @@ void MovePosteriorToEpoch(bastion::Overwatch& tracer, const OrbitPropagationJob&
 
             if (setting.stm_method == 1)
             {
-                const double elapsed = (UTC2TT(reference_epoch_utc) - job.opn_setting.t0_MJD_TT) * 86400 / UNITTIME;
+                const double elapsed = (UTC2TT(reference_epoch_utc) - job.opn_setting.t0_MJD_TT) * constants::SECONDS_PER_DAY / UNIT_TIME_S;
                 transition.topLeftCorner<6, 6>() = AnalyticStmNSG2(initial, elapsed, setting.analytic_stm);
             }
             else
@@ -558,7 +561,7 @@ void MovePosteriorToEpoch(bastion::Overwatch& tracer, const OrbitPropagationJob&
                     StateVector difference = plus_endpoint - minus_endpoint;
 
                     // λ 是周期角；这里求局部导数，不把跨 2π 的绕回当成巨大变化。
-                    difference[5] = std::remainder(difference[5], 2 * pi);
+                    difference[5] = std::remainder(difference[5], 2 * PI);
                     transition.block(0, column, 6, 1) = difference / (2 * h * (column == 6 ? result.parameter_apriori_amr_si : 1));
                 }
             }
@@ -581,8 +584,8 @@ void MovePosteriorToEpoch(bastion::Overwatch& tracer, const OrbitPropagationJob&
             StateMatrix geometry = GeometryPartialsNSG2(tracer, result.fitted_nsg2_norm);
             if (tracer.Code() != bastion::ERR_NOERROR) return;
 
-            geometry.topRows<3>() *= ae;
-            geometry.bottomRows<3>() *= ae / UNITTIME;
+            geometry.topRows<3>() *= UNIT_LENGTH_M;
+            geometry.bottomRows<3>() *= UNIT_LENGTH_M / UNIT_TIME_S;
             result.covariance_cart_si = geometry * result.covariance_nsg2 * geometry.transpose();
         }
 
@@ -706,7 +709,7 @@ bool BatchOrbitDetermination_NSG2(bastion::Overwatch& tracer, const OrbitPropaga
         }
 
         // 初始轨道的 UTC 历元应与首条观测一致，批处理在这个历元估计初始根数。
-        if (!(std::abs(observations.front().mjd_utc - input.opn_setting.t0_MJD_UTC) * 86400 < 1e-5))
+        if (!(std::abs(observations.front().mjd_utc - input.opn_setting.t0_MJD_UTC) * constants::SECONDS_PER_DAY < 1e-5))
         {
             result.message = "Initial orbit must be at the first observation epoch.";
             tracer.LogEvent(__FILE__, __func__, __LINE__, result.message, bastion::EventType::ERROR);
@@ -715,7 +718,7 @@ bool BatchOrbitDetermination_NSG2(bastion::Overwatch& tracer, const OrbitPropaga
 
         // 传播使用 TT，输入任务中的 UTC 和 TT 起始历元应表示同一时刻。
         if (!(std::isfinite(input.opn_setting.t0_MJD_TT) &&
-                std::abs(UTC2TT(input.opn_setting.t0_MJD_UTC) - input.opn_setting.t0_MJD_TT) * 86400 < 1e-6))
+                std::abs(UTC2TT(input.opn_setting.t0_MJD_UTC) - input.opn_setting.t0_MJD_TT) * constants::SECONDS_PER_DAY < 1e-6))
         {
             result.message = "Initial UTC/TT epochs are inconsistent.";
             tracer.LogEvent(__FILE__, __func__, __LINE__, result.message, bastion::EventType::ERROR);
@@ -764,7 +767,7 @@ bool BatchOrbitDetermination_NSG2(bastion::Overwatch& tracer, const OrbitPropaga
 
             if (obs.type != ObservationType::InertialPosition)
             {
-                if (!(std::abs(obs.value[1]) < pi / 2))
+                if (!(std::abs(obs.value[1]) < PI / 2))
                 {
                     result.message = "Declination must be between -90 and 90 deg.";
                     tracer.LogEvent(__FILE__, __func__, __LINE__, result.message, bastion::EventType::ERROR);
@@ -804,7 +807,7 @@ bool BatchOrbitDetermination_NSG2(bastion::Overwatch& tracer, const OrbitPropaga
 
         // 以首观测历元的 NSG2 为待估参数 z，传播区间覆盖全部资料。
         OrbitPropagationJob job = input;
-        job.opn_setting.duration_norm = (UTC2TT(epochs.back()) - job.opn_setting.t0_MJD_TT) * 86400 / UNITTIME;
+        job.opn_setting.duration_norm = (UTC2TT(epochs.back()) - job.opn_setting.t0_MJD_TT) * constants::SECONDS_PER_DAY / UNIT_TIME_S;
 
         // 将首观测历元的初轨转为归一化 NSG2，作为本次批处理的六个待估轨道参数 z。
         orbit::NonSingular2 initial;
@@ -824,11 +827,11 @@ bool BatchOrbitDetermination_NSG2(bastion::Overwatch& tracer, const OrbitPropaga
 
         if (parameter == 3)
         {
-            const double period = 2 * pi * std::pow(z[0], 1.5) * UNITTIME;
+            const double period = 2 * PI * std::pow(z[0], 1.5) * UNIT_TIME_S;
             parameter = 0;
 
             // 先要求至少覆盖三圈；满足后以平均高度选光压或已开启的阻力，短弧保留六状态。
-            if ((epochs.back() - epochs.front()) * 86400 >= 3 * period) parameter = (z[0] - 1) * ae >= 2000000 ? 2 : (job.opn_model.use_drag ? 1 : 0);
+            if ((epochs.back() - epochs.front()) * constants::SECONDS_PER_DAY >= 3 * period) parameter = (z[0] - 1) * UNIT_LENGTH_M >= 2000000 ? 2 : (job.opn_model.use_drag ? 1 : 0);
         }
 
         const int ncol = parameter ? 7 : 6;
@@ -843,7 +846,7 @@ bool BatchOrbitDetermination_NSG2(bastion::Overwatch& tracer, const OrbitPropaga
         // 先验 AMR 保留归一化值供传播，同时恢复 SI 值供最终物理参数及协方差输出。
         const model::common::SphereSatellite& sat = job.opn_model.sat;
         const double prior_amr_norm = parameter == 1 ? sat.AMR_drag : sat.AMR_SRP;
-        const double prior_amr_si = parameter ? prior_amr_norm * ae * ae / MASS_OF_EARTH : 0;
+        const double prior_amr_si = parameter ? prior_amr_norm * UNIT_LENGTH_M * UNIT_LENGTH_M / UNIT_MASS_KG : 0;
 
         // 同估力参数只支持完整传播差分，且必须启用对应力模型；解析近似没有该参数列。
         if (parameter)
@@ -1469,10 +1472,10 @@ bool BatchOrbitDetermination_NSG2(bastion::Overwatch& tracer, const OrbitPropaga
                 return false;
             }
 
-            G.topRows<3>() *= ae;
+            G.topRows<3>() *= UNIT_LENGTH_M;
 
             // 后三行对应速度，按 ae/UNITTIME 恢复到 m/s 的尺度。
-            G.bottomRows<3>() *= ae / UNITTIME;
+            G.bottomRows<3>() *= UNIT_LENGTH_M / UNIT_TIME_S;
 
             // 先计算 G*P_z，再右乘 G^T，得到位置和速度的 SI 协方差。
             const StateMatrix state_element_covariance = G * result.covariance_nsg2;
@@ -1529,7 +1532,7 @@ void BatchSetting::Display(bastion::Overwatch& tracer, double sigma_angle_rad, d
     if (estimate_parameter == 3) text << "; automatic AMR selection";
 
     text << '\n' << std::setw(label_width) << "- Observation error standard deviation" << ": "
-         << sigma_angle_rad * 180 * 3600 / pi << " arcsec (East / North); " << sigma_position_m << " m (XYZ)"
+         << sigma_angle_rad * 180 * 3600 / PI << " arcsec (East / North); " << sigma_position_m << " m (XYZ)"
          << '\n' << std::setw(label_width) << "- STM computation method" << ": ";
 
     if (stm_method == 2)
@@ -1554,7 +1557,7 @@ void BatchSetting::Display(bastion::Overwatch& tracer, double sigma_angle_rad, d
             text << '\n' << std::setw(label_width) << "  > Angular hard window [rad]" << ": " << rejection_angle_window_rad;
         }
 
-        if (rejection_position_window_m != ae)
+        if (rejection_position_window_m != UNIT_LENGTH_M)
         {
             text << '\n' << std::setw(label_width) << "  > Position hard window [m]" << ": " << rejection_position_window_m;
         }
@@ -1618,7 +1621,7 @@ void BatchResult::PrintSummary(bastion::Overwatch& tracer, const BatchSetting& s
 
     for (int j = 0; j < 6; ++j)
     {
-        cart_values[j] *= ae / 1000.0 / (j < 3 ? 1.0 : UNITTIME);
+        cart_values[j] *= UNIT_LENGTH_M / 1000.0 / (j < 3 ? 1.0 : UNIT_TIME_S);
         const double cart_variance = covariance_cart_si(j, j);
         const double nsg2_variance = covariance_nsg2(j, j);
         cart_sigma[j] = std::isfinite(cart_variance) && cart_variance >= 0 ? std::sqrt(cart_variance) / 1000.0
@@ -1848,7 +1851,7 @@ void BatchResult::PrintReport(bastion::Overwatch& tracer, const BatchSetting& se
         report << "  " << std::left << std::setw(12) << cart_names[j]
                << std::setw(10) << (j < 3 ? "m" : "m/s") << std::right
                << std::scientific << std::setprecision(precision) << std::setw(26)
-               << final[j] * ae / (j < 3 ? 1 : UNITTIME) << '\n';
+               << final[j] * UNIT_LENGTH_M / (j < 3 ? 1 : UNIT_TIME_S) << '\n';
 
     // 密切根数采用 km 与 deg；M 是平近点角，不能与真近点角混用。
     report << "\nKeplerian osculating elements (M = mean anomaly)\n"
@@ -1877,7 +1880,7 @@ void BatchResult::PrintReport(bastion::Overwatch& tracer, const BatchSetting& se
         report << "  " << std::left << std::setw(12) << nsg_names[j]
                << std::setw(10) << (j == 0 ? "km" : j == 5 ? "deg" : "1") << std::right
                << std::scientific << std::setprecision(precision) << std::setw(26)
-               << final_nsg2[j] * (j == 0 ? ae / 1000 : j == 5 ? 180 / pi : 1) << '\n';
+               << final_nsg2[j] * (j == 0 ? UNIT_LENGTH_M / 1000 : j == 5 ? 180 / PI : 1) << '\n';
 
     output << report.str();
 

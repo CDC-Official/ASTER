@@ -30,6 +30,8 @@
 
 #include "ASTER.h"
 
+using namespace constants::Scale;
+
 using namespace std;
 using namespace Eigen;
 using namespace orbit;
@@ -215,7 +217,7 @@ int main(int argc, char* argv[])
 				case 1:
 					// 原本的str_epoch仅为一个数字，spilt完被原封不动加进vec_epoch，作为第一个也是唯一一个元素
 					// 对应的日期格式为JD或MJD，统一转换存储为MJD
-					t0_mjd_utc = stod(vec_epoch[0]) > 2400000.5 ? stod(vec_epoch[0]) - 2400000.5 : stod(vec_epoch[0]);
+					t0_mjd_utc = stod(vec_epoch[0]) > constants::MJD_OFFSET ? stod(vec_epoch[0]) - constants::MJD_OFFSET : stod(vec_epoch[0]);
 					break;
 				case 6:
 					// 原本的str_epoch仅为年月日时分秒 2025 05 25 12 40 0.322
@@ -245,7 +247,7 @@ int main(int argc, char* argv[])
 			{
 				// 输入只接受 km deg！
 				initial_kep.Set(stod(vec_kep[0]), stod(vec_kep[1]), stod(vec_kep[2]), stod(vec_kep[3]), stod(vec_kep[4]), stod(vec_kep[5]), false);
-				initial_kep.Normalize(tracer, ae / 1000.0);
+				initial_kep.Normalize(tracer, UNIT_LENGTH_M / 1000.0);
 				if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 				// 转换一下
 				initial_kep.ToCartesian(tracer, initial_cart);
@@ -271,7 +273,7 @@ int main(int argc, char* argv[])
 			{
 				// 输入只接受 km km/s！
 				initial_cart.Set(stod(vec_cart[0]), stod(vec_cart[1]), stod(vec_cart[2]), stod(vec_cart[3]), stod(vec_cart[4]), stod(vec_cart[5]), false);
-				initial_cart.Normalize(tracer, ae / 1000.0, UNITTIME);
+				initial_cart.Normalize(tracer, UNIT_LENGTH_M / 1000.0, UNIT_TIME_S);
 				if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 				// 转换一下
 				initial_cart.ToKeplerian(tracer, initial_kep);
@@ -597,12 +599,12 @@ int main(int argc, char* argv[])
 		// 读入卫星质量，同时归一化...........
 		if (sat_mass > 0.0)
 		{
-			opn_model.sat.mass = sat_mass / MASS_OF_EARTH;
+			opn_model.sat.mass = sat_mass / UNIT_MASS_KG;
 		}
 		// 读入迎风向面积，同时归一化...........
 		if (sat_area_drag > 0.0)
 		{
-			opn_model.sat.area_drag = sat_area_drag / ae / ae;
+			opn_model.sat.area_drag = sat_area_drag / UNIT_LENGTH_M / UNIT_LENGTH_M;
 		}
 		// 质量和迎风向面积都就位时，计算归一化大气阻力面质比...........
 		if (opn_model.sat.mass > 0.0 && opn_model.sat.area_drag > 0.0)
@@ -612,7 +614,7 @@ int main(int argc, char* argv[])
 		// 读入光压面积，同时归一化...........
 		if (sat_area_SRP > 0.0)
 		{
-			opn_model.sat.area_SRP = sat_area_SRP / ae / ae;
+			opn_model.sat.area_SRP = sat_area_SRP / UNIT_LENGTH_M / UNIT_LENGTH_M;
 		}
 		// 质量和光压面积都就位时，计算归一化光压面质比...........
 		if (opn_model.sat.mass > 0.0 && opn_model.sat.area_SRP > 0.0)
@@ -632,8 +634,8 @@ int main(int argc, char* argv[])
 		opn_setting.t0_MJD_UTC = t0_mjd_utc;
 		opn_setting.t0_MJD_TT = UTC2TT(t0_mjd_utc);
 		opn_setting.rkf.maxTE_norm = integrator_maxTE;
-		opn_setting.duration_norm = opn_length_sec * SEC_TO_NORMALIZED_TIME;
-		opn_setting.h0_norm = integrator_step_sec * SEC_TO_NORMALIZED_TIME;
+		opn_setting.duration_norm = opn_length_sec * constants::Conversion::SEC_TO_NORMALIZED_TIME;
+		opn_setting.h0_norm = integrator_step_sec * constants::Conversion::SEC_TO_NORMALIZED_TIME;
 		opn_setting.display_progress = display_progress;
 		opn_setting.rkf.fixed_step = integrator_id == 102;
 		opn_setting.adams.steps = adams_steps;
@@ -673,10 +675,10 @@ int main(int argc, char* argv[])
 		// 初态显示统一为 km、km/s、deg；只恢复副本的单位，积分仍使用原归一化状态。
 		Cartesian initial_cart_km = initial_cart;
 		Keplerian initial_kep_km = initial_kep;
-		initial_cart_km.Restore(tracer, ae / 1000.0, UNITTIME);
+		initial_cart_km.Restore(tracer, UNIT_LENGTH_M / 1000.0, UNIT_TIME_S);
 		if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
-		initial_kep_km.Restore(tracer, ae / 1000.0);
+		initial_kep_km.Restore(tracer, UNIT_LENGTH_M / 1000.0);
 		if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
 		double initial_cart_values[6], initial_kep_values[6];
@@ -693,7 +695,7 @@ int main(int argc, char* argv[])
 			  << "\n- Target ID                    : " << sat_id
 			  << "\n- Mass [kg]                    : " << std::defaultfloat << std::setprecision(14) << sat_mass
 			  << "\n\n- Start epoch [UTC]            : " << std::fixed << std::setprecision(12) << t0_mjd_utc
-			  << "\n- End epoch [UTC]              : " << TT2UTC(opn_setting.t0_MJD_TT + opn_length_sec / 86400.0)
+			  << "\n- End epoch [UTC]              : " << TT2UTC(opn_setting.t0_MJD_TT + opn_length_sec / constants::SECONDS_PER_DAY)
 			  << "\n- Duration [s]                 : " << std::showpos << std::setprecision(2) << opn_length_sec << std::noshowpos
 			  << "\n\n";
 
@@ -802,10 +804,10 @@ int main(int argc, char* argv[])
 		final_nsg2_norm.ToKeplerian(tracer, final_kep_km);
 		if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
-		final_cart_km.Restore(tracer, ae / 1000.0, UNITTIME);
+		final_cart_km.Restore(tracer, UNIT_LENGTH_M / 1000.0, UNIT_TIME_S);
 		if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
-		final_kep_km.Restore(tracer, ae / 1000.0);
+		final_kep_km.Restore(tracer, UNIT_LENGTH_M / 1000.0);
 		if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
 		double final_cart_values[6], final_kep_values[6];
@@ -848,11 +850,11 @@ int main(int argc, char* argv[])
 						case STATE_UNIT_NORMALIZE:
 							break;
 						case STATE_UNIT_KM_SEC_DEGREE:
-							temp_cart.Restore(tracer, ae / 1000.0, UNITTIME);
+							temp_cart.Restore(tracer, UNIT_LENGTH_M / 1000.0, UNIT_TIME_S);
 							if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 							break;
 						case STATE_UNIT_M_SEC_DEGREE:
-							temp_cart.Restore(tracer, ae, UNITTIME);
+							temp_cart.Restore(tracer, UNIT_LENGTH_M, UNIT_TIME_S);
 							if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 							break;
 						default:
@@ -913,11 +915,11 @@ int main(int argc, char* argv[])
 						case STATE_UNIT_NORMALIZE:
 							break;
 						case STATE_UNIT_KM_SEC_DEGREE:
-							temp_kep.Restore(tracer, ae / 1000.0);
+							temp_kep.Restore(tracer, UNIT_LENGTH_M / 1000.0);
 							if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 							break;
 						case STATE_UNIT_M_SEC_DEGREE:
-							temp_kep.Restore(tracer, ae);
+							temp_kep.Restore(tracer, UNIT_LENGTH_M);
 							if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 							break;
 						default:
@@ -973,11 +975,11 @@ int main(int argc, char* argv[])
 						case STATE_UNIT_NORMALIZE:
 							break;
 						case STATE_UNIT_KM_SEC_DEGREE:
-							record_nsg2[k].Restore(tracer, ae / 1000.0);
+							record_nsg2[k].Restore(tracer, UNIT_LENGTH_M / 1000.0);
 							if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 							break;
 						case STATE_UNIT_M_SEC_DEGREE:
-							record_nsg2[k].Restore(tracer, ae);
+							record_nsg2[k].Restore(tracer, UNIT_LENGTH_M);
 							if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 							break;
 						default:
@@ -1035,7 +1037,7 @@ int main(int argc, char* argv[])
 				<< "- Status                       : COMPLETED"
 				<< "\n- Final epoch [UTC]            : " << std::fixed << std::setprecision(12) << record_MJD_UTC.back()
 				<< "\n- Propagated duration [s]      : " << std::showpos << std::setprecision(2)
-				<< (UTC2TT(record_MJD_UTC.back()) - opn_setting.t0_MJD_TT) * 86400.0 << std::noshowpos
+				<< (UTC2TT(record_MJD_UTC.back()) - opn_setting.t0_MJD_TT) * constants::SECONDS_PER_DAY << std::noshowpos
 				<< "\n- Ephemeris records            : " << record_nsg2.size() << "\n\n";
 
 		for (int row = 0; row < 2; ++row)

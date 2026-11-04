@@ -4,22 +4,15 @@
 
 #ifndef _DATA_GRAVITYFIELD_HPP_
 #define _DATA_GRAVITYFIELD_HPP_
-// CSR 发布的 GGM03C 文件头给出以下 GM（m³/s²）和参考半径（m），与球谐系数配套使用。
-// 来源：https://download.csr.utexas.edu/pub/grace/GGM03/GGM03_Archive.zip
-constexpr double GGM03C_GM = 3.986004415e14;
-constexpr double GGM03C_REFERENCE_RADIUS = 6378136.3;
 
-//GGM03C 80*80的归一化谐系数
-//跟教材P123区别，这里是这样对应的:
-// l	m
-// 2    0
-// 2	1
-// 2	2
-// 3	0
-// 3	1
-// 3	2……
-// 其中每个子数组的第一个为归一化的C，第二个为为一化的S
-const double GGM03C_arr[][2] =
+#include "utils_constants.hpp"
+
+namespace constants::GGM03C
+{
+// 地球非球形加速度和瞬转平计算使用的 80 阶完全归一化球谐系数，配套 GM 和参考半径见 utils_constants.hpp。
+// 每行依次存 C_nm、S_nm，均为无量纲；从 (n,m)=(2,0) 开始，依次为 (2,1)、(2,2)、(3,0)……。
+// 数组下标为 n*(n+1)/2-3+m，中心引力由动力学方程单独计算。
+const double COEFFICIENTS[][2] =
 	{{ -0.484169325971E-03, 0.000000000000E+00 }, { -0.218981004071E-09, 0.146745163612E-08 },
 	 { 0.243934909350E-05, -0.140028485773E-05 }, { 0.957214152046E-06, 0.000000000000E+00 },
 	 { 0.203046566451E-05, 0.248205893606E-06 }, { 0.904790245637E-06, -0.618988302546E-06 },
@@ -1679,4 +1672,13 @@ const double GGM03C_arr[][2] =
 	 { 0.607443550739E-08, 0.151712441169E-08 }, { -0.816680075516E-09, -0.890486082888E-09 },
 	 { 0.153808822077E-08, 0.105585202667E-08 }, { -0.131109704485E-08, 0.252378297142E-08 },
 	 { 0.751861057956E-10, -0.687662353450E-09 }, { -0.142692741370E-08, -0.275705360182E-08 }};
+
+// 从同一组 C20 求出地球 J2，供初轨和解析 STM 的 J2 项换算使用；无量纲。
+const double J2 = -sqrt(5.0) * COEFFICIENTS[0][0];
+
+// 初轨修正和解析 STM 直接使用的 J2 项系数，包含重力场 GM、参考半径与积分尺度的比值。
+const double NORMALIZED_J2 = J2 * (GM / constants::Scale::UNIT_GM_M3_S2) *
+    pow(REFERENCE_RADIUS / constants::Scale::UNIT_LENGTH_M, 2);
+}
+
 #endif //CDC_LIB_INCLUDE_DATA_GRAVITYFIELD_HPP_

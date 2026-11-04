@@ -25,7 +25,7 @@ struct OrbitPropagationNModel {
 };
 inline void AccelCompleteNSG2(Detective& tracer, double t0, double t, OrbitPropagationNModel& model,
                             int n, double* state, double* result) {
-    Acceleration_NSG2(tracer, model.job, t0+t*NORMALIZED_TIME_TO_DAY,n,state,result);
+    Acceleration_NSG2(tracer, model.job, t0+t*constants::Conversion::NORMALIZED_TIME_TO_DAY,n,state,result);
 }
 inline void Step(Detective& sherlock,
 	int n,

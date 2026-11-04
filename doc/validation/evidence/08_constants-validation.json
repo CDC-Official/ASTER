@@ -1,0 +1,300 @@
+{
+  "branch": "fix/earth-gm-conventions",
+  "baseline": {
+    "branch": "fix/earth-gm-conventions",
+    "commit": "406294200eb808221fe430adc6b750b403a140b5",
+    "modified_files": {
+      "include/utils_constants.hpp": "aab296a5387b4a5bdd9f22ecf7f426043149d9e638f9c67b0b5ca62583704022",
+      "src/accel_solar_radiation.cpp": "0473c2c5a29d8458d4fae164f21437530970399180737f1de045c029b9dcd6fa",
+      "src/frame_definition.cpp": "75edf971241858d8c8c265b66172b1c1cb202fa610cf31c5f30068ac3672ab61",
+      "src/model_atmosphere.cpp": "e41bf20a39438203c07358862b131b42ed3516428bea986bc0864301df7186b8",
+      "tests/core/frame_coordinates.cpp": "5ebd2d21352392197ff352dde1fbdec4d2994b2e64890792b54eae3b9ddf29ba"
+    },
+    "memo_path": "/Users/chendingcun/Documents/最新轨道预报精度对比 260205周日.pdf",
+    "memo_sha256": "03497ea36b65c150c5cedb5f88eb07f5042d5e691b7807df8e639556546cbfe7"
+  },
+  "baseline_definition": "提交 4062942 加本轮开始时的五个未提交文件；不是 main 分支。",
+  "full_evidence_directory": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/常数规范化_008",
+  "comparisons": {
+    "organization_only": {
+      "left": "ASTER 本轮整理前工作区快照",
+      "right": "ASTER 仅整理命名空间后",
+      "results": {
+        "leo_two_body": {
+          "identical_bytes": true
+        },
+        "leo_earth80": {
+          "identical_bytes": true
+        },
+        "leo_full": {
+          "identical_bytes": true
+        },
+        "cislunar_full": {
+          "identical_bytes": true
+        },
+        "range": {
+          "count": 448,
+          "max_difference": {
+            "record": 0.0,
+            "tx": 0.0,
+            "rx": 0.0,
+            "rx_year": 0.0,
+            "rx_month": 0.0,
+            "rx_day": 0.0,
+            "rx_hour": 0.0,
+            "rx_minute": 0.0,
+            "rx_second": 0.0,
+            "tx_year": 0.0,
+            "tx_month": 0.0,
+            "tx_day": 0.0,
+            "tx_hour": 0.0,
+            "tx_minute": 0.0,
+            "tx_second": 0.0,
+            "light_time_s": 0.0,
+            "geometric_m": 0.0,
+            "gravity_s": 0.0,
+            "tx_clock_s": 0.0,
+            "rx_clock_s": 0.0,
+            "clock_m": 0.0,
+            "theoretical_pseudorange_m": 0.0,
+            "systematic_bias_m": 0.0,
+            "noise_m": 0.0,
+            "pseudorange_m": 0.0,
+            "iterations": 0.0,
+            "update_s": 0.0
+          }
+        }
+      }
+    },
+    "physical_corrections": {
+      "left": "ASTER 本轮修改前工作区快照",
+      "right": "ASTER 本轮物理参数修正后",
+      "results": {
+        "leo_two_body": {
+          "rows": 8641,
+          "duration_s": 86400,
+          "max_position_m": 0.0,
+          "final_position_m": 0.0,
+          "max_velocity_mps": 0.0,
+          "final_velocity_mps": 0.0
+        },
+        "leo_earth80": {
+          "rows": 8641,
+          "duration_s": 86400,
+          "max_position_m": 0.0,
+          "final_position_m": 0.0,
+          "max_velocity_mps": 0.0,
+          "final_velocity_mps": 0.0
+        },
+        "leo_full": {
+          "rows": 8641,
+          "duration_s": 86400,
+          "max_position_m": 0.00933675777032702,
+          "final_position_m": 0.006660944001678911,
+          "max_velocity_mps": 9.568626214955998e-06,
+          "final_velocity_mps": 8.174391244935951e-06
+        },
+        "cislunar_full": {
+          "rows": 1441,
+          "duration_s": 86400,
+          "max_position_m": 0.0314647569524678,
+          "final_position_m": 0.0314647569524678,
+          "max_velocity_mps": 7.306676369778753e-07,
+          "final_velocity_mps": 7.306676369778753e-07
+        },
+        "range": {
+          "count": 448,
+          "max_difference": {
+            "record": 0.0,
+            "tx": 0.0,
+            "rx": 0.0,
+            "rx_year": 0.0,
+            "rx_month": 0.0,
+            "rx_day": 0.0,
+            "rx_hour": 0.0,
+            "rx_minute": 0.0,
+            "rx_second": 0.0,
+            "tx_year": 0.0,
+            "tx_month": 0.0,
+            "tx_day": 0.0,
+            "tx_hour": 0.0,
+            "tx_minute": 0.0,
+            "tx_second": 0.0,
+            "light_time_s": 0.0,
+            "geometric_m": 0.0,
+            "gravity_s": 0.0,
+            "tx_clock_s": 0.0,
+            "rx_clock_s": 0.0,
+            "clock_m": 0.0,
+            "theoretical_pseudorange_m": 0.0,
+            "systematic_bias_m": 0.0,
+            "noise_m": 0.0,
+            "pseudorange_m": 0.0,
+            "iterations": 0.0,
+            "update_s": 0.0
+          }
+        },
+        "station_45deg_height0_shift_m": 0.0643932919962997,
+        "ggm03c_j2": 0.0010826355254914103
+      }
+    },
+    "force_switch_isolation": {
+      "left": "ASTER 本轮修改前",
+      "right": "ASTER 本轮修改后",
+      "conditions": "两侧采用相同开关、物理初值和输入资料",
+      "results": {
+        "leo_gravity": {
+          "max_position_m": 0.0,
+          "final_position_m": 0.0
+        },
+        "leo_gravity_drag": {
+          "max_position_m": 0.0065647166836373845,
+          "final_position_m": 0.0065647166836373845
+        },
+        "leo_gravity_srp": {
+          "max_position_m": 0.0031748752465248498,
+          "final_position_m": 0.0007210612328160355
+        },
+        "cislunar_no_srp": {
+          "max_position_m": 0.0,
+          "final_position_m": 0.0
+        }
+      }
+    },
+    "fixed_ecef_gravity": {
+      "left": "ASTER 本轮修改前重力计算核",
+      "right": "ASTER 本轮修改后重力计算核",
+      "results": {
+        "frame": "ECEF, no coordinate rotations",
+        "degrees": [
+          10,
+          80
+        ],
+        "point_count": 4,
+        "gm_m3_s2": 398600441500000.0,
+        "radius_m": 6378136.3,
+        "max_acceleration_difference_mps2": 0.0,
+        "same_kernel_after_identifier_mapping": true,
+        "math_backend": "OPENLIBM, same compiler and flags"
+      }
+    },
+    "mentor": {
+      "left": "ASTER 本轮修改前（before）或修改后（physical）",
+      "right": "导师GM对照_006/runs/nao_* 已保存输出，未重跑导师程序",
+      "results": {
+        "leo_two_body": {
+          "before": {
+            "max_position_m": 0.9994511228592258,
+            "final_position_m": 0.9994511228592258,
+            "initial_position_m": 4.797412671516237e-07,
+            "initial_velocity_mps": 3.926839352455904e-07,
+            "max_epoch_difference_s": 5.029141902923584e-06
+          },
+          "physical": {
+            "max_position_m": 0.9994511228592258,
+            "final_position_m": 0.9994511228592258,
+            "initial_position_m": 4.797412671516237e-07,
+            "initial_velocity_mps": 3.926839352455904e-07,
+            "max_epoch_difference_s": 5.029141902923584e-06
+          }
+        },
+        "leo_earth80": {
+          "before": {
+            "max_position_m": 1.0282218248689976,
+            "final_position_m": 1.0282218248689976,
+            "initial_position_m": 4.797412671516237e-07,
+            "initial_velocity_mps": 3.926839352455904e-07,
+            "max_epoch_difference_s": 5.029141902923584e-06
+          },
+          "physical": {
+            "max_position_m": 1.0282218248689976,
+            "final_position_m": 1.0282218248689976,
+            "initial_position_m": 4.797412671516237e-07,
+            "initial_velocity_mps": 3.926839352455904e-07,
+            "max_epoch_difference_s": 5.029141902923584e-06
+          }
+        },
+        "leo_full": {
+          "before": {
+            "max_position_m": 14.596314846485315,
+            "final_position_m": 6.545761228498575,
+            "initial_position_m": 4.797412671516237e-07,
+            "initial_velocity_mps": 3.926839352455904e-07,
+            "max_epoch_difference_s": 5.029141902923584e-06
+          },
+          "physical": {
+            "max_position_m": 14.586980049934954,
+            "final_position_m": 6.539227314488683,
+            "initial_position_m": 4.797412671516237e-07,
+            "initial_velocity_mps": 3.926839352455904e-07,
+            "max_epoch_difference_s": 5.029141902923584e-06
+          }
+        }
+      }
+    },
+    "geodetic": {
+      "left": "修改后 ASTER 大地坐标转换",
+      "right": "SOFA iauGd2gc(WGS84)",
+      "case_count": 6,
+      "position_tolerance_m": 1e-05
+    },
+    "si_force_formulas": {
+      "left": "修改后 ASTER",
+      "right": "测试内独立写出的有量纲地球中心引力、J2、光压和阻力公式",
+      "test": "gravity_conventions"
+    }
+  },
+  "external_code_review": {
+    "software": [
+      "Orekit 13.1",
+      "NASA GMAT",
+      "Tudat"
+    ],
+    "scope": "查阅常数组织、模型参数和调用方式；没有运行这些软件的轨道预报"
+  },
+  "lunar_data": {
+    "source_url": "https://pds-geosciences.wustl.edu/grail/grail-l-lgrs-5-rdr-v1/grail_1001/shadr/gggrx_0660pm_sha.tab",
+    "official_sha256": "a77ee9996aff7341ef89f69aa401f39ba0c2949ed80411505fb4826b771dd63e",
+    "local_sha256": "979d49f6b7e7a5d79bb885dff4ed603e8949095bdc413cace066df4a64000ad0",
+    "official_lines": 218791,
+    "local_lines": 3321,
+    "coefficient_lines_equal": false,
+    "official_header": "0.1738000000000000E+04, 0.4902799806931690E+04, 7.7430418973615078E-06,  660,  660,    1, 0.0000000000000000E+00, 0.0000000000000000E+00",
+    "local_header": "0.1738000000000000E+07, 0.4902799806931690E+13, 7.7430418973615078E-06,  660,  660,    1, 0.0000000000000000E+00, 0.0000000000000000E+00",
+    "local_coefficients_equal_official_prefix": true,
+    "local_max_degree": 80,
+    "comparison_stage": "修改表头前的随库文件与官方完整文件；系数逐行等于官方前 80 阶，完整系数行数不同。",
+    "final_local_sha256": "16832b9d9090bdda2a3981497ea501f542a3cdd45d82afa029da152930cb2d1d"
+  },
+  "remaining_convention_question": "GRGM660PRIM 发布 GM、参考半径的 TT/TDB 相容尺度尚未找到明确说明；当前保留发布参数。模型为 DE421 PA 系，当前使用已加载历表的天平动。",
+  "tests": {
+    "targeted_ctest": {
+      "passed": 14,
+      "failed": 0,
+      "log": "ctest_physical.log"
+    },
+    "organization_phase_legacy_failures": {
+      "failed": 10,
+      "log": "ctest_organized.log"
+    },
+    "preexisting_full_build_failure": "cislunar_interpolation.cpp 引用已删除的 observation 接口；见 build_before.log",
+    "final_affected_ctest": {
+      "passed": 3,
+      "failed": 0,
+      "log": "ctest_last_checks.log",
+      "successful_build_log": "build_last_checks.log"
+    }
+  },
+  "evidence_sha256": {
+    "organization_comparison.json": "6bee5041a8d0ee1a256296d5c747b397b441437abeb6efffe4918584904f6016",
+    "physical_comparison.json": "475e77a4feed27a5d8a566ddd89aad3d5a4525559541cdb6331ecf7a28e6eaa1",
+    "isolated/comparison.json": "7ebd0fd8519850e904fe5cdc5013e3f2c06d6f6569e09501af30bffaa802c1f5",
+    "mentor_comparison.json": "ffd1dde2f5410ea893b8493c91b88d8d9d15d264e47c7f20cac3e31da52e7116",
+    "gravity_control/comparison.json": "778ec32e048f6fbeee8610945e9cf817e68fe727ce008cf509f67461a42d9016",
+    "ctest_physical.log": "88a6a63dea59fc618e98b64f99576ab37432b3b9c1bd9385f3cb2f52353140e0",
+    "ctest_organized.log": "5ad461b125d7854d3f84b4fd0322d8ce0969f0ac3ededf84918cdba09c300c8b",
+    "build_before.log": "9c69108f5034bcc6788a74f9abc6d63fe16aae0f5257972caaf3dc25f0daf76f",
+    "build_last_checks.log": "daaff7e796dc7eb8a273723a0c08eb7d3e0ac8106c21458f70ef25af6854b1b2",
+    "ctest_last_checks.log": "f18484e8538e683c386b37f3529a4b45558ded7308f07fd03cd6f5974e1f98ae"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "date": "2026-11-04",
+  "branch": "fix/earth-gm-conventions",
+  "based_on": "406294200eb808221fe430adc6b750b403a140b5",
+  "build": "All default targets built successfully",
+  "tests": {
+    "core_frame_coordinates": "Passed",
+    "core_orbit_averaging": "Passed",
+    "core_batch_determination": "Passed",
+    "core_batch_parameters": "Passed",
+    "core_rkf78_safety": "Passed",
+    "core_adams_safety": "Passed",
+    "core_iod_eccentricity": "Passed",
+    "invalid_inputs": "Passed",
+    "data_integrity": "Passed",
+    "math_backend_sofa": "Passed",
+    "observation_geometry": "Passed",
+    "observation_angular_noise": "Passed",
+    "cislunar_interpolation": "Passed",
+    "core_cislunar_observation": "Passed",
+    "cislunar_observation_runtime": "Passed",
+    "gravity_conventions": "Passed"
+  },
+  "passed_count": 16,
+  "test_changes": {
+    "tests/core/cislunar_interpolation.cpp": "Current Cislunar StateRecord interpolation, position/velocity/clock analytic values, endpoints, midnight and JPL split date; Tracer errors",
+    "tests/core/batch_parameters.cpp": "SRP fixture inclination 15 to 5 degrees; require sunlit observation epochs; original residual and parameter thresholds retained"
+  },
+  "srp_final_wrms": [
+    0.000205573759946,
+    0.000205575191224,
+    0.00021614919301
+  ],
+  "logs": {
+    "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/验证总报告_015/提交前检查/ctest_initial.log": "a41e8c6b6d1ca06871c4695048d10e0ee0b0e0e2108758e42e066275e96eac39",
+    "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/验证总报告_015/提交前检查/batch_final.log": "a05f411d605d69ae5c7e4c75a66111e9e275edb24ff33cbc460596fe7a17dd5b",
+    "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/验证总报告_015/提交前检查/ctest_batch_final.log": "a071020a508315a90c6d913ceeb8326e411f8ccebcc0451efded49f32963af3b",
+    "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/验证总报告_015/提交前检查/build.log": "081556183ca49c3b7b5b18d02ab52471ecb717a5dbafb33c06e4672de930eb99"
+  },
+  "source_sha256": {
+    "tests/core/cislunar_interpolation.cpp": "0be7fec739ed1ce85ac959ddf164f3191db0663ff5d69ca10fafdb5813b8285c",
+    "tests/core/batch_parameters.cpp": "4ecd312fe87ba4dbe5e662ef3389fb3eeb8fea9276ebac41808fb65518225b2a"
+  }
+}

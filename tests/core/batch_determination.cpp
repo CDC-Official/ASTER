@@ -32,12 +32,12 @@ OrbitPropagationJob makejob(bastion::Overwatch &t, double a = 7200, double e = 0
     std::string path = "data/eop/EOP-All_250516.txt";
     j.opn_EOP.Read_EOP(t, path);
     j.initKep_norm.Set(a, e, inc, 20, 40, 10, false);
-    j.initKep_norm.Normalize(t, ae / 1000);
+    j.initKep_norm.Normalize(t, constants::Scale::UNIT_LENGTH_M / 1000);
     j.initKep_norm.SyncAnomaly(t);
     j.initKep_norm.ToCartesian(t, j.initCart_norm);
     j.opn_setting.t0_MJD_UTC = 59215;
     j.opn_setting.t0_MJD_TT = UTC2TT(59215);
-    j.opn_setting.h0_norm = 10 / UNITTIME;
+    j.opn_setting.h0_norm = 10 / constants::Scale::UNIT_TIME_S;
     j.opn_setting.rkf.maxTE_norm = 1e-13;
     j.opn_setting.display_progress = 0;
     return j;
@@ -56,7 +56,7 @@ std::vector<Observation> truth(bastion::Overwatch &t, const OrbitPropagationJob 
         double seconds = i * 40.0 + (i % 3) * 0.37;
         double epoch = 59215 + seconds / 86400;
         StateVector zi = z;
-        zi[5] += pow(z[0], -1.5) * (UTC2TT(epoch) - UTC2TT(59215)) * 86400 / UNITTIME;
+        zi[5] += pow(z[0], -1.5) * (UTC2TT(epoch) - UTC2TT(59215)) * 86400 / constants::Scale::UNIT_TIME_S;
         auto state = nsg(t, zi);
         state.SyncAnomaly(t);
         orbit::Cartesian cart;
@@ -70,7 +70,7 @@ std::vector<Observation> truth(bastion::Overwatch &t, const OrbitPropagationJob 
             o.object_id = "SYNTHETIC";
             o.observer_id = station ? "B" : "A";
             o.type = static_cast<ObservationType>(type);
-            Eigen::Vector3d position(a[0] * ae, a[1] * ae, a[2] * ae);
+            Eigen::Vector3d position(a[0] * constants::Scale::UNIT_LENGTH_M, a[1] * constants::Scale::UNIT_LENGTH_M, a[2] * constants::Scale::UNIT_LENGTH_M);
             if (type == 7)
             {
                 o.value = position;
@@ -85,7 +85,7 @@ std::vector<Observation> truth(bastion::Overwatch &t, const OrbitPropagationJob 
                     station ? Eigen::Vector3d(-3e6, 5e6, 2e6) : Eigen::Vector3d(6e6, 1e6, -1e6);
                 Eigen::Vector3d dr_gcrs_m = position - o.observer_position_gcrs_m;
                 o.value << atan2(dr_gcrs_m[1], dr_gcrs_m[0]), atan2(dr_gcrs_m[2], hypot(dr_gcrs_m[0], dr_gcrs_m[1])), 0;
-                o.sigma.setConstant(pi / (180 * 3600));
+                o.sigma.setConstant(constants::PI / (180 * 3600));
                 if (noise)
                 {
                     o.value[0] += normal(random) * o.sigma[0] / cos(o.value[1]);
@@ -128,7 +128,7 @@ int main(int argc, char **argv)
         for (double seconds : {0.0, 20.0, 57.0, 100.0})
         {
             const double epoch = 59215 + seconds / 86400;
-            const double t = (UTC2TT(epoch) - polynomial_epoch0_tt) * 86400 / UNITTIME;
+            const double t = (UTC2TT(epoch) - polynomial_epoch0_tt) * 86400 / constants::Scale::UNIT_TIME_S;
             polynomial_epochs.push_back(epoch);
             polynomial_nodes.emplace_back(1 + t + 0.5*t*t + 0.03*t*t*t, 2 - 0.2*t + 0.4*t*t, -1 + 0.4*t - 0.07*t*t*t,
                                           1 + t + 0.09*t*t, -0.2 + 0.8*t, 0.4 - 0.21*t*t, true);
@@ -142,7 +142,7 @@ int main(int argc, char **argv)
 
         for (std::size_t i = 0; i < sample_epochs.size(); ++i)
         {
-            const double t = (UTC2TT(sample_epochs[i]) - polynomial_epoch0_tt) * 86400 / UNITTIME;
+            const double t = (UTC2TT(sample_epochs[i]) - polynomial_epoch0_tt) * 86400 / constants::Scale::UNIT_TIME_S;
             const double expected[6] = {1 + t + 0.5*t*t + 0.03*t*t*t, 2 - 0.2*t + 0.4*t*t, -1 + 0.4*t - 0.07*t*t*t,
                                         1 + t + 0.09*t*t, -0.2 + 0.8*t, 0.4 - 0.21*t*t};
             double actual[6];
@@ -159,8 +159,8 @@ int main(int argc, char **argv)
         const Eigen::Vector3d line_of_sight(-3, 3, std::sqrt(6.0));
         const auto equatorial = LOS_to_Equatorial(line_of_sight);
         require(std::abs(equatorial.rho - std::sqrt(24.0)) < 1e-14 &&
-                    std::abs(equatorial.right_ascension - 3 * pi / 4) < 1e-14 &&
-                    std::abs(equatorial.declination - pi / 6) < 1e-14,
+                    std::abs(equatorial.right_ascension - 3 * constants::PI / 4) < 1e-14 &&
+                    std::abs(equatorial.declination - constants::PI / 6) < 1e-14,
                 "Relative line-of-sight geometry mismatch.");
         double equator[3];
         RelativePosition_to_Equatorial(7, 23, 30 + std::sqrt(6.0), 10, 20, 30, equator);
@@ -173,10 +173,10 @@ int main(int argc, char **argv)
         require(zero_line.rho == 0 && std::isnan(zero_line.right_ascension) &&
                     std::isnan(zero_line.declination), "Zero line of sight must have undefined angles.");
         require(pole_line.rho == 2 && pole_line.right_ascension == 0 &&
-                    pole_line.declination == -pi / 2, "Polar line-of-sight convention mismatch.");
-        const double high_ra = 359.999 * pi / 180, low_ra = 0.001 * pi / 180;
-        require(std::abs(std::remainder(high_ra - low_ra, 2 * pi) + 0.002 * pi / 180) < 1e-14 &&
-                    std::abs(std::remainder(low_ra - high_ra, 2 * pi) - 0.002 * pi / 180) < 1e-14,
+                    pole_line.declination == -constants::PI / 2, "Polar line-of-sight convention mismatch.");
+        const double high_ra = 359.999 * constants::PI / 180, low_ra = 0.001 * constants::PI / 180;
+        require(std::abs(std::remainder(high_ra - low_ra, 2 * constants::PI) + 0.002 * constants::PI / 180) < 1e-14 &&
+                    std::abs(std::remainder(low_ra - high_ra, 2 * constants::PI) - 0.002 * constants::PI / 180) < 1e-14,
                 "Signed RA difference across zero changed sign or magnitude.");
         auto job = makejob(tracer);
         orbit::NonSingular2 state;
@@ -240,7 +240,7 @@ int main(int argc, char **argv)
             Compute_ObsAndPartials(tracer, observations[0], orbit::Cartesian(m[0], m[1], m[2], m[3], m[4], m[5], true), calc_obs_minus, unused);
 
             Eigen::Vector3d difference = (calc_obs_plus - calc_obs_minus) / 2e-7;
-            difference[0] = std::remainder(calc_obs_plus[0] - calc_obs_minus[0], 2 * pi) * std::cos(observations[0].value[1]) / 2e-7;
+            difference[0] = std::remainder(calc_obs_plus[0] - calc_obs_minus[0], 2 * constants::PI) * std::cos(observations[0].value[1]) / 2e-7;
             observation_error = std::max(observation_error, (difference - H.col(k)).norm());
         }
 
@@ -268,7 +268,7 @@ int main(int argc, char **argv)
             }
             else if (geometry == 1)
             {
-                invalid.observer_position_gcrs_m = Eigen::Vector3d(ae, 0, 0);
+                invalid.observer_position_gcrs_m = Eigen::Vector3d(constants::Scale::UNIT_LENGTH_M, 0, 0);
             }
             else
             {
@@ -323,8 +323,8 @@ int main(int argc, char **argv)
                 double pos = 0, vel = 0;
                 for (int k = 0; k < 3; ++k)
                 {
-                    pos += pow((x[k] - y[k]) * ae, 2);
-                    vel += pow((x[k + 3] - y[k + 3]) * ae / UNITTIME, 2);
+                    pos += pow((x[k] - y[k]) * constants::Scale::UNIT_LENGTH_M, 2);
+                    vel += pow((x[k + 3] - y[k + 3]) * constants::Scale::UNIT_LENGTH_M / constants::Scale::UNIT_TIME_S, 2);
                 }
                 require(sqrt(pos) < 0.002 && sqrt(vel) < 2e-6, "Noise-free recovered orbit inaccurate.");
                 require(result.covariance_cart_si.allFinite() &&
@@ -333,7 +333,7 @@ int main(int argc, char **argv)
                 Eigen::Vector3d calc_obs, checkres = Eigen::Vector3d::Zero();
                 Eigen::Matrix<double, 3, 6> unused;
                 Compute_ObsAndPartials(tracer, observations[0], result.fitted_cart_norm, calc_obs, unused);
-                checkres[0] = std::remainder(observations[0].value[0] - calc_obs[0], 2 * pi) * std::cos(observations[0].value[1]);
+                checkres[0] = std::remainder(observations[0].value[0] - calc_obs[0], 2 * constants::PI) * std::cos(observations[0].value[1]);
                 checkres[1] = observations[0].value[1] - calc_obs[1];
                 require((checkres - result.residuals[0]).norm() < 1e-12,
                         "Final residual/state not from same orbit.");
@@ -361,7 +361,7 @@ int main(int argc, char **argv)
                 auto x = exported_values_9, y = exported_values_8;
                 double pos = 0;
                 for (int k = 0; k < 3; ++k)
-                    pos += pow((x[k] - y[k]) * ae, 2);
+                    pos += pow((x[k] - y[k]) * constants::Scale::UNIT_LENGTH_M, 2);
                 require(sqrt(pos) < 0.02, "GEO/HEO truth recovery inaccurate.");
                 std::cout << (high_e ? "HEO" : "GEO") << " id " << id << " position_m " << sqrt(pos)
                           << " WRMS " << result.weighted_rms << '\n';
@@ -399,7 +399,7 @@ int main(int argc, char **argv)
                 MovePosteriorToEpoch(tracer, fitjob, transfer, target_epoch, moved);
                 require(tracer.Code() == bastion::ERR_NOERROR && moved.fit_epoch_utc == target_epoch, "Posterior epoch label/transfer failed.");
                 StateVector expected_z = statevector(state);
-                expected_z[5] += std::pow(expected_z[0], -1.5) * (UTC2TT(target_epoch)-UTC2TT(59215)) * 86400 / UNITTIME;
+                expected_z[5] += std::pow(expected_z[0], -1.5) * (UTC2TT(target_epoch)-UTC2TT(59215)) * 86400 / constants::Scale::UNIT_TIME_S;
                 auto expected = nsg(tracer, expected_z);
                 expected.SyncAnomaly(tracer);
                 orbit::Cartesian expected_cart;
@@ -407,7 +407,7 @@ int main(int argc, char **argv)
                 std::array<double, 6> a, b;
                 expected_cart.ToArray(a.data()); moved.fitted_cart_norm.ToArray(b.data());
                 double error = 0;
-                for (int j=0; j<3; ++j) error += std::pow((a[j]-b[j])*ae,2);
+                for (int j=0; j<3; ++j) error += std::pow((a[j]-b[j])*constants::Scale::UNIT_LENGTH_M,2);
                 require(std::sqrt(error)<0.002, "Reference-epoch posterior disagrees with independent truth.");
                 require(moved.covariance_full.allFinite() && (moved.covariance_full.diagonal().array()>0).all(), "Transferred covariance invalid.");
                 require(moved.accepted == xyz_result.accepted && moved.residuals == xyz_result.residuals, "Epoch transfer changed observations.");
@@ -436,8 +436,8 @@ int main(int argc, char **argv)
         forcejob.opn_model.lunar_gravity_config = 2;
         forcejob.opn_model.use_drag = true;
         auto &sat = forcejob.opn_model.sat;
-        sat.mass = 100 / MASS_OF_EARTH;
-        sat.area_drag = 1 / (ae * ae);
+        sat.mass = 100 / constants::Scale::UNIT_MASS_KG;
+        sat.area_drag = 1 / (constants::Scale::UNIT_LENGTH_M * constants::Scale::UNIT_LENGTH_M);
         sat.AMR_drag = sat.area_drag / sat.mass;
         sat.Cd = 2.2;
         double density_step = 0;
@@ -459,18 +459,18 @@ int main(int argc, char **argv)
             obs.observer_id = "XYZ";
             obs.mjd_utc = 59215 + (i * 60 + (i % 3) * 0.31) / 86400.;
             obs.sigma.setConstant(1);
-            const double target = (UTC2TT(obs.mjd_utc) - UTC2TT(59215)) * 86400 / UNITTIME;
+            const double target = (UTC2TT(obs.mjd_utc) - UTC2TT(59215)) * 86400 / constants::Scale::UNIT_TIME_S;
             while (target - elapsed > 1e-13)
             {
-                double accepted = 0, step = std::min(2 / UNITTIME, target - elapsed);
-                RKF78_Cart(tracer, truthjob, UTC2TT(59215) + elapsed * UNITTIME / 86400, x.data(), step,
+                double accepted = 0, step = std::min(2 / constants::Scale::UNIT_TIME_S, target - elapsed);
+                RKF78_Cart(tracer, truthjob, UTC2TT(59215) + elapsed * constants::Scale::UNIT_TIME_S / 86400, x.data(), step,
                            accepted);
                 require(accepted > 0 && tracer.Code() == bastion::ERR_NOERROR,
                         "Independent Cartesian truth failed.");
                 elapsed += accepted;
             }
             for (int k = 0; k < 3; ++k)
-                obs.value[k] = x[k] * ae;
+                obs.value[k] = x[k] * constants::Scale::UNIT_LENGTH_M;
             forceobs.push_back(obs);
         }
         for (int id : {101, 102, 201, 202})
@@ -490,7 +490,7 @@ int main(int argc, char **argv)
                 auto fitted = exported_values_12, reference = exported_values_11;
                 double distance = 0;
                 for (int k = 0; k < 3; ++k)
-                    distance += pow((fitted[k] - reference[k]) * ae, 2);
+                    distance += pow((fitted[k] - reference[k]) * constants::Scale::UNIT_LENGTH_M, 2);
                 require(sqrt(distance) < 0.003 && result.weighted_rms < 0.005,
                         "Perturbed orbit recovery inaccurate.");
                 std::cout << "perturbed id " << id << " fd " << fd << " position_m " << sqrt(distance)
@@ -502,7 +502,7 @@ int main(int argc, char **argv)
             {
                 double xi = eccentricity * cos(0.4), eta = eccentricity * sin(0.4);
                 double u = SolveGeneralizedKepler(xi, eta, longitude, 1e-18, 30);
-                require(std::abs(std::remainder(u - xi * sin(u) + eta * cos(u) - longitude, 2 * pi)) < 3e-14,
+                require(std::abs(std::remainder(u - xi * sin(u) + eta * cos(u) - longitude, 2 * constants::PI)) < 3e-14,
                         "Generalized Kepler did not converge.");
             }
         // 直接测试残差统计的数学边界，不依赖轨道转换能否生成机器精确的零残差。
@@ -529,7 +529,7 @@ int main(int argc, char **argv)
         bad.stm_method = 0;
         require(invalid(observations, bad), "Invalid STM accepted.");
         auto poles = observations;
-        poles[0].value[1] = pi / 2;
+        poles[0].value[1] = constants::PI / 2;
         require(invalid(poles, settings), "Polar RA singularity accepted.");
         // 可供真实 CLI 重跑的输入，保留东西、南北方向的 sigma 约定。
         if (argc > 1)
@@ -538,18 +538,18 @@ int main(int argc, char **argv)
             std::ofstream f(std::filesystem::path(argv[1]) / "observations.txt");
             f << std::setprecision(17);
             for (const auto &o : observations)
-                f << o.mjd_utc << " 6 " << o.object_id << ' ' << o.observer_id << ' ' << o.value[0] * 180 / pi
-                  << ' ' << o.value[1] * 180 / pi << ' ' << o.observer_position_gcrs_m.transpose() << '\n';
+                f << o.mjd_utc << " 6 " << o.object_id << ' ' << o.observer_id << ' ' << o.value[0] * 180 / constants::PI
+                  << ' ' << o.value[1] * 180 / constants::PI << ' ' << o.observer_position_gcrs_m.transpose() << '\n';
             std::ofstream tf(std::filesystem::path(argv[1]) / "truth.txt");
             tf << std::setprecision(17);
             std::array<double, 6> exported_values_13; job.initCart_norm.ToArray(exported_values_13.data());
             auto a = exported_values_13;
             for (int j = 0; j < 6; ++j)
-                tf << a[j] * ae / (j < 3 ? 1 : UNITTIME) << ' ';
+                tf << a[j] * constants::Scale::UNIT_LENGTH_M / (j < 3 ? 1 : constants::Scale::UNIT_TIME_S) << ' ';
             tf << '\n';
             std::ofstream kf(std::filesystem::path(argv[1]) / "initial_keplerian.txt");
             auto kep = fitjob.initKep_norm;
-            kep.Restore(tracer, ae / 1000);
+            kep.Restore(tracer, constants::Scale::UNIT_LENGTH_M / 1000);
             kf << std::setprecision(17);
             std::array<double, 6> exported_values_14; kep.ToArray(exported_values_14.data());
             for (double x : exported_values_14)
@@ -564,7 +564,7 @@ int main(int argc, char **argv)
                 force_file << o.mjd_utc << " 7 " << o.object_id << ' ' << o.observer_id << ' '
                            << o.value.transpose() << '\n';
             auto perturbed_kep = perturbed(tracer, forcejob).initKep_norm;
-            perturbed_kep.Restore(tracer, ae / 1000);
+            perturbed_kep.Restore(tracer, constants::Scale::UNIT_LENGTH_M / 1000);
             force_initial << std::setprecision(17);
             std::array<double, 6> exported_values_15; perturbed_kep.ToArray(exported_values_15.data());
             for (double value : exported_values_15)
@@ -573,13 +573,13 @@ int main(int argc, char **argv)
             std::array<double, 6> exported_values_16; forcejob.initCart_norm.ToArray(exported_values_16.data());
             auto reference = exported_values_16;
             for (int k = 0; k < 6; ++k)
-                force_truth << reference[k] * ae / (k < 3 ? 1 : UNITTIME) << ' ';
+                force_truth << reference[k] * constants::Scale::UNIT_LENGTH_M / (k < 3 ? 1 : constants::Scale::UNIT_TIME_S) << ' ';
             std::ofstream ground(std::filesystem::path(argv[1]) / "ground.txt"),
                 space(std::filesystem::path(argv[1]) / "ground_as_space.txt"),
                 stations(std::filesystem::path(argv[1]) / "stations.txt");
             ground << std::setprecision(17);
             space << std::setprecision(17);
-            stations << std::setprecision(17) << "A 1 30 120 100\nB 2 0 " << ae << " 0\n";
+            stations << std::setprecision(17) << "A 1 30 120 100\nB 2 0 " << constants::Scale::UNIT_LENGTH_M << " 0\n";
             for (auto o : observations)
             {
                 aEOP eop;
@@ -587,26 +587,26 @@ int main(int argc, char **argv)
                 Eigen::Matrix3d rotation;
                 ITRS_to_GCRS_Matrix(o.mjd_utc, eop, rotation);
                 // 独立椭球公式给出 A 站位置，用非零纬经高核对 CLI 的单位和三列顺序。
-                double latitude = 30 * pi / 180, longitude = 120 * pi / 180,
-                       N = ae / sqrt(1 - E_SQUARED * pow(sin(latitude), 2));
+                double latitude = 30 * constants::PI / 180, longitude = 120 * constants::PI / 180,
+                       N = constants::Scale::UNIT_LENGTH_M / sqrt(1 - constants::Wgs84::ECCENTRICITY_SQUARED * pow(sin(latitude), 2));
                 Eigen::Vector3d fixed = o.observer_id == "A"
                                             ? Eigen::Vector3d((N + 100) * cos(latitude) * cos(longitude),
                                                               (N + 100) * cos(latitude) * sin(longitude),
-                                                              (N * (1 - E_SQUARED) + 100) * sin(latitude))
-                                            : Eigen::Vector3d(0, ae, 0);
+                                                              (N * (1 - constants::Wgs84::ECCENTRICITY_SQUARED) + 100) * sin(latitude))
+                                            : Eigen::Vector3d(0, constants::Scale::UNIT_LENGTH_M, 0);
                 StateVector zi = z;
-                zi[5] += pow(z[0], -1.5) * (UTC2TT(o.mjd_utc) - UTC2TT(59215)) * 86400 / UNITTIME;
+                zi[5] += pow(z[0], -1.5) * (UTC2TT(o.mjd_utc) - UTC2TT(59215)) * 86400 / constants::Scale::UNIT_TIME_S;
                 auto ns = nsg(tracer, zi);
                 ns.SyncAnomaly(tracer);
                 orbit::Cartesian c;
                 ns.ToCartesian(tracer, c);
                 std::array<double, 6> exported_values_17; c.ToArray(exported_values_17.data());
                 auto a = exported_values_17;
-                Eigen::Vector3d position = Eigen::Vector3d(a[0], a[1], a[2]) * ae;
+                Eigen::Vector3d position = Eigen::Vector3d(a[0], a[1], a[2]) * constants::Scale::UNIT_LENGTH_M;
                 o.observer_position_gcrs_m = rotation * fixed;
                 Eigen::Vector3d dr_gcrs_m = position - o.observer_position_gcrs_m;
-                double ra = atan2(dr_gcrs_m[1], dr_gcrs_m[0]) * 180 / pi,
-                       dec = atan2(dr_gcrs_m[2], hypot(dr_gcrs_m[0], dr_gcrs_m[1])) * 180 / pi;
+                double ra = atan2(dr_gcrs_m[1], dr_gcrs_m[0]) * 180 / constants::PI,
+                       dec = atan2(dr_gcrs_m[2], hypot(dr_gcrs_m[0], dr_gcrs_m[1])) * 180 / constants::PI;
                 ground << o.mjd_utc << " 1 " << o.object_id << ' ' << o.observer_id << ' ' << ra << ' ' << dec
                        << '\n';
                 space << o.mjd_utc << " 6 " << o.object_id << ' ' << o.observer_id << ' ' << ra << ' ' << dec

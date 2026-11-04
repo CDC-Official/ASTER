@@ -23,11 +23,15 @@
   },
   {
     "file": "gravity/grail.txt",
-    "bytes": 405282,
-    "sha256": "979d49f6b7e7a5d79bb885dff4ed603e8949095bdc413cace066df4a64000ad0",
-    "description": "原工程月球重力场系数表",
+    "bytes": 405176,
+    "sha256": "16832b9d9090bdda2a3981497ea501f542a3cdd45d82afa029da152930cb2d1d",
+    "description": "NASA GSFC GRGM660PRIM 完全归一化球谐系数，截取到 80 阶；表头采用 SI 单位",
     "source": "/Users/chendingcun/CLionProjects/CDC_lib/test/grail.txt",
-    "resolved_source": "/Users/chendingcun/CLionProjects/CDC_lib/test/grail.txt"
+    "resolved_source": "/Users/chendingcun/CLionProjects/CDC_lib/test/grail.txt",
+    "source_url": "https://pds-geosciences.wustl.edu/grail/grail-l-lgrs-5-rdr-v1/grail_1001/shadr/gggrx_0660pm_sha.tab",
+    "source_sha256": "a77ee9996aff7341ef89f69aa401f39ba0c2949ed80411505fb4826b771dd63e",
+    "label_url": "https://pds-geosciences.wustl.edu/grail/grail-l-lgrs-5-rdr-v1/grail_1001/shadr/gggrx_0660pm_sha.lbl",
+    "transform": "保留 1 至 80 阶的全部系数行；文件头半径 km 转 m，GM 及其标准差 km^3/s^2 转 m^3/s^2，最大阶次设为 80。"
   },
   {
     "file": "atmosphere/atmosphere.txt",

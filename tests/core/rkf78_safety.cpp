@@ -193,7 +193,7 @@ template<class Job, class Propagate, class Orbit>
 void check_propagation(Job job, Propagate propagate, bool tdb, const char* name)
 {
     // 以相同椭圆根数构造解析轨道；TDB 的速度和平均运动按地球 GM 缩放。
-    const double velocity_scale = tdb ? sqrt(MAJOR_BODY_GM_NORMALIZED[2]) : 1.0;
+    const double velocity_scale = tdb ? sqrt(constants::Scale::NORMALIZED_BODY_GM_TDB[2]) : 1.0;
     State initial = analytic(0);
 
     for (int i = 3; i < 6; ++i) initial[i] *= velocity_scale;
@@ -218,17 +218,17 @@ void check_propagation(Job job, Propagate propagate, bool tdb, const char* name)
 
         for (int i = 3; i < 6; ++i) reference[i] *= velocity_scale;
 
-        max_position=std::max(max_position,distance(last,reference,0)*ae);
-        max_velocity=std::max(max_velocity,distance(last,reference,3)*NORMALIZED_VELOCITY_TO_MPS);
-        std::cout<<"CASE "<<name<<" duration="<<duration<<" position_m="<<distance(last,reference,0)*ae<<" velocity_mps="<<distance(last,reference,3)*NORMALIZED_VELOCITY_TO_MPS<<'\n';
+        max_position=std::max(max_position,distance(last,reference,0)*constants::Scale::UNIT_LENGTH_M);
+        max_velocity=std::max(max_velocity,distance(last,reference,3)*constants::Conversion::NORMALIZED_VELOCITY_TO_MPS);
+        std::cout<<"CASE "<<name<<" duration="<<duration<<" position_m="<<distance(last,reference,0)*constants::Scale::UNIT_LENGTH_M<<" velocity_mps="<<distance(last,reference,3)*constants::Conversion::NORMALIZED_VELOCITY_TO_MPS<<'\n';
         require(distance(last,reference,0)<2e-9,"Two-body position disagrees with analytic reference");
         require(distance(last,reference,3)<2e-9,"Two-body velocity disagrees with analytic reference");
         const double epoch_elapsed=(epochs.back()-epochs.front())*86400.;
-        const double endpoint_error=std::abs(epoch_elapsed-duration*NORMALIZED_TIME_TO_SEC);
+        const double endpoint_error=std::abs(epoch_elapsed-duration*constants::Conversion::NORMALIZED_TIME_TO_SEC);
         max_endpoint=std::max(max_endpoint,endpoint_error);
         // UTC 包装函数先合并为完整 JD，会引入数十微秒舍入；不将该历史误差归因于积分器。
-        const double expected_epoch=tdb ? 60000.25+duration*NORMALIZED_TIME_TO_DAY
-            : TT2UTC(UTC2TT(60000.25)+duration*NORMALIZED_TIME_TO_DAY);
+        const double expected_epoch=tdb ? 60000.25+duration*constants::Conversion::NORMALIZED_TIME_TO_DAY
+            : TT2UTC(UTC2TT(60000.25)+duration*constants::Conversion::NORMALIZED_TIME_TO_DAY);
         require(std::abs(epochs.back()-expected_epoch)*86400.<1e-6,"Endpoint clipping failed");
         require(endpoint_error<(tdb?1e-6:1e-4),"Recorded epoch exceeds existing time-conversion precision");
         for(size_t k=1;k<epochs.size();++k)
@@ -320,11 +320,11 @@ int main(int argc,char** argv) try {
         State base_elements=exported_values_5;base_elements[5]+=elapsed/std::sqrt(2.2*2.2*2.2);
         const State expected=analytic(elapsed);
         for(int turns:{-3,-1,0,1,3}) {
-            State elements=base_elements;elements[5]+=turns*2*pi;
+            State elements=base_elements;elements[5]+=turns*2*constants::PI;
             Overwatch wrap_trace(__FILE__,"nsg2_wrap",__LINE__);
             NonSingular2 shifted(wrap_trace,elements[0],elements[1],elements[2],elements[3],elements[4],elements[5],true);
             State restored{};shifted.ToCartesian(wrap_trace,restored.data());
-            const double position_error=distance(restored,expected,0)*ae;
+            const double position_error=distance(restored,expected,0)*constants::Scale::UNIT_LENGTH_M;
             if(wrap_probe) std::cout<<"WRAP elapsed="<<elapsed<<" turns="<<turns<<" position_m="<<position_error<<'\n';
             else {
                 require(wrap_trace.Code()==ERR_NOERROR,"NSG2 wrap conversion failed");

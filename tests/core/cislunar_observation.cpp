@@ -54,8 +54,8 @@ int main(int argc, char* argv[])
     Cislunar::ComputeGravityDelay(tracer, {2e8, 0.0, 0.0}, {3e8, 0.0, 0.0}, bodies, {3}, delay_s);
     if (tracer.Code() != bastion::ERR_NOERROR) tracer.EmergencyExit();
 
-    const double c = SPEED_OF_LIGHT_MPS;
-    const double expected_delay = 2.0 * MAJOR_BODY_GM[2] / (c * c * c) * std::log(1.5);
+    const double c = constants::SPEED_OF_LIGHT_MPS;
+    const double expected_delay = 2.0 * constants::DE440::GM_TDB[2] / (c * c * c) * std::log(1.5);
 
     if (std::abs(delay_s - expected_delay) > 1e-24) return 4;
 

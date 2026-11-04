@@ -17,6 +17,8 @@
 #include <iomanip>
 #include <sstream>
 
+using namespace constants::Scale;
+
 namespace observation
 {
 
@@ -598,7 +600,7 @@ namespace determination
 		// 将归一化位置恢复为 GCRS 米制位置，与观测者位置使用相同单位。
 		std::array<double, 6> state_values;
 		state.ToArray(state_values.data());
-		Eigen::Vector3d position_gcrs_m(state_values[0] * ae, state_values[1] * ae, state_values[2] * ae);
+		Eigen::Vector3d position_gcrs_m(state_values[0] * UNIT_LENGTH_M, state_values[1] * UNIT_LENGTH_M, state_values[2] * UNIT_LENGTH_M);
 
 		// calc_obs 和偏导矩阵按三分量准备，测角只使用前两行；瞬时观测的速度偏导为零。
 		calc_obs.setZero();
@@ -608,7 +610,7 @@ namespace determination
 		{
 			// 位置观测直接取目标 XYZ，ae 将偏导恢复为对归一化位置的米制偏导。
 			calc_obs = position_gcrs_m;
-			partials.block<3, 3>(0, 0) = ae * Eigen::Matrix3d::Identity();
+			partials.block<3, 3>(0, 0) = UNIT_LENGTH_M * Eigen::Matrix3d::Identity();
 			tracer.CheckOut(__func__);
 			return;
 		}
@@ -641,8 +643,8 @@ namespace determination
 		// 第一行偏导乘 cos(观测Dec)，对应东西方向；第二行对应南北方向。
 		// ae 将对米制位置的偏导转为对归一化位置的偏导。
 		const double cos_dec = std::cos(obs.value[1]);
-		partials.block<1, 3>(0, 0) = cos_dec * ae * Eigen::RowVector3d(-dr_gcrs_m[1] / (xy * xy), dr_gcrs_m[0] / (xy * xy), 0);
-		partials.block<1, 3>(1, 0) = ae * Eigen::RowVector3d(-dr_gcrs_m[0] * dr_gcrs_m[2] / xy, -dr_gcrs_m[1] * dr_gcrs_m[2] / xy, xy) / (rho * rho);
+		partials.block<1, 3>(0, 0) = cos_dec * UNIT_LENGTH_M * Eigen::RowVector3d(-dr_gcrs_m[1] / (xy * xy), dr_gcrs_m[0] / (xy * xy), 0);
+		partials.block<1, 3>(1, 0) = UNIT_LENGTH_M * Eigen::RowVector3d(-dr_gcrs_m[0] * dr_gcrs_m[2] / xy, -dr_gcrs_m[1] * dr_gcrs_m[2] / xy, xy) / (rho * rho);
 
 		tracer.CheckOut(__func__);
 	}

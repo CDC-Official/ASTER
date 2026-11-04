@@ -202,7 +202,7 @@ int Earth_Nonspherical_Gravitational_Acceleration(double* a_celestial,
  */
 int Earth_Nonspherical_Gravitational_Acceleration(double* a_terrestrial, const double* R_terrestrial,
 	int field_id, int zonal_order, int tesseral_degree,
-	double field_gm = GGM03C_GM, double reference_radius = GGM03C_REFERENCE_RADIUS);
+	double field_gm = constants::GGM03C::GM, double reference_radius = constants::GGM03C::REFERENCE_RADIUS);
 
 
 /**

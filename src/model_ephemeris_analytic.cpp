@@ -7,6 +7,9 @@
 
 #include "model_ephemeris_analytic.hpp"
 
+using namespace constants::Scale;
+using constants::PI;
+
 //用于积分器的老版本，使用了static类型的MJD0，定义在RKF78.hpp里
 void MeanMoonCart(double MJD0,
 	double RKF_t,
@@ -16,19 +19,19 @@ void MeanMoonCart(double MJD0,
 	MJD0为积分的起点儒略日，通常设置为一个全局的static变量，RKFt为积分中的归一化时间，从0开始，因此积分过程中的MJD实际为MJD0+RKFt（单位转化为天后）
 	*/
 	double T, d;  // Julian centuries and days from J2000.0
-	double JD = MJD0 + RKF_t * UNITTIME / 86400.0 + 2400000.5;
-	d = JD - 2451545.0;
-	T = d / 36525.0;
+	double JD = MJD0 + RKF_t * UNIT_TIME_S / constants::SECONDS_PER_DAY + constants::MJD_OFFSET;
+	d = JD - constants::J2000_JD;
+	T = d / constants::DAYS_PER_CENTURY;
 
 	double a, e, i, OMEGA, omega, M;  // mean elements in ecliptic coordinate, normalized & rad
-	a = 384747981 / ae;
+	a = constants::MeanOrbit::LUNAR_SEMIMAJOR_AXIS / UNIT_LENGTH_M;
 	e = 0.05488;
-	i = 5.1298 / 180. * pi;
-	OMEGA = (125.0446 - 1934.14 * T) / 180. * pi;
-	omega = (318.3087 + 6003.15 * T) / 180. * pi;
-	M = (134.9634 + 13.065 * d) / 180. * pi;
+	i = 5.1298 / 180. * PI;
+	OMEGA = (125.0446 - 1934.14 * T) / 180. * PI;
+	omega = (318.3087 + 6003.15 * T) / 180. * PI;
+	M = (134.9634 + 13.065 * d) / 180. * PI;
 
-	double eps = 23.4393 / 180 * pi;
+	double eps = constants::MeanOrbit::OBLIQUITY;
 	//求出月球在平黄道坐标系下的位置，在旋转Rx（-eps）转换一下就行
 
 	double state_ecliptic_norm_array[6];
@@ -50,17 +53,17 @@ void MeanSunCart(double MJD0,
 	MJD0为积分的起点儒略日，通常设置为一个全局的const变量，RKFt为积分中的归一化时间，从0开始，因此积分过程中的MJD实际为MJD0+RKFt（单位转化为天后）
 	*/
 	double T, d;  // Julian centuries and days from J2000.0
-	double JD = MJD0 + RKF_t * UNITTIME / 86400.0 + 2400000.5;
-	d = JD - 2451545.0;
-	T = d / 36525.0;
+	double JD = MJD0 + RKF_t * UNIT_TIME_S / constants::SECONDS_PER_DAY + constants::MJD_OFFSET;
+	d = JD - constants::J2000_JD;
+	T = d / constants::DAYS_PER_CENTURY;
 
 	double a, e, i, OMEGA, omega, M;  // mean elements in equator coordinate, normalized & rad
-	a = 1.00000102 * 1.4959787E11 / ae;
+	a = constants::MeanOrbit::SOLAR_SEMIMAJOR_AXIS / UNIT_LENGTH_M;
 	e = 0.016709;
-	i = 23.4393 / 180 * pi;
+	i = constants::MeanOrbit::OBLIQUITY;
 	OMEGA = 0.;
-	omega = (282.9373 + 0.32 * T) / 180. * pi;
-	M = (357.5291 + 0.9856 * d) / 180. * pi;
+	omega = (282.9373 + 0.32 * T) / 180. * PI;
+	M = (357.5291 + 0.9856 * d) / 180. * PI;
 
 	double vector[6];
 	KeplerianToCartsian(a, e, i, OMEGA, omega, M, vector);
@@ -70,7 +73,7 @@ void MeanSunCart(double MJD0,
 	R_Sun[2] = vector[2];
 }
 
-//新版本，直接返回MJD对应的平位置
+// 长期进动椭圆模型：根数及角速度取自讲义第 104 页，T 为儒略世纪，d 为儒略日。
 void Cart_MeanMoon(double MJD_UT1, double* R_Moon, double* V_Moon)
 {
 	/// XYZ of the Mean Moon in Earth J2000, using normalized unit
@@ -79,19 +82,19 @@ void Cart_MeanMoon(double MJD_UT1, double* R_Moon, double* V_Moon)
 	///   - Cart: XYZ of the Mean Moon in Earth J2000, using normalized unit
 	//	231227 跟精密定轨part2 P94一样 平均轨道1
 	double T, d;  // Julian centuries and days from J2000.0
-	double JD = MJD_UT1 + 2400000.5;// Julian day
-	d = JD - 2451545.0;
-	T = d / 36525.0;
+	double JD = MJD_UT1 + constants::MJD_OFFSET;// Julian day
+	d = JD - constants::J2000_JD;
+	T = d / constants::DAYS_PER_CENTURY;
 
 	double a, e, i, OMEGA, omega, M;  // mean elements in ecliptic coordinate, normalized & rad
-	a = 384747981. / ae;
+	a = constants::MeanOrbit::LUNAR_SEMIMAJOR_AXIS / UNIT_LENGTH_M;
 	e = 0.05488;
-	i = 5.1298 / 180. * pi;
-	OMEGA = (125.0446 - 1934.14 * T) / 180. * pi;
-	omega = (318.3087 + 6003.15 * T) / 180. * pi;
-	M = (134.9634 + 13.065 * d) / 180. * pi;
+	i = 5.1298 / 180. * PI;
+	OMEGA = (125.0446 - 1934.14 * T) / 180. * PI;
+	omega = (318.3087 + 6003.15 * T) / 180. * PI;
+	M = (134.9634 + 13.065 * d) / 180. * PI;
 
-	double eps = 23.4393 / 180 * pi;
+	double eps = constants::MeanOrbit::OBLIQUITY;
 	//求出月球在平黄道坐标系下的位置，在旋转Rx（-eps）转换一下就行
 
 	double state_ecliptic_norm_array[6];
@@ -130,17 +133,17 @@ void Cart_MeanSun(double MJD_UT1, double* R_Sun, double* V_Sun)
 	///   - Cart: XYZ of the Mean Moon in Earth J2000, using normalized unit
 	//	231227 跟精密定轨part2 P94一样 平均轨道1
 	double T, d;  // Julian centuries and days from J2000.0
-	double JD = MJD_UT1 + 2400000.5;
-	d = JD - 2451545.0;
-	T = d / 36525.0;
+	double JD = MJD_UT1 + constants::MJD_OFFSET;
+	d = JD - constants::J2000_JD;
+	T = d / constants::DAYS_PER_CENTURY;
 
 	double a, e, i, OMEGA, omega, M;  // mean elements in equator coordinate, normalized & rad
-	a = 1.00000102 * 1.4959787E11 / ae;
+	a = constants::MeanOrbit::SOLAR_SEMIMAJOR_AXIS / UNIT_LENGTH_M;
 	e = 0.016709;
-	i = 23.4393 / 180 * pi;
+	i = constants::MeanOrbit::OBLIQUITY;
 	OMEGA = 0.;
-	omega = (282.9373 + 0.32 * T) / 180. * pi;
-	M = (357.5291 + 0.9856 * d) / 180. * pi;
+	omega = (282.9373 + 0.32 * T) / 180. * PI;
+	M = (357.5291 + 0.9856 * d) / 180. * PI;
 
 	double vector[6];
 	KeplerianToCartsian(a, e, i, OMEGA, omega, M, vector);
@@ -168,18 +171,18 @@ void Cart_OsculatingMoon(double MJD_UT1, double* R_Moon)
 	///   - Cart: XYZ of the Mean Moon in Earth J2000, using normalized unit
 	//	231227 跟精密定轨part2 P94一样 删去了平均项
 	double d;  // Julian centuries and days from J2000.0
-	double JD = MJD_UT1 + 2400000.5;// Julian day
-	d = JD - 2451545.0;
+	double JD = MJD_UT1 + constants::MJD_OFFSET;// Julian day
+	d = JD - constants::J2000_JD;
 
 	double a, e, i, OMEGA, omega, M;  // mean elements in ecliptic coordinate, normalized & rad
-	a = 384747981. / ae;
+	a = constants::MeanOrbit::LUNAR_SEMIMAJOR_AXIS / UNIT_LENGTH_M;
 	e = 0.05488;
-	i = 5.1298 / 180. * pi;
-	OMEGA = (125.0446) / 180. * pi;
-	omega = (318.3087) / 180. * pi;
-	M = (134.9634 + 13.065 * d) / 180. * pi;
+	i = 5.1298 / 180. * PI;
+	OMEGA = (125.0446) / 180. * PI;
+	omega = (318.3087) / 180. * PI;
+	M = (134.9634 + 13.065 * d) / 180. * PI;
 
-	double eps = 23.4393 / 180 * pi;
+	double eps = constants::MeanOrbit::OBLIQUITY;
 	//求出月球在平黄道坐标系下的位置，在旋转Rx（-eps）转换一下就行
 
 	double state_ecliptic_norm_array[6];
@@ -204,16 +207,16 @@ void Cart_OsculatingSun(double MJD_UT1, double* R_Sun)
 	///   - Cart: XYZ of the Mean Moon in Earth J2000, using normalized unit
 	//	231227 跟精密定轨part2 P94一样 忽略了omega的平均运动
 	double d;  // Julian centuries and days from J2000.0
-	double JD = MJD_UT1 + 2400000.5;
-	d = JD - 2451545.0;
+	double JD = MJD_UT1 + constants::MJD_OFFSET;
+	d = JD - constants::J2000_JD;
 
 	double a, e, i, OMEGA, omega, M;  // mean elements in equator coordinate, normalized & rad
-	a = 1.00000102 * 1.4959787E11 / ae;
+	a = constants::MeanOrbit::SOLAR_SEMIMAJOR_AXIS / UNIT_LENGTH_M;
 	e = 0.016709;
-	i = 23.4393 / 180 * pi;
+	i = constants::MeanOrbit::OBLIQUITY;
 	OMEGA = 0.;
-	omega = (282.9373) / 180. * pi;//不变
-	M = (357.5291 + 0.9856 * d) / 180. * pi;//不变
+	omega = (282.9373) / 180. * PI;//不变
+	M = (357.5291 + 0.9856 * d) / 180. * PI;//不变
 
 	double vector[6];
 	KeplerianToCartsian(a, e, i, OMEGA, omega, M, vector);

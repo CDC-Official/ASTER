@@ -4,6 +4,8 @@
 
 #include "accel_thirdbody.hpp"
 
+using namespace constants::Scale;
+
 //计算日月第三体摄动加速度，使用JPL数值历表，N代表数值
 // 下面的四个老了已经不用了
 int Solar_Gravity_Acceleration_N(double* a_celestial, const double* r_v_Norm, double MJD_TT)
@@ -16,7 +18,7 @@ int Solar_Gravity_Acceleration_N(double* a_celestial, const double* r_v_Norm, do
 	//int nEarth = 3;    //中心天体序号 EARTH
 
 	//需要在外部事先读JPL
-	double JD_TT = MJD_TT + START_OF_MJD;
+	double JD_TT = MJD_TT + constants::MJD_OFFSET;
 	double r_v_Sun_Norm[6];
 	int a = Get_JPLEPH(JD_TT, 11, 3, r_v_Sun_Norm);
 
@@ -27,7 +29,7 @@ int Solar_Gravity_Acceleration_N(double* a_celestial, const double* r_v_Norm, do
 	double Delta_module = Delta_vec.norm();
 
 	Vector3d F2 =
-		-SUN_EARTH_MASS_RATIO
+		-NORMALIZED_SUN_GM_TT
 			* (Delta_vec / Delta_module / Delta_module / Delta_module + r_prime_vec / pow(r_prime_vec.norm(), 3));
 
 	a_celestial[0] = F2[0];
@@ -57,7 +59,7 @@ int Solar_Gravity_Acceleration_A(double* a_celestial, const double* r_v_Norm, do
 	double Delta_module = Delta_vec.norm();
 
 	Vector3d F2 =
-		-SUN_EARTH_MASS_RATIO
+		-NORMALIZED_SUN_GM_TT
 			* (Delta_vec / Delta_module / Delta_module / Delta_module + r_prime_vec / pow(r_prime_vec.norm(), 3));
 
 	a_celestial[0] = F2[0];
@@ -77,7 +79,7 @@ int Lunar_Gravity_Acceleration_N(double* a_celestial, const double* r_v_Norm, do
 	//int nEarth = 3;    //中心天体序号 EARTH
 
 	//需要在外部事先读JPL
-	double JD_TT = MJD_TT + START_OF_MJD;
+	double JD_TT = MJD_TT + constants::MJD_OFFSET;
 	double r_v_Moon_Norm[6];
 	int a = Get_JPLEPH(JD_TT, 10, 3, r_v_Moon_Norm);
 
@@ -87,7 +89,7 @@ int Lunar_Gravity_Acceleration_N(double* a_celestial, const double* r_v_Norm, do
 
 	double Delta_module = Delta_vec.norm();
 
-	Vector3d F2 = -MOON_EARTH_MASS_RATIO
+	Vector3d F2 = -NORMALIZED_MOON_GM_TT
 		* (Delta_vec / Delta_module / Delta_module / Delta_module + r_prime_vec / pow(r_prime_vec.norm(), 3));
 
 	a_celestial[0] = F2[0];
@@ -117,7 +119,7 @@ int Lunar_Gravity_Acceleration_A(double* a_celestial, const double* r_v_Norm, do
 
 	double Delta_module = Delta_vec.norm();
 
-	Vector3d F2 = -MOON_EARTH_MASS_RATIO
+	Vector3d F2 = -NORMALIZED_MOON_GM_TT
 		* (Delta_vec / Delta_module / Delta_module / Delta_module + r_prime_vec / pow(r_prime_vec.norm(), 3));
 
 	a_celestial[0] = F2[0];

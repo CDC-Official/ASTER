@@ -32,6 +32,8 @@
 
 #include "ASTER.h"
 
+using namespace constants::Scale;
+
 using namespace std;
 using namespace Eigen;
 using namespace orbit;
@@ -211,7 +213,7 @@ int main(int argc, char* argv[])
 		{
 			case 1:
 				// 输入为 JD 或 MJD，统一转成 MJD(TDB) 存储。
-				t0_mjd_tdb = stod(vec_epoch[0]) > 2400000.5 ? stod(vec_epoch[0]) - 2400000.5 : stod(vec_epoch[0]);
+				t0_mjd_tdb = stod(vec_epoch[0]) > constants::MJD_OFFSET ? stod(vec_epoch[0]) - constants::MJD_OFFSET : stod(vec_epoch[0]);
 				break;
 			case 6:
 				// 输入为年月日时分秒，解释为 TDB 日历时间。
@@ -240,7 +242,7 @@ int main(int argc, char* argv[])
 
 			// 输入为 EBCRS 下、以地球为中心定义的 Keplerian osculating elements：半长轴 km，角度 deg。
 			initial_kep.Set(stod(vec_kep[0]), stod(vec_kep[1]), stod(vec_kep[2]), stod(vec_kep[3]), stod(vec_kep[4]), stod(vec_kep[5]), false);
-			initial_kep.Normalize(tracer, ae / 1000.0);
+			initial_kep.Normalize(tracer, UNIT_LENGTH_M / 1000.0);
 			if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
 			// 后续地月空间积分入口仍以 Cartesian 为主；Keplerian 只作为输入便利格式。
@@ -250,7 +252,7 @@ int main(int argc, char* argv[])
 			// 根数转换函数以归一化 GM=1 计算速度；E-BCRS 初速度按 DE440 地球 GM 缩放。
 			double state_norm[6];
 			initial_cart.ToArray(state_norm);
-			const double velocity_scale = sqrt(MAJOR_BODY_GM_NORMALIZED[2]);
+			const double velocity_scale = sqrt(NORMALIZED_BODY_GM_TDB[2]);
 
 			for (int i = 3; i < 6; ++i) state_norm[i] *= velocity_scale;
 
@@ -274,7 +276,7 @@ int main(int argc, char* argv[])
 
 			// 输入为 EBCRS Cartesian 状态：位置 km，速度 km/s。
 			initial_cart.Set(stod(vec_cart[0]), stod(vec_cart[1]), stod(vec_cart[2]), stod(vec_cart[3]), stod(vec_cart[4]), stod(vec_cart[5]), false);
-			initial_cart.Normalize(tracer, ae / 1000.0, UNITTIME);
+			initial_cart.Normalize(tracer, UNIT_LENGTH_M / 1000.0, UNIT_TIME_S);
 			if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 			isCartReady = true;
 		}
@@ -297,7 +299,7 @@ int main(int argc, char* argv[])
 			// 用 DE440 地球 GM 求参考根数，先将副本的速度换成转换函数要求的 GM=1 尺度。
 			double state_norm[6];
 			initial_cart.ToArray(state_norm);
-			const double velocity_scale = sqrt(MAJOR_BODY_GM_NORMALIZED[2]);
+			const double velocity_scale = sqrt(NORMALIZED_BODY_GM_TDB[2]);
 
 			for (int i = 3; i < 6; ++i) state_norm[i] /= velocity_scale;
 
@@ -686,11 +688,11 @@ int main(int argc, char* argv[])
 		EBCRS_model.sat.Id = sat_id;
 		if (sat_mass > 0.0)
 		{
-			EBCRS_model.sat.mass = sat_mass / MASS_OF_EARTH;
+			EBCRS_model.sat.mass = sat_mass / UNIT_MASS_KG;
 		}
 		if (sat_area_drag > 0.0)
 		{
-			EBCRS_model.sat.area_drag = sat_area_drag / ae / ae;
+			EBCRS_model.sat.area_drag = sat_area_drag / UNIT_LENGTH_M / UNIT_LENGTH_M;
 		}
 		if (EBCRS_model.sat.mass > 0.0 && EBCRS_model.sat.area_drag > 0.0)
 		{
@@ -698,7 +700,7 @@ int main(int argc, char* argv[])
 		}
 		if (sat_area_SRP > 0.0)
 		{
-			EBCRS_model.sat.area_SRP = sat_area_SRP / ae / ae;
+			EBCRS_model.sat.area_SRP = sat_area_SRP / UNIT_LENGTH_M / UNIT_LENGTH_M;
 		}
 		if (EBCRS_model.sat.mass > 0.0 && EBCRS_model.sat.area_SRP > 0.0)
 		{
@@ -710,8 +712,8 @@ int main(int argc, char* argv[])
 		// 共同预报参数与积分器专用参数分开；时间仍为 TDB，状态仍为归一化 Cartesian。
 		EBCRS_setting.t0_MJD_TDB = t0_mjd_tdb;
 		EBCRS_setting.display_progress = display_progress;
-		EBCRS_setting.duration_norm = propagation_length_sec * SEC_TO_NORMALIZED_TIME;
-		EBCRS_setting.h0_norm = integrator_step_sec * SEC_TO_NORMALIZED_TIME;
+		EBCRS_setting.duration_norm = propagation_length_sec * constants::Conversion::SEC_TO_NORMALIZED_TIME;
+		EBCRS_setting.h0_norm = integrator_step_sec * constants::Conversion::SEC_TO_NORMALIZED_TIME;
 		EBCRS_setting.rkf.maxTE_norm = integrator_maxTE;
 		EBCRS_setting.rkf.fixed_step = integrator_id == 102;
 		EBCRS_setting.adams.steps = adams_steps;
@@ -744,7 +746,7 @@ int main(int argc, char* argv[])
 
 		// 显示只恢复当前 E-BCRS 状态副本的单位，原归一化初态留给积分使用。
 		Cartesian initial_cart_km = initial_cart;
-		initial_cart_km.Restore(tracer, ae / 1000.0, UNITTIME);
+		initial_cart_km.Restore(tracer, UNIT_LENGTH_M / 1000.0, UNIT_TIME_S);
 		if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
 		double initial_cart_values[6];
@@ -759,7 +761,7 @@ int main(int argc, char* argv[])
 			  << "\n- Target ID                    : " << sat_id
 			  << "\n- Mass [kg]                    : " << std::defaultfloat << std::setprecision(14) << sat_mass
 			  << "\n\n- Start epoch [TDB]            : " << std::fixed << std::setprecision(12) << t0_mjd_tdb
-			  << "\n- End epoch [TDB]              : " << t0_mjd_tdb + propagation_length_sec / 86400.0
+			  << "\n- End epoch [TDB]              : " << t0_mjd_tdb + propagation_length_sec / constants::SECONDS_PER_DAY
 			  << "\n- Duration [s]                 : " << std::showpos << std::setprecision(2) << propagation_length_sec << std::noshowpos
 			  << "\n\n";
 
@@ -834,7 +836,7 @@ int main(int argc, char* argv[])
 
 		// 摘要复用已保存的末状态，只在副本上恢复 km、km/s，不再传播或变换坐标系。
 		Cartesian final_cart_km = record_cart.back();
-		final_cart_km.Restore(tracer, ae / 1000.0, UNITTIME);
+		final_cart_km.Restore(tracer, UNIT_LENGTH_M / 1000.0, UNIT_TIME_S);
 		if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
 		double final_cart_values[6];
@@ -870,11 +872,11 @@ int main(int argc, char* argv[])
 						case STATE_UNIT_NORMALIZE:
 							break;
 						case STATE_UNIT_KM_SEC_DEGREE:
-							temp_cart.Restore(tracer, ae / 1000.0, UNITTIME);
+							temp_cart.Restore(tracer, UNIT_LENGTH_M / 1000.0, UNIT_TIME_S);
 							if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 							break;
 						case STATE_UNIT_M_SEC_DEGREE:
-							temp_cart.Restore(tracer, ae, UNITTIME);
+							temp_cart.Restore(tracer, UNIT_LENGTH_M, UNIT_TIME_S);
 							if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 							break;
 						default:
@@ -937,7 +939,7 @@ int main(int argc, char* argv[])
 				<< "- Status                       : COMPLETED"
 				<< "\n- Final epoch [TDB]            : " << std::fixed << std::setprecision(12) << record_MJD_TDB.back()
 				<< "\n- Propagated duration [s]      : " << std::showpos << std::setprecision(2)
-				<< (record_MJD_TDB.back() - EBCRS_setting.t0_MJD_TDB) * 86400.0 << std::noshowpos
+				<< (record_MJD_TDB.back() - EBCRS_setting.t0_MJD_TDB) * constants::SECONDS_PER_DAY << std::noshowpos
 				<< "\n- Ephemeris records            : " << record_cart.size() << "\n\n";
 
 		for (int row = 0; row < 2; ++row)

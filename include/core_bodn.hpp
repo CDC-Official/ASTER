@@ -32,7 +32,7 @@ struct BatchSetting
     double rejection_scale = 3; // 同组全部原始残差 preRMS 的倍数；0 关闭剔除。
     int rejection_start = 1; // 剔除开始轮次，从 1 计数。
     double rejection_angle_window_rad = 1; // 测角分量的硬窗口，单位 rad。
-    double rejection_position_window_m = ae; // 位置分量的硬窗口，单位 m。
+    double rejection_position_window_m = constants::Scale::UNIT_LENGTH_M; // 位置分量的硬窗口，单位 m。
     bool compute_covariance = true; // 返回已知测量 sigma 下的形式协方差，不自动按 RMS 放大。
     bool display_iterations = true;
     int estimate_parameter = 0; // 0 六状态；1 阻力 AMR；2 光压 AMR；3 自动选择（至少三圈，以 a*ae-ae=2000 km 为分界）。

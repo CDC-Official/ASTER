@@ -102,11 +102,11 @@ void Adams_Step(bastion::Overwatch& tracer, const Job& job,
     // 检查节点数、状态与时间是否有效；一步必须能在 double 精度下推进经过时间和 MJD。
     // 单步调用直接采用 h_norm 的符号；epoch_MJD 固定不变，elapsed_norm 允许为负。
     const int k = job.opn_setting.adams.steps;
-    const double current_mjd = epoch_MJD + elapsed_norm * NORMALIZED_TIME_TO_DAY;
+    const double current_mjd = epoch_MJD + elapsed_norm * constants::Conversion::NORMALIZED_TIME_TO_DAY;
 
     // 时间仍由固定起点加累计经过时间构造，避免每步直接累加大数 MJD。
     const double next_elapsed = elapsed_norm + h_norm;
-    const double next_mjd = epoch_MJD + next_elapsed * NORMALIZED_TIME_TO_DAY;
+    const double next_mjd = epoch_MJD + next_elapsed * constants::Conversion::NORMALIZED_TIME_TO_DAY;
 
     // 空指针不读取；逐分量检查初态，随后与时间及设置一并验收。
     bool state_is_finite = X0 != nullptr;

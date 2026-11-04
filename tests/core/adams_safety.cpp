@@ -51,7 +51,7 @@ void check_reference(OrbitPropagationJob& job,const State& initial) {
             Adams_NSG2(trace,job,t0,elapsed,x.data(),h,history,accepted,error);
             require(trace.Code()==ERR_NOERROR && accepted==h && std::isfinite(error),"Startup failed");
             elapsed+=h;
-            State f{};Acceleration_NSG2(trace,job,t0+elapsed*NORMALIZED_TIME_TO_DAY,6,x.data(),f.data());
+            State f{};Acceleration_NSG2(trace,job,t0+elapsed*constants::Conversion::NORMALIZED_TIME_TO_DAY,6,x.data(),f.data());
             require(history.derivatives[i]==f,"Startup derivative not evaluated at accepted state");
         }
         // 用同一批历史节点，直接执行导师原函数与新函数；不借两个力模型的差异解释结果。
@@ -158,11 +158,11 @@ void check_analytic_and_endpoints(OrbitPropagationJob job) {
             if(i) elapsed=std::copysign(std::min(i*.01,std::abs(duration)),duration);
             State cart{};states[i].ToCartesian(trace,cart.data());
             State expected=analytic(elapsed);
-            max_pos=std::max(max_pos,separation(cart,expected,0)*ae);
-            max_vel=std::max(max_vel,separation(cart,expected,3)*ae/UNITTIME);
+            max_pos=std::max(max_pos,separation(cart,expected,0)*constants::Scale::UNIT_LENGTH_M);
+            max_vel=std::max(max_vel,separation(cart,expected,3)*constants::Scale::UNIT_LENGTH_M/constants::Scale::UNIT_TIME_S);
             if(i)require((epochs[i]-epochs[i-1])*duration>0,"Epoch direction wrong");
         }
-        double expected=duration==0?job.opn_setting.t0_MJD_UTC:TT2UTC(UTC2TT(job.opn_setting.t0_MJD_UTC)+duration*NORMALIZED_TIME_TO_DAY);
+        double expected=duration==0?job.opn_setting.t0_MJD_UTC:TT2UTC(UTC2TT(job.opn_setting.t0_MJD_UTC)+duration*constants::Conversion::NORMALIZED_TIME_TO_DAY);
         require(std::abs(epochs.back()-expected)*86400<1e-6,"Partial final step endpoint wrong");
         job.opn_setting.h0_norm=-.01;
         std::vector<double> e2;std::vector<NonSingular2>s2;bastion::Overwatch t2(__FILE__,"step_sign",__LINE__);
