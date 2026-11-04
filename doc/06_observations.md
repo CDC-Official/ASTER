@@ -93,7 +93,7 @@ python3 tests/check_observation_handoff.py --bin-dir build/v1.3.0/bin \
 
 两端的 E-BCRS 位置分别加上各自时刻的地球 BCRS 位置，从而在同一 BCRS 轴向下计算两个事件之间的距离。状态表用附近最多十点作 Neville 插值，位置、速度和总钟差分别求值。主程序可按开关计入除地球外十个主要天体的引力时延，并对最终伪距加入系统差和高斯白噪声。
 
-[程序使用](03_programs.md#地月单程测距两颗星两个方向)提供独立运行副本的准备命令；[配置参考](04_configuration.md#地月单程测距仿真)列出全部关键词；[数据格式](05_data-formats.md#cislunar)解释输入输出历元。核心接口见 [Cislunar 科学计算](07_interfaces.md#cislunar)。
+[程序使用](03_programs.md#cislunar)提供独立运行副本的准备命令；[配置参考](04_configuration.md#地月单程测距仿真)列出全部关键词；[数据格式](05_data-formats.md#cislunar)解释输入输出历元。核心接口见 [Cislunar 科学计算](07_interfaces.md#cislunar)。
 
 ```sh
 ctest --test-dir build/v1.3.0 \

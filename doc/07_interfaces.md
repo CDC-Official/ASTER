@@ -49,7 +49,7 @@ build/interface-demo/build/aster-build/bin/orbit_demo
 
 Boost 路径按[构建指南](02_quick-start.md)追加。示例将程序放在 OpenLibm 所在的 `aster-build/bin/`；自己的输出目录若不同，需把对应私有共享库放到程序旁边。常用头文件可通过 `#include "ASTER.h"` 引入；GL 求解器额外包含 `core_iod_solver.hpp`。
 
-下文示例通过 `using namespace constants::Scale;` 引入归一化单位，物理值和来源见[常数说明](11_constants.md)。
+下文示例通过 `using namespace constants::Scale;` 引入归一化单位，通过 `using namespace constants::Conversion;` 引入换算系数，物理值和来源见[常数说明](11_constants.md)。
 
 ## 错误怎样返回
 
@@ -85,6 +85,7 @@ Boost 路径按[构建指南](02_quick-start.md)追加。示例将程序放在 O
 #include <iostream>
 
 using namespace constants::Scale;
+using namespace constants::Conversion;
 
 int main()
 {

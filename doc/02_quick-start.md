@@ -17,7 +17,7 @@ git status --short --branch
 
 所需环境为 CMake 3.26 及以上、支持 C++17 的 C/C++ 编译器、Boost 头文件、OpenMP，以及运行检查和加噪工具所需的 Python 3。仓库自带 Eigen 3.4.0、SOFA 2018-01-30 和 OpenLibm 0.8.8，来源和许可见[第三方说明](../third_party/README.md)。
 
-1.2.0 已使用 Mac arm64 / AppleClang 21 和 Linux x86_64 / GCC 13.3 构建。两端源码相同，各自生成适用于本机的程序。
+1.3.0 已使用 Mac arm64 / AppleClang 21 和 Linux x86_64 / GCC 13.3 完成全目标构建与代表算例检查。两端共 37 份科学输出逐字节一致，具体范围见[发布验收](validation/11_release-1.3.0.md)。
 
 ### Mac
 

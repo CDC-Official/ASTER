@@ -12,7 +12,7 @@ ctest --test-dir build/v1.3.0 \
     --output-on-failure
 ```
 
-按改动范围选择正则即可，例如 `-R '^observation_'` 运行三项光学观测检查，`-R '^core_frame_coordinates$'` 只检查坐标。
+`ctest --preset release` 使用同一组当前回归。按改动范围选择正则即可，例如 `-R '^observation_'` 运行三项光学观测检查，`-R '^core_frame_coordinates$'` 只检查坐标。
 
 | 检查 | 关注内容 |
 | --- | --- |
@@ -28,13 +28,13 @@ ctest --test-dir build/v1.3.0 \
 | `observation_runtime` / `observation_geometry` | 观测、真值和分弧，筛选、单位、EOP、输入约束和独立几何 |
 | `observation_angular_noise` | 误差模型、固定种子、输入顺序、样本扩展、零噪声与失败情况 |
 
-## 当前数学后端的应用比较
+## 1.1.0 数学后端验收追溯
 
-默认 OPENLIBM 的四个单 GL 使用已有观测和科学输出哈希，同时核对逐轮状态与停止分支：
+以下入口保存 1.1.0 数学后端切换时的参考与门限，使用相应版本构建执行。当前发布检查采用本文末尾的十一程序入口。四个单 GL 的历史检查使用已保存的观测和科学输出哈希，同时核对逐轮状态与停止分支：
 
 ```sh
-python3 tests/math_backend_cases/run_checks.py --bin-dir build/v1.3.0/bin \
-    --output build/v1.3.0/acceptance/gl --only-gl
+python3 tests/math_backend_cases/run_checks.py --bin-dir build/v1.1.0/bin \
+    --output build/v1.1.0/acceptance/gl --only-gl
 ```
 
 需要完整候选验收时，去掉 `--only-gl`，执行四个单 GL 和 e010/e070 两个各含 10,001 候选的 GLML；`math_backend_iod` 这一 CTest 调用的就是该完整入口，只在 OPENLIBM 构建中注册。
@@ -42,8 +42,8 @@ python3 tests/math_backend_cases/run_checks.py --bin-dir build/v1.3.0/bin \
 七个普通程序使用 `cases.json` 中已有输入，按物理量门限比较：
 
 ```sh
-python3 tests/check_math_backend_apps.py --bin-dir build/v1.3.0/bin \
-    --output build/v1.3.0/acceptance/apps
+python3 tests/check_math_backend_apps.py --bin-dir build/v1.1.0/bin \
+    --output build/v1.1.0/acceptance/apps
 ```
 
 门限为位置/半长轴 1 mm、速度 1 μm/s、偏心率与倾角参数 1e−10、角度 1e−7 deg、角残差 1e−10 rad；历元、编号和文本对应，角度按 360° 周期处理。可用 `--native-summary` 指定已有同平台原生运行清单；默认与仓库参考比较。范围、构建条件和历史结果见[数学后端指南](../doc/08_math-backend.md)及[1.1.0 验收](../doc/validation/03_math-backend.md)。

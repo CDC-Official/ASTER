@@ -70,7 +70,7 @@ namespace DE440
 // 参数取自 IERS Conventions 2010 第 1 章及第 6.1 节。
 namespace IERS2010
 {
-    // GCRS/TT 地球地球质点引力使用的 GM，同时定义轨道积分和根数转换的 GM 尺度；单位 m³/s²。
+    // GCRS/TT 地球质点引力使用的 GM，同时定义轨道积分和根数转换的 GM 尺度；单位 m³/s²。
     constexpr double EARTH_GM_TT = 3.986004415e14;
 
     // 计算共转大气速度 omega × r，再与卫星速度相减得到阻力模型的相对速度。

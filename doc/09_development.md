@@ -88,7 +88,7 @@ git tag --list
 git show --stat v1.2.0
 ```
 
-`log --graph` 左边的线表示提交之间的关系，`main`、`origin/main`、`tag: v1.2.0` 是相应提交旁的名称。正式记录为 v1.0.0、v1.1.0、v1.2.0，变更内容统一查 [CHANGELOG](../CHANGELOG.md)。
+`log --graph` 左边的线表示提交之间的关系，`main`、`origin/main`、`tag: v1.2.0` 是相应提交旁的名称。正式记录为 v1.0.0、v1.1.0、v1.2.0、v1.3.0，变更内容统一查 [CHANGELOG](../CHANGELOG.md)。
 
 需要临时运行旧版时，先确保工作区改动已保存，切到标签并使用对应构建目录：
 

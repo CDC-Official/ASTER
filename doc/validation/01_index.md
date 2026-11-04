@@ -17,7 +17,7 @@
 | 当前 ASTER 与 Orekit 的近地摄动逐项开关及全开一天预报 | [摄动开关对照](08_orekit-perturbations.md) | [模型设置、逐项结果及输入校验](evidence/10_orekit-perturbations.json) |
 | 各自采用大气、地影和地球姿态模型时，一天预报相差多少；近地月球间接项是否补齐 | [独立模型对照及月球间接项](09_orekit-models.md) | [独立模型结果](evidence/11_orekit-models.json)、[间接项修正验证](evidence/12_lunar-indirect-fix.json) |
 | 当前 ASTER 与导师程序的百天 ADAMS 预报随步长变化的差异 | [百天预报对照及曲线](10_adams-100days.md) | [运行配置、星历及图件校验](evidence/13_adams-100days.json) |
-| 1.3.0 的构建、十一程序和跨平台检查 | [1.3.0 发布验收](11_release-1.3.0.md) | 两端运行与科学输出校验记录随发布归档 |
+| 1.3.0 的构建、十一程序和跨平台检查 | [1.3.0 发布验收](11_release-1.3.0.md) | [两端构建、回归及37份科学输出校验](evidence/15_release-1.3.0.json) |
 
 <a id="migration"></a>
 ## 1.0.0 迁移来源与核对
