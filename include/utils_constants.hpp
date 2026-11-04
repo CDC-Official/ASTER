@@ -9,8 +9,9 @@
 #define CDC_UTILS_CONSTANTS_HPP
 
 #include <cmath>
+#include <sofam.h>
 
-// 天体 GM 采用 Park 等（2021，AJ 161:105）DE440/DE441 论文表 2，单位 m³/s²。
+// TDB 相容的天体 GM 采用 Park 等（2021，AJ 161:105）DE440/DE441 论文表 2，单位 m³/s²。
 // 顺序按 JPL 编号 1—11：水星、金星、地球、火星、木星、土星、天王星、海王星、冥王星、月球、太阳。
 // 火星至冥王星采用表中的行星系统 GM；这些参数也是李昊翰程序注释所引用的来源。
 constexpr double MAJOR_BODY_GM[11] = {
@@ -27,11 +28,16 @@ constexpr double MAJOR_BODY_GM[11] = {
     1.32712440041279419e20
 };
 
-// 地球、月球和太阳质点引力均从同一参数表取值；GE 同时用于地球归一化。
-constexpr double GEOCENTRIC_GRAVITATIONAL_CONSTANT = MAJOR_BODY_GM[2];
+// IERS Conventions 2010 第 6.1 节的 TT 相容地球 GM，单位 m³/s²，供 GCRS/TT 动力学使用。
+// GE 也定义程序的数值归一化尺度；E-BCRS/TDB 动力学另用 MAJOR_BODY_GM 中的物理参数。
+constexpr double GEOCENTRIC_GRAVITATIONAL_CONSTANT = 3.986004415e14;
 constexpr double GE = GEOCENTRIC_GRAVITATIONAL_CONSTANT;
-constexpr double LUNAR_GRAVITATIONAL_CONSTANT = MAJOR_BODY_GM[9];
-constexpr double HELIOCENTRIC_GRAVITATIONAL_CONSTANT = MAJOR_BODY_GM[10];
+
+// TT 与 TDB 相容参数的尺度比；IAU 定义的 L_G、L_B 取自 SOFA。
+// 长度和 GM 均按此比例缩放，日月 GM 转为 TT 相容值后用于 GCRS 摄动。
+constexpr double TDB_TO_TT_SCALE = (1.0 - ELG) / (1.0 - ELB);
+constexpr double LUNAR_GRAVITATIONAL_CONSTANT = MAJOR_BODY_GM[9] * TDB_TO_TT_SCALE;
+constexpr double HELIOCENTRIC_GRAVITATIONAL_CONSTANT = MAJOR_BODY_GM[10] * TDB_TO_TT_SCALE;
 const double CONSTANT_OF_GRAVITATION = 6.672E-11;                      // Constant of gravitaion G m3kg-1s-2 跟老师一致
 const double MASS_OF_EARTH = GEOCENTRIC_GRAVITATIONAL_CONSTANT / CONSTANT_OF_GRAVITATION;//地球质量 kg
 //const double ae = 6378136.6;                                          // Equatorial radius of the Earth 之前的应该不自洽，纯二体的误差都比较大，达不到double的精度
@@ -49,8 +55,9 @@ const double START_OF_MJD = 2400000.5;
 // 真空光速，单位 m/s；归一化时除以各模型的速度尺度。
 constexpr double SPEED_OF_LIGHT_MPS = 299792458.0;
 
-// 各天体 GM 除以同一地球 GM，供归一化动力学使用。
-constexpr double MAJOR_BODY_EARTH_GM_RATIO[11] = {
+// TDB 天体 GM 除以数值归一化常数 GE，供 E-BCRS 的牛顿项和后牛顿项共同使用。
+// 地球项也保留这一系数，因为 TDB 地球 GM 与 GE 的 TT 数值不同。
+constexpr double MAJOR_BODY_GM_NORMALIZED[11] = {
     MAJOR_BODY_GM[0] / GE,
     MAJOR_BODY_GM[1] / GE,
     MAJOR_BODY_GM[2] / GE,
@@ -64,8 +71,9 @@ constexpr double MAJOR_BODY_EARTH_GM_RATIO[11] = {
     MAJOR_BODY_GM[10] / GE
 };
 
-constexpr double MOON_EARTH_MASS_RATIO = MAJOR_BODY_EARTH_GM_RATIO[9];
-constexpr double SUN_EARTH_MASS_RATIO = MAJOR_BODY_EARTH_GM_RATIO[10];
+// GCRS/TT 动力学中，日月与地球 GM 使用同一时标约定。
+constexpr double MOON_EARTH_MASS_RATIO = LUNAR_GRAVITATIONAL_CONSTANT / GE;
+constexpr double SUN_EARTH_MASS_RATIO = HELIOCENTRIC_GRAVITATIONAL_CONSTANT / GE;
 //速度归一化
 const double MPS_TO_NORMALIZED_VELOCITY = UNITTIME / ae;
 const double KMPS_TO_NORMALIZED_VELOCITY = 1000.0 * UNITTIME / ae;

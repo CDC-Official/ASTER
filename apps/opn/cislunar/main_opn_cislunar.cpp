@@ -246,6 +246,15 @@ int main(int argc, char* argv[])
 			// 后续地月空间积分入口仍以 Cartesian 为主；Keplerian 只作为输入便利格式。
 			initial_kep.ToCartesian(tracer, initial_cart);
 			if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
+
+			// 根数转换函数以归一化 GM=1 计算速度；E-BCRS 初速度按 DE440 地球 GM 缩放。
+			double state_norm[6];
+			initial_cart.ToArray(state_norm);
+			const double velocity_scale = sqrt(MAJOR_BODY_GM_NORMALIZED[2]);
+
+			for (int i = 3; i < 6; ++i) state_norm[i] *= velocity_scale;
+
+			initial_cart.Set(state_norm[0], state_norm[1], state_norm[2], state_norm[3], state_norm[4], state_norm[5], true);
 			isKepReady = true;
 		}
 
@@ -285,8 +294,16 @@ int main(int argc, char* argv[])
 		}
 		if (isCartReady)
 		{
-			// 由当前 E-BCRS 状态准备参考密度模型使用的根数，不改变积分状态的坐标系。
-			initial_cart.ToKeplerian(tracer, initial_kep);
+			// 用 DE440 地球 GM 求参考根数，先将副本的速度换成转换函数要求的 GM=1 尺度。
+			double state_norm[6];
+			initial_cart.ToArray(state_norm);
+			const double velocity_scale = sqrt(MAJOR_BODY_GM_NORMALIZED[2]);
+
+			for (int i = 3; i < 6; ++i) state_norm[i] /= velocity_scale;
+
+			Cartesian state_for_elements;
+			state_for_elements.Set(state_norm[0], state_norm[1], state_norm[2], state_norm[3], state_norm[4], state_norm[5], true);
+			state_for_elements.ToKeplerian(tracer, initial_kep);
 			if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 		}
 

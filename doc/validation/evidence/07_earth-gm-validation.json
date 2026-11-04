@@ -1,0 +1,311 @@
+{
+  "branch": "fix/earth-gm-conventions",
+  "base_commit": "1a93537",
+  "legacy_commit": "ae2aa1e",
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "math_backend": "OPENLIBM",
+  "build_type": "Release",
+  "workspace": "/Users/chendingcun/Projects/五院地月空间滤波项目/04_代码工作/实现观测量仿真/地球GM核查_005",
+  "constants_and_sources": {
+    "gravity_field_file_header": [
+      " (2A10,3E20.10)               ",
+      "GGM03C (GGM3v2+surf)    398600.44150E+09          6378136.30              2005.0"
+    ],
+    "sources": {
+      "04_代码工作/实现观测量仿真/地球GM核查_005/GGM03_Archive.zip": "6c757d8a6ebe9a82445f9475777a0a05e1eb271a558036eebebb57956fafe28a",
+      "04_代码工作/实现观测量仿真/地球GM核查_005/GGM03C_source.txt": "7289c54898f02343d52ab0e19bb74a288ec455647c5b2c6508823b8a28088410"
+    },
+    "inputs": {
+      "data/eop/EOP-All_250516.txt": "d60ce7d6de3befd2699804d1069c29297604c270e05f13f27bf34ce95bb24882",
+      "data/ephemeris/JPLEPH_C.430": "9459bf98bb46dfec80bf7a931e9957cc4877eb011ccaca4c2175a254f8e25427",
+      "data/gravity/grail.txt": "979d49f6b7e7a5d79bb885dff4ed603e8949095bdc413cace066df4a64000ad0",
+      "data/atmosphere/atmosphere.txt": "edd6fb3e96f3450e620500cb0186cab9ae15e3457897afc73078b52c80ef8715",
+      "tests/generate_cislunar_observations/input/JPLEPH_C.440": "0cff70007ea4f21d9cc29d1c772b335af2a0fbed145a5dab682d5dc25ce8cde2"
+    },
+    "gm_m3s2": {
+      "old": 398600441800000.0,
+      "GCRS_TT": 398600441500000.0,
+      "DE440_TDB": 398600435507000.0
+    },
+    "TDB_TO_TT_SCALE": 1.000000014808269,
+    "DE440_earth_converted_to_TT_m3s2": 398600441409582.5,
+    "GGM03C_TDB_GM_m3s2": 398600435597417.5,
+    "GGM03C_TDB_radius_m": 6378136.205550843,
+    "moon_TT_m3s2": 4902800190601.983,
+    "sun_TT_m3s2": 1.3271244200652094e+20
+  },
+  "orbits": {
+    "tdb_all_minus_legacy": {
+      "leo_two_body_cart": {
+        "position_600_m": 0.02643588345792666,
+        "position_86400_m": 20.96511140398977,
+        "velocity_86400_mps": 0.023386551811664352,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 0.0,
+        "max_position_m": 20.96511140398977
+      },
+      "leo_two_body_kep": {
+        "position_600_m": 0.0365003414085819,
+        "position_86400_m": 5.169913696015761,
+        "velocity_86400_mps": 0.005764000640902787,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 6.103517094615608e-05,
+        "max_position_m": 5.169913696015761
+      },
+      "leo_full_cart": {
+        "position_600_m": 0.026459793650625705,
+        "position_86400_m": 21.04622363825653,
+        "velocity_86400_mps": 0.02353044570219692,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 0.0,
+        "max_position_m": 21.04622363825653
+      },
+      "leo_full_kep": {
+        "position_600_m": 0.036492170099105554,
+        "position_86400_m": 5.178896975678584,
+        "velocity_86400_mps": 0.005790843918585337,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 6.103517094615608e-05,
+        "max_position_m": 5.178896975678584
+      },
+      "cislunar_full_cart": {
+        "position_600_m": 8.734992422089269e-06,
+        "position_86400_m": 0.17732297700252342,
+        "velocity_86400_mps": 4.052158999123212e-06,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 0.0,
+        "max_position_m": 0.17732297700252342
+      }
+    },
+    "tt_gm_only_minus_legacy": {
+      "leo_two_body_cart": {
+        "position_600_m": 0.0012602482475963374,
+        "position_86400_m": 0.9994574154028927,
+        "velocity_86400_mps": 0.0011148933867801887,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 0.0,
+        "max_position_m": 0.9994574154028927
+      },
+      "leo_two_body_kep": {
+        "position_600_m": 0.0017400450868271325,
+        "position_86400_m": 0.24645846171008082,
+        "velocity_86400_mps": 0.00027477956725638955,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 2.909670722591862e-06,
+        "max_position_m": 0.24645846171008082
+      },
+      "leo_full_cart": {
+        "position_600_m": 0.0012613893001890799,
+        "position_86400_m": 1.0033219454973312,
+        "velocity_86400_mps": 0.00112175011384498,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 0.0,
+        "max_position_m": 1.0033219454973312
+      },
+      "leo_full_kep": {
+        "position_600_m": 0.0017396406142337112,
+        "position_86400_m": 0.24688182206142964,
+        "velocity_86400_mps": 0.00027605337690855326,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 2.909670722591862e-06,
+        "max_position_m": 0.24688182206142964
+      },
+      "cislunar_full_cart": {
+        "position_600_m": 8.734992422089269e-06,
+        "position_86400_m": 0.17732291269935974,
+        "velocity_86400_mps": 4.0521516965451e-06,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 0.0,
+        "max_position_m": 0.17732291269935974
+      }
+    },
+    "final_minus_legacy": {
+      "leo_two_body_cart": {
+        "position_600_m": 0.0012602482475963374,
+        "position_86400_m": 0.9994574154028927,
+        "velocity_86400_mps": 0.0011148933867801887,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 0.0,
+        "max_position_m": 0.9994574154028927
+      },
+      "leo_two_body_kep": {
+        "position_600_m": 0.0017400450868271325,
+        "position_86400_m": 0.24645846171008082,
+        "velocity_86400_mps": 0.00027477956725638955,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 2.909670722591862e-06,
+        "max_position_m": 0.24645846171008082
+      },
+      "leo_full_cart": {
+        "position_600_m": 0.0015774342922925282,
+        "position_86400_m": 1.2301472734516952,
+        "velocity_86400_mps": 0.001372534352159596,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 0.0,
+        "max_position_m": 1.2301472734516952
+      },
+      "leo_full_kep": {
+        "position_600_m": 0.0017318485118875168,
+        "position_86400_m": 0.4793648144167304,
+        "velocity_86400_mps": 0.000528418411903163,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 2.909670722591862e-06,
+        "max_position_m": 0.47945184296212134
+      },
+      "cislunar_full_cart": {
+        "position_600_m": 8.734992422089269e-06,
+        "position_86400_m": 0.17732366668467875,
+        "velocity_86400_mps": 4.052172179770912e-06,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 0.0,
+        "max_position_m": 0.17732366668467875
+      }
+    },
+    "final_minus_tt_gm_only": {
+      "leo_two_body_cart": {
+        "position_600_m": 0.0,
+        "position_86400_m": 0.0,
+        "velocity_86400_mps": 0.0,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 0.0,
+        "max_position_m": 0.0
+      },
+      "leo_two_body_kep": {
+        "position_600_m": 0.0,
+        "position_86400_m": 0.0,
+        "velocity_86400_mps": 0.0,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 0.0,
+        "max_position_m": 0.0
+      },
+      "leo_full_cart": {
+        "position_600_m": 0.00043203429479080416,
+        "position_86400_m": 0.24214213182365832,
+        "velocity_86400_mps": 0.00025514123121112014,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 0.0,
+        "max_position_m": 0.24485680758198664
+      },
+      "leo_full_kep": {
+        "position_600_m": 0.00043203328268260656,
+        "position_86400_m": 0.24215429262156152,
+        "velocity_86400_mps": 0.00025515556402215013,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 0.0,
+        "max_position_m": 0.24486861387797745
+      },
+      "cislunar_full_cart": {
+        "position_600_m": 0.0,
+        "position_86400_m": 1.246123248540828e-06,
+        "velocity_86400_mps": 2.6202733444554234e-11,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 0.0,
+        "max_position_m": 1.2927474637115844e-06
+      }
+    },
+    "final_minus_tdb_all": {
+      "leo_two_body_cart": {
+        "position_600_m": 0.025175635210330866,
+        "position_86400_m": 19.965653988588098,
+        "velocity_86400_mps": 0.022271658424885394,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 0.0,
+        "max_position_m": 19.965653988588098
+      },
+      "leo_two_body_kep": {
+        "position_600_m": 0.03476029632176216,
+        "position_86400_m": 4.923455234305695,
+        "velocity_86400_mps": 0.00548922107364641,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 5.812550022356427e-05,
+        "max_position_m": 4.923455234305695
+      },
+      "leo_full_cart": {
+        "position_600_m": 0.024918909048556138,
+        "position_86400_m": 19.81987796610892,
+        "velocity_86400_mps": 0.022158954648371584,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 0.0,
+        "max_position_m": 19.81987796610892
+      },
+      "leo_full_kep": {
+        "position_600_m": 0.03481657768772423,
+        "position_86400_m": 4.709766367041398,
+        "velocity_86400_mps": 0.0052652472056567805,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 5.812550022356427e-05,
+        "max_position_m": 4.709766367041398
+      },
+      "cislunar_full_cart": {
+        "position_600_m": 0.0,
+        "position_86400_m": 1.5635692642197608e-06,
+        "velocity_86400_mps": 1.9390482947852658e-11,
+        "initial_position_m": 0.0,
+        "initial_velocity_mps": 0.0,
+        "max_position_m": 1.5635692642197608e-06
+      }
+    }
+  },
+  "step_halving": {
+    "legacy": {
+      "position_600_m": 4.290077928115626e-09,
+      "position_86400_m": 1.3785528497182585e-06,
+      "max_position_m": 1.3785528497182585e-06
+    },
+    "final": {
+      "position_600_m": 5.3032198546546174e-09,
+      "position_86400_m": 1.965024289526254e-07,
+      "max_position_m": 1.4010576954965281e-06
+    }
+  },
+  "range_448": {
+    "count": 448,
+    "max_abs_difference": {
+      "record": 0.0,
+      "tx": 0.0,
+      "rx": 0.0,
+      "rx_year": 0.0,
+      "rx_month": 0.0,
+      "rx_day": 0.0,
+      "rx_hour": 0.0,
+      "rx_minute": 0.0,
+      "rx_second": 0.0,
+      "tx_year": 0.0,
+      "tx_month": 0.0,
+      "tx_day": 0.0,
+      "tx_hour": 0.0,
+      "tx_minute": 0.0,
+      "tx_second": 0.0,
+      "light_time_s": 0.0,
+      "geometric_m": 0.0,
+      "gravity_s": 0.0,
+      "tx_clock_s": 0.0,
+      "rx_clock_s": 0.0,
+      "clock_m": 0.0,
+      "theoretical_pseudorange_m": 0.0,
+      "systematic_bias_m": 0.0,
+      "noise_m": 0.0,
+      "pseudorange_m": 0.0,
+      "iterations": 0.0,
+      "update_s": 0.0
+    }
+  },
+  "kepler_input": {
+    "position_difference_m": 0.0,
+    "velocity_difference_mps": 1.7763568394002505e-12
+  },
+  "validation": {
+    "ctest_passed": [
+      "gravity_conventions",
+      "core_rkf78_safety",
+      "core_adams_safety",
+      "core_orbit_averaging",
+      "core_cislunar_observation",
+      "cislunar_observation_runtime"
+    ],
+    "rkf_with_jpl_checks_passed": 923,
+    "ebcrs_analytic_max_position_m": 6.303859754553674e-06,
+    "historical_byte_references": "unchanged",
+    "server_run": false
+  }
+}

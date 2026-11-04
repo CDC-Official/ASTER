@@ -192,7 +192,13 @@ void check_fixed_steps(Job job, Step step, const State& initial)
 template<class Job, class Propagate, class Orbit>
 void check_propagation(Job job, Propagate propagate, bool tdb, const char* name)
 {
-    // 归一化 μ=1 的椭圆轨道；TT/TDB 内的时间长度用于解析解，GCRS 输出历元转换为 UTC。
+    // 以相同椭圆根数构造解析轨道；TDB 的速度和平均运动按地球 GM 缩放。
+    const double velocity_scale = tdb ? sqrt(MAJOR_BODY_GM_NORMALIZED[2]) : 1.0;
+    State initial = analytic(0);
+
+    for (int i = 3; i < 6; ++i) initial[i] *= velocity_scale;
+
+    job.initCart_norm.Set(initial[0], initial[1], initial[2], initial[3], initial[4], initial[5], true);
     double max_position=0,max_velocity=0,max_endpoint=0;
     for(double duration:{7.13,-7.13,.11,-.11}) {
         job.opn_setting.duration_norm=duration;
@@ -208,7 +214,10 @@ void check_propagation(Job job, Propagate propagate, bool tdb, const char* name)
         std::array<double, 6> exported_values_1; states.back().ToArray(exported_values_1.data());
         if constexpr(std::is_same_v<Orbit,Cartesian>) last=exported_values_1;
         else { states.back().ToCartesian(tracer,last.data()); require(tracer.Code()==ERR_NOERROR,"NSG2 final conversion failed"); }
-        const State reference=analytic(duration);
+        State reference = analytic(duration * velocity_scale);
+
+        for (int i = 3; i < 6; ++i) reference[i] *= velocity_scale;
+
         max_position=std::max(max_position,distance(last,reference,0)*ae);
         max_velocity=std::max(max_velocity,distance(last,reference,3)*NORMALIZED_VELOCITY_TO_MPS);
         std::cout<<"CASE "<<name<<" duration="<<duration<<" position_m="<<distance(last,reference,0)*ae<<" velocity_mps="<<distance(last,reference,3)*NORMALIZED_VELOCITY_TO_MPS<<'\n';

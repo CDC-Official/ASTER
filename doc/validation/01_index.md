@@ -11,6 +11,7 @@
 | 原生数学下的 GLML 短弧为何选出不同候选 | [GLML 敏感性诊断](02_glml-sensitivity.md) | [编译器、线程与扰动](evidence/04_clang-glml-validation.json)、[收敛与控制试验](evidence/05_glml-convergence.json) |
 | 1.1.0 统一后端的结果与成本 | [后端数值和计时](03_math-backend.md) | [构建、科学差异和计时](evidence/06_math-backend-validation.json) |
 | 1.2.0 观测生成是否保持原行为 | [观测生成验收](04_observations.md) | [迁移来源与输入校验](../../tests/generate_observations/source.json)；完整运行证据位置见说明 |
+| 地球 GM 如何按 TT/TDB 取值，以及对轨道的影响 | [GM 约定与轨道对照](05_earth-gm.md) | [参数、输入校验和数值结果](evidence/07_earth-gm-validation.json) |
 
 <a id="migration"></a>
 ## 1.0.0 迁移来源与核对

@@ -93,3 +93,11 @@ add_test(NAME cislunar_observation_runtime COMMAND "${Python3_EXECUTABLE}"
     --case "${CMAKE_CURRENT_SOURCE_DIR}/generate_cislunar_observations"
     --output "${PROJECT_BINARY_DIR}/test-output/cislunar_observation")
 set_tests_properties(core_cislunar_observation cislunar_observation_runtime PROPERTIES TIMEOUT 120)
+
+# 有量纲公式验证中心引力和 GGM03C 参数的时标约定。
+add_executable(aster_test_gravity_conventions core/gravity_conventions.cpp)
+target_link_libraries(aster_test_gravity_conventions PRIVATE ASTER::core)
+add_test(NAME gravity_conventions COMMAND aster_test_gravity_conventions
+    "${PROJECT_SOURCE_DIR}/data/eop/EOP-All_250516.txt"
+    "${PROJECT_SOURCE_DIR}/data/ephemeris/JPLEPH_C.430")
+set_tests_properties(gravity_conventions PROPERTIES TIMEOUT 30)

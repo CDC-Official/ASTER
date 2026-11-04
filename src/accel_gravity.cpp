@@ -366,24 +366,28 @@ double Norm_LPAD_Single(int l, int m, double mu)
 }
 
 
-int Earth_Nonspherical_Gravitational_Acceleration(double* a_terrestrial, const double* R_terrestrial, int field_id, int zonal_order, int tesseral_degree)
+/**
+ * @brief 计算地固轴系中的 GGM03C 非球形引力加速度。
+ * @param[out] a_terrestrial 三维摄动加速度 [ax, ay, az]，以 GE/ae² 归一化，不含中心引力。
+ * @param[in] R_terrestrial 三维地心位置 [x, y, z]，按调用方的时空约定取值，并以 ae 归一化。
+ * @param[in] field_id 引力场编号，当前实现采用 GGM03C。
+ * @param[in] zonal_order 带谐项 C_n0 的最高次数 n，支持 0—80；0 或 1 关闭带谐项。
+ * @param[in] tesseral_degree 田谐项和扇谐项的最高次数 n，保留 m=1—n，支持 0—80。
+ * @param[in] field_gm 与球谐系数配套的 GM，单位 m³/s²，默认取 GGM03C 文件头的值。
+ * @param[in] reference_radius 与球谐系数配套的参考半径，单位 m，默认取 GGM03C 文件头的值。
+ * @return 成功返回 1，截断次数为负时返回 -1。
+ * @details 先将位置转为参考半径归一化，再计算二阶及以上球谐项，最后转为 GE/ae² 尺度。
+ *          field_gm、reference_radius 和位置须采用同一尺度约定；TT 调用使用默认参数，
+ *          TDB 调用传入按 (1-L_B)/(1-L_G) 缩放的参数。2/0 的截断设置仅保留 J2 项。
+ */
+int Earth_Nonspherical_Gravitational_Acceleration(double* a_terrestrial, const double* R_terrestrial,
+	int field_id, int zonal_order, int tesseral_degree, double field_gm, double reference_radius)
 {
-	/*
-	 * 计算地固坐标系下，地球非球形引力摄动加速度，不考虑二体质点的引力以及坐标转换！！！
-	 * a_terrestrial[3] 地固系下的归一化的摄动加速度，不考虑二体质点的引力！！！
-	 * R_terrestrial[3] 地固系卫星的归一化位置 XYZ
-	 * 输入长度尺度为 ae，输出加速度尺度为 GE/ae²，GE 取公共 DE440 地球 GM。
-	 * zonal_order 带谐项阶次
-	 * tesseral_degree 田谐项阶次
-	 * 预留接口：field_id 引力场模型id 目前仅支持GGM03C
-	 * 不需要传入时间与EOP，也不涉及坐标转换，加速度的转换在外部进行（需要在外部计算HG^T）
-	 */
-	//
-
-	// X Y Z
-	double X = R_terrestrial[0];
-	double Y = R_terrestrial[1];
-	double Z = R_terrestrial[2];
+	// 球谐展开中的距离以模型参考半径为单位，外部积分状态仍以 ae 为单位。
+	const double length_scale = ae / reference_radius;
+	double X = R_terrestrial[0] * length_scale;
+	double Y = R_terrestrial[1] * length_scale;
+	double Z = R_terrestrial[2] * length_scale;
 
 	//R R'
 	double R = sqrt(X * X + Y * Y + Z * Z);
@@ -518,9 +522,9 @@ int Earth_Nonspherical_Gravitational_Acceleration(double* a_terrestrial, const d
 	}
 
 
-	// 修改为仅在函数哪计算在地固系下的总加速度从而不涉及任何坐标转换，在外部转换为惯性系
-
-	Vector3d a_total_terrestrial = a_zonal + a_tesseral;
+	// 将模型的 GM/reference_radius² 加速度尺度换成积分器使用的 GE/ae²。
+	const double acceleration_scale = (field_gm / GE) * length_scale * length_scale;
+	Vector3d a_total_terrestrial = (a_zonal + a_tesseral) * acceleration_scale;
 	a_terrestrial[0] = a_total_terrestrial[0];
 	a_terrestrial[1] = a_total_terrestrial[1];
 	a_terrestrial[2] = a_total_terrestrial[2];

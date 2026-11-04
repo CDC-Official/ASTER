@@ -107,23 +107,16 @@ void PostNewtonian_EIH_EBCRS(bastion::Overwatch& tracer,
 	double a_post_newtonian_ebcrs_norm[3]);
 
 /**
- * @brief Compute the EBCRS/TDB right-hand side for a normalized Cartesian state.
- *
- * @param tracer Runtime event logger and error-state carrier.
- * @param thisjob EBCRS orbit propagation job containing EBCRS force-model switches,
- *                EOP data, satellite model, and output settings.
- * @param MJD_TDB Current right-hand-side evaluation epoch, expressed as MJD(TDB).
- * @param n State dimension. The current implementation expects n = 6.
- * @param x Input normalized EBCRS Cartesian state at MJD_TDB.
- * @param f Output normalized Cartesian state derivative, [vx, vy, vz, ax, ay, az].
- *
- * @note EBCRS means BCRS translated to the geocenter, so x[0..2] is the target
- *       position relative to the geocenter in normalized Earth-radius units.
- * @note JPL ephemeris data must be loaded before calling this function, because
- *       Sun/Moon states and the TDB-to-TT position correction depend on it.
- * @note If thisjob.opn_model.use_post_newtonian is true, the right-hand side
- *       adds the EIH N-body post-Newtonian correction computed by
- *       PostNewtonian_EIH_EBCRS.
+ * @brief 计算 E-BCRS/TDB 下直角坐标状态的动力学右函数。
+ * @param[in,out] tracer 记录函数调用和模型计算中的错误。
+ * @param[in] thisjob 提供力模型开关、EOP、卫星参数和大气密度资料的地月预报任务。
+ * @param[in] MJD_TDB 当前积分评估点的 TDB 时刻，单位 MJD。
+ * @param[in] n 状态维数，当前使用 6 维状态。
+ * @param[in] x 六维 E-BCRS 状态 [x,y,z,vx,vy,vz]，位置尺度 ae，速度尺度 ae/UNITTIME。
+ * @param[out] f 六维状态导数，前三项为归一化速度，后三项为归一化加速度，时间尺度 UNITTIME。
+ * @details 牛顿质点引力和 EIH 后牛顿项均采用 DE440 的 TDB 相容 GM，以 GE 归一化。
+ *          JPL 历表须预先加载。地球姿态由当前 TDB 时刻和位置换算的 TT、UTC 计算；
+ *          地球非球形项将 E-BCRS 位置近似旋转到地固轴系，采用 TDB 尺度的 GGM03C 参数。
  */
 void Acceleration_Cart_EBCRS(bastion::Overwatch& tracer, const OrbitPropagationJob_EBCRS& thisjob,
 	double MJD_TDB, int n, const double* x, double* f);

@@ -186,10 +186,23 @@ int Earth_Nonspherical_Gravitational_Acceleration(double* a_celestial,
 	const Matrix3d& HG_transpose,
 	int field_id, int zonal_order, int tesseral_degree);
 
-// 地固系归一化非球形摄动加速度，不含中心引力；输入位置以 ae 归一化。
-// zonal_order 截断带谐项 C_n0；tesseral_degree 截断田谐项（含扇谐项，m=1..n）。
-// 两者分别控制最高 n，而不是通常 N×M 的次数/阶数；2 / 0 仅保留 J2。
-int Earth_Nonspherical_Gravitational_Acceleration(double* a_terrestrial, const double* R_terrestrial, int field_id, int zonal_order, int tesseral_degree);
+/**
+ * @brief 计算地固轴系中的 GGM03C 非球形引力加速度。
+ * @param[out] a_terrestrial 三维摄动加速度 [ax, ay, az]，以 GE/ae² 归一化，不含中心引力。
+ * @param[in] R_terrestrial 三维地心位置 [x, y, z]，按调用方的时空约定取值，并以 ae 归一化。
+ * @param[in] field_id 引力场编号，当前实现采用 GGM03C。
+ * @param[in] zonal_order 带谐项 C_n0 的最高次数 n，支持 0—80；0 或 1 关闭带谐项。
+ * @param[in] tesseral_degree 田谐项和扇谐项的最高次数 n，保留 m=1—n，支持 0—80。
+ * @param[in] field_gm 与球谐系数配套的 GM，单位 m³/s²，默认取 GGM03C 文件头的值。
+ * @param[in] reference_radius 与球谐系数配套的参考半径，单位 m，默认取 GGM03C 文件头的值。
+ * @return 成功返回 1，截断次数为负时返回 -1。
+ * @details 先将位置转为参考半径归一化，再计算二阶及以上球谐项，最后转为 GE/ae² 尺度。
+ *          field_gm、reference_radius 和位置须采用同一尺度约定；TT 调用使用默认参数，
+ *          TDB 调用传入按 (1-L_B)/(1-L_G) 缩放的参数。2/0 的截断设置仅保留 J2 项。
+ */
+int Earth_Nonspherical_Gravitational_Acceleration(double* a_terrestrial, const double* R_terrestrial,
+	int field_id, int zonal_order, int tesseral_degree,
+	double field_gm = GGM03C_GM, double reference_radius = GGM03C_REFERENCE_RADIUS);
 
 
 /**

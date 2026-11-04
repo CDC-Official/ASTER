@@ -77,12 +77,12 @@ namespace
 				const double dr3 = dr * dr * dr;
 
 				// 经典牛顿加速度：a_i += -mu_j * (r_i - r_j) / |r_i - r_j|^3。
-				body_acc_norm[i][0] -= MAJOR_BODY_EARTH_GM_RATIO[j] * dx / dr3;
-				body_acc_norm[i][1] -= MAJOR_BODY_EARTH_GM_RATIO[j] * dy / dr3;
-				body_acc_norm[i][2] -= MAJOR_BODY_EARTH_GM_RATIO[j] * dz / dr3;
+				body_acc_norm[i][0] -= MAJOR_BODY_GM_NORMALIZED[j] * dx / dr3;
+				body_acc_norm[i][1] -= MAJOR_BODY_GM_NORMALIZED[j] * dy / dr3;
+				body_acc_norm[i][2] -= MAJOR_BODY_GM_NORMALIZED[j] * dz / dr3;
 
 				// EIH 公式中的势函数求和项 sum(mu_j / r_ij)。
-				body_potential_norm[i] += MAJOR_BODY_EARTH_GM_RATIO[j] / dr;
+				body_potential_norm[i] += MAJOR_BODY_GM_NORMALIZED[j] / dr;
 			}
 		}
 	}
@@ -128,7 +128,7 @@ namespace
 		double spacecraft_potential_norm = 0.0;
 		for (int j = 0; j < PN_BODY_COUNT; ++j)
 		{
-			spacecraft_potential_norm += MAJOR_BODY_EARTH_GM_RATIO[j] / relative_distance[j];
+			spacecraft_potential_norm += MAJOR_BODY_GM_NORMALIZED[j] / relative_distance[j];
 		}
 
 		// v^2，注意这是卫星 BCRS 速度平方，不是希腊字母 nu。
@@ -179,17 +179,17 @@ namespace
 				4.0 * vvi -
 				1.5 * rvi * rvi -
 				0.5 * rai;
-			temp1 = -MAJOR_BODY_EARTH_GM_RATIO[i] * temp1 / dr3 / cl2;
+			temp1 = -MAJOR_BODY_GM_NORMALIZED[i] * temp1 / dr3 / cl2;
 
 			// 第二组项：乘在相对速度 (v-v_i) 前面的系数。
 			const double sum3 =
 				(4.0 * target_bcrs_state_norm[3] - 3.0 * major_body_bcrs_state_norm[i][3]) * relative_state[i][0] +
 				(4.0 * target_bcrs_state_norm[4] - 3.0 * major_body_bcrs_state_norm[i][4]) * relative_state[i][1] +
 				(4.0 * target_bcrs_state_norm[5] - 3.0 * major_body_bcrs_state_norm[i][5]) * relative_state[i][2];
-			const double temp2 = MAJOR_BODY_EARTH_GM_RATIO[i] * sum3 / dr3 / cl2;
+			const double temp2 = MAJOR_BODY_GM_NORMALIZED[i] * sum3 / dr3 / cl2;
 
 			// 第三组项：乘在大天体牛顿加速度 ddot(r_i) 前面的系数。
-			const double temp3 = 3.5 * MAJOR_BODY_EARTH_GM_RATIO[i] / dr / cl2;
+			const double temp3 = 3.5 * MAJOR_BODY_GM_NORMALIZED[i] / dr / cl2;
 
 			fpn_bcrs_norm[0] += temp1 * relative_state[i][0] + temp2 * relative_state[i][3] + temp3 * body_acc_norm[i][0];
 			fpn_bcrs_norm[1] += temp1 * relative_state[i][1] + temp2 * relative_state[i][4] + temp3 * body_acc_norm[i][1];
@@ -246,7 +246,7 @@ namespace
 		for (int j = 0; j < PN_BODY_COUNT; ++j)
 		{
 			if (j == target_body_index) continue;
-			target_potential_norm += MAJOR_BODY_EARTH_GM_RATIO[j] / relative_distance[j];
+			target_potential_norm += MAJOR_BODY_GM_NORMALIZED[j] / relative_distance[j];
 		}
 
 		fpn_bcrs_norm[0] = 0.0;
@@ -288,14 +288,14 @@ namespace
 				4.0 * vvi -
 				1.5 * rvi * rvi -
 				0.5 * rai;
-			temp1 = -MAJOR_BODY_EARTH_GM_RATIO[i] * temp1 / dr3 / cl2;
+			temp1 = -MAJOR_BODY_GM_NORMALIZED[i] * temp1 / dr3 / cl2;
 
 			const double sum3 =
 				(4.0 * major_body_bcrs_state_norm[target_body_index][3] - 3.0 * major_body_bcrs_state_norm[i][3]) * relative_state[i][0] +
 				(4.0 * major_body_bcrs_state_norm[target_body_index][4] - 3.0 * major_body_bcrs_state_norm[i][4]) * relative_state[i][1] +
 				(4.0 * major_body_bcrs_state_norm[target_body_index][5] - 3.0 * major_body_bcrs_state_norm[i][5]) * relative_state[i][2];
-			const double temp2 = MAJOR_BODY_EARTH_GM_RATIO[i] * sum3 / dr3 / cl2;
-			const double temp3 = 3.5 * MAJOR_BODY_EARTH_GM_RATIO[i] / dr / cl2;
+			const double temp2 = MAJOR_BODY_GM_NORMALIZED[i] * sum3 / dr3 / cl2;
+			const double temp3 = 3.5 * MAJOR_BODY_GM_NORMALIZED[i] / dr / cl2;
 
 			fpn_bcrs_norm[0] += temp1 * relative_state[i][0] + temp2 * relative_state[i][3] + temp3 * body_acc_norm[i][0];
 			fpn_bcrs_norm[1] += temp1 * relative_state[i][1] + temp2 * relative_state[i][4] + temp3 * body_acc_norm[i][1];
@@ -837,38 +837,20 @@ void Acceleration_Cart(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 	tracer.CheckOut(__func__);
 }
 
+/**
+ * @brief 计算 E-BCRS/TDB 下直角坐标状态的动力学右函数。
+ * @param[in,out] tracer 记录函数调用和模型计算中的错误。
+ * @param[in] thisjob 提供力模型开关、EOP、卫星参数和大气密度资料的地月预报任务。
+ * @param[in] MJD_TDB 当前积分评估点的 TDB 时刻，单位 MJD。
+ * @param[in] n 状态维数，当前使用 6 维状态。
+ * @param[in] x 六维 E-BCRS 状态 [x,y,z,vx,vy,vz]，位置尺度 ae，速度尺度 ae/UNITTIME。
+ * @param[out] f 六维状态导数，前三项为归一化速度，后三项为归一化加速度，时间尺度 UNITTIME。
+ * @details 牛顿质点引力和 EIH 后牛顿项均采用 DE440 的 TDB 相容 GM，以 GE 归一化。
+ *          JPL 历表须预先加载。地球姿态由当前 TDB 时刻和位置换算的 TT、UTC 计算；
+ *          地球非球形项将 E-BCRS 位置近似旋转到地固轴系，采用 TDB 尺度的 GGM03C 参数。
+ */
 void Acceleration_Cart_EBCRS(bastion::Overwatch& tracer, const OrbitPropagationJob_EBCRS& thisjob, double MJD_TDB, int n, const double* x, double* f)
 {
-	/*
-	 * 函数用途：
-	 *   计算 EBCRS/TDB 框架下 Cartesian 状态量的右函数 f = dX/dt。
-	 *   这里的状态量 X = [x, y, z, vx, vy, vz]，位置和速度均为项目统一的地球归一化单位。
-	 *   输出 f 的前三项是速度，后三项是归一化加速度，供 RKF78 积分器直接使用。
-	 *
-	 * 时间含义：
-	 *   MJD_TDB 是当前右函数评估点的时刻，单位为 MJD(TDB)。
-	 *   本函数不关心这个时刻是 RKF78 的单步起点、某个中间 stage，还是其它积分器给出的采样点。
-	 *   积分器负责在调用本函数前计算好当前时刻；动力学右函数只使用“当前时刻 + 当前状态”。
-	 *
-	 * 状态量 x 的含义：
-	 *   x 不是全局初值，也不是当前单步起点状态。
-	 *   在 RKF78 的 13 个 stage 中，积分器会根据前面已经算出的斜率递推得到每个中间时刻的状态，
-	 *   然后把该中间状态作为 x 传入本函数。因此，x[0..2] 就是当前 stage 对应时刻的 EBCRS 位置。
-	 *   用 x[0..2] 参与 TDB -> TT 的位置项转换，是当前积分框架下应当采用的做法。
-	 *
-	 * 坐标与外部数据：
-	 *   本函数假定 x 位于 EBCRS，也就是 BCRS 平移到地心后的坐标系。
-	 *   日、月、行星等天体位置速度需要由 JPL DE 星历提供，因此调用本函数前必须已经 Read_JPLEPH。
-	 *   地球非球形引力、大气阻力等需要地固系和 EOP 的模块，会通过 TDB -> TT -> UTC 的时间链获取 EOP。
-	 *
-	 * 参数说明：
-	 *   thisjob   EBCRS 轨道预报任务设置，包括力模型、EOP、卫星参数和输出设置。
-	 *   MJD_TDB   当前右函数评估点的 MJD(TDB)。
-	 *   n         状态维数，目前应为 6，暂未实际使用。
-	 *   x         当前评估点的 6 维 EBCRS Cartesian 归一化状态。
-	 *   f         输出的 6 维归一化状态导数。
-	 */
-
 	tracer.CheckIn(__FILE__, __func__, __LINE__);
 
 	//用于部分函数的返回状态
@@ -915,10 +897,11 @@ void Acceleration_Cart_EBCRS(bastion::Overwatch& tracer, const OrbitPropagationJ
 	double rho_atm = 0, axyz_atmDrag[3] = {0};//大气密度和大气阻力加速度
 	double major_body_bcrs_state_norm[11][6] = {{0.0}};//11个太阳系大天体相对太阳系质心的BCRS状态，用于后牛顿项
 
-	// 先计算地球二体加速度
-	axyz_tb[0] = -cart_array[0] / r3;    //	-x/r^3
-	axyz_tb[1] = -cart_array[1] / r3;    //	-y/r^3
-	axyz_tb[2] = -cart_array[2] / r3;    //	-z/r^3
+	// TDB 地球 GM 按 GE 归一化，与后牛顿项中的地球参数一致。
+	const double earth_gm_norm = MAJOR_BODY_GM_NORMALIZED[2];
+	axyz_tb[0] = -earth_gm_norm * cart_array[0] / r3;
+	axyz_tb[1] = -earth_gm_norm * cart_array[1] / r3;
+	axyz_tb[2] = -earth_gm_norm * cart_array[2] / r3;
 
 
 	// 地球非球形引力采用如下近似：将当前 E-BCRS 位置视为 GCRS 位置，再旋转到 ITRS 计算摄动加速度。
@@ -937,9 +920,16 @@ void Acceleration_Cart_EBCRS(bastion::Overwatch& tracer, const OrbitPropagationJ
 		R[1] = position_itrs_approx_norm_evec[1];
 		R[2] = position_itrs_approx_norm_evec[2];
 
-		// 计算地固系下加速度
+		// GGM03C 的 GM 和参考半径一并转为 TDB 尺度，供当前 E-BCRS 近似地固位置使用。
 		double a_nsGravity_terrestrial[3] = {0};
-		Earth_Nonspherical_Gravitational_Acceleration(a_nsGravity_terrestrial, R, 1, thisjob.opn_model.earth_zonal_order, thisjob.opn_model.earth_tesseral_degree);
+		a = Earth_Nonspherical_Gravitational_Acceleration(a_nsGravity_terrestrial, R, 1,
+			thisjob.opn_model.earth_zonal_order, thisjob.opn_model.earth_tesseral_degree,
+			GGM03C_GM / TDB_TO_TT_SCALE, GGM03C_REFERENCE_RADIUS / TDB_TO_TT_SCALE);
+		if (a < 0)
+		{
+			tracer.LogEvent(__FILE__, __func__, __LINE__, "Invalid Earth gravity truncation degree.", EventType::ERROR);
+			return;
+		}
 
 		// 转换回惯性系
 		Vector3d a_nsGravity_terrestrial_evec(a_nsGravity_terrestrial[0], a_nsGravity_terrestrial[1], a_nsGravity_terrestrial[2]);
@@ -957,7 +947,7 @@ void Acceleration_Cart_EBCRS(bastion::Overwatch& tracer, const OrbitPropagationJ
 	// 计算第三体摄动，太阳
 	if (thisjob.opn_model.solar_gravity_config == SOLAR_GRAVITY_JPL)	//1 调用数值历表
 	{
-		Thirdbody_Gravity_Acceleration(axyz_sunGravity, cart_array, rv_sun, SUN_EARTH_MASS_RATIO);
+		Thirdbody_Gravity_Acceleration(axyz_sunGravity, cart_array, rv_sun, MAJOR_BODY_GM_NORMALIZED[10]);
 	}
 	else if (thisjob.opn_model.solar_gravity_config == SOLAR_GRAVITY_ANALYTICAL)	//2 调用分析历表，此处不支持，直接报错
 	{
@@ -982,7 +972,7 @@ void Acceleration_Cart_EBCRS(bastion::Overwatch& tracer, const OrbitPropagationJ
 	// 计算第三体摄动，月亮，理论上地月空间是必加的
 	if (thisjob.opn_model.lunar_gravity_config == LUNAR_GRAVITY_JPL)//1 调用数值历表
 	{
-		Thirdbody_Gravity_Acceleration(axyz_moonGravity, cart_array, rv_moon, MOON_EARTH_MASS_RATIO);
+		Thirdbody_Gravity_Acceleration(axyz_moonGravity, cart_array, rv_moon, MAJOR_BODY_GM_NORMALIZED[9]);
 	}
 	else if (thisjob.opn_model.lunar_gravity_config == LUNAR_GRAVITY_ANALYTICAL)	//2 调用分析历表，此处不支持，直接报错
 	{
@@ -1019,7 +1009,7 @@ void Acceleration_Cart_EBCRS(bastion::Overwatch& tracer, const OrbitPropagationJ
 			// Get_JPLEPH 的 n_center = 3 直接返回行星相对地球的 EBCRS 状态，不需要先取 BCRS 再手动作差。
 			a = Get_JPLEPH(MJDs_t.TDB, body_id, 3, planet_ebcrs_state_norm);
 
-			Thirdbody_Gravity_Acceleration(axyz_planet_single, cart_array, planet_ebcrs_state_norm, MAJOR_BODY_EARTH_GM_RATIO[body_index]);
+			Thirdbody_Gravity_Acceleration(axyz_planet_single, cart_array, planet_ebcrs_state_norm, MAJOR_BODY_GM_NORMALIZED[body_index]);
 			axyz_planetGravity[0] += axyz_planet_single[0];
 			axyz_planetGravity[1] += axyz_planet_single[1];
 			axyz_planetGravity[2] += axyz_planet_single[2];

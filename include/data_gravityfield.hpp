@@ -4,6 +4,11 @@
 
 #ifndef _DATA_GRAVITYFIELD_HPP_
 #define _DATA_GRAVITYFIELD_HPP_
+// CSR 发布的 GGM03C 文件头给出以下 GM（m³/s²）和参考半径（m），与球谐系数配套使用。
+// 来源：https://download.csr.utexas.edu/pub/grace/GGM03/GGM03_Archive.zip
+constexpr double GGM03C_GM = 3.986004415e14;
+constexpr double GGM03C_REFERENCE_RADIUS = 6378136.3;
+
 //GGM03C 80*80的归一化谐系数
 //跟教材P123区别，这里是这样对应的:
 // l	m
