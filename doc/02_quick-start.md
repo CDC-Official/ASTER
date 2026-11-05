@@ -17,7 +17,7 @@ git status --short --branch
 
 所需环境为 CMake 3.26 及以上、支持 C++17 的 C/C++ 编译器、Boost 头文件、OpenMP，以及运行检查和加噪工具所需的 Python 3。仓库自带 Eigen 3.4.0、SOFA 2018-01-30 和 OpenLibm 0.8.8，来源和许可见[第三方说明](../third_party/README.md)。
 
-1.3.0 已使用 Mac arm64 / AppleClang 21 和 Linux x86_64 / GCC 13.3 完成全目标构建与代表算例检查。两端共 37 份科学输出逐字节一致，具体范围见[发布验收](validation/11_release-1.3.0.md)。
+1.4.0 已使用 Mac arm64 / AppleClang 21 和 Linux x86_64 / GCC 13.3 完成全目标构建与发布检查。两端共 55 份科学输出逐字节一致，具体范围见[发布验收](validation/14_release-1.4.0.md)。
 
 ### Mac
 
@@ -50,7 +50,7 @@ cmake --build build/v1.4.0 --parallel 3
 build/v1.4.0/bin/aster_iod_gl --version
 ```
 
-首行应包含程序名和 `1.3.0`。多数程序的后续文字显示实际数学后端、构建类型和浮点条件。默认后端为 `OPENLIBM-0.8.8`。
+首行应包含程序名和 `1.4.0`。多数程序的后续文字显示实际数学后端、构建类型和浮点条件。默认后端为 `OPENLIBM-0.8.8`。
 
 OPENLIBM 程序需要同目录中的 `libopenlibm.dylib`（Mac）或 `libopenlibm.so`（Linux）。移动程序时一起移动该库。切换后端和链接公共库的方法见[数学后端](08_math-backend.md)。
 

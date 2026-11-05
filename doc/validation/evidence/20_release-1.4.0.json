@@ -1,0 +1,340 @@
+{
+  "version": "1.4.0",
+  "release_tag": "v1.4.0",
+  "date": "2026-11-05",
+  "validated_code_commit": "f27671d1a6dfe9596eeab4d84461596811fc2d3a",
+  "backend": "OPENLIBM-0.8.8",
+  "build": {
+    "mac": "all default targets passed, AppleClang 21 arm64",
+    "linux": "all default targets passed, GCC 13.3 x86_64"
+  },
+  "release_checks": {
+    "mac": {
+      "ctest": [
+        "core_earth_solid_tide",
+        "conversion_roundtrips",
+        "invalid_inputs"
+      ],
+      "passed": 3,
+      "failed": 0,
+      "tide_case": "600 s, GGM03C 20x20 plus solid tide only; both Earth mains"
+    },
+    "linux": {
+      "ctest": [
+        "core_earth_solid_tide",
+        "conversion_roundtrips",
+        "invalid_inputs"
+      ],
+      "passed": 3,
+      "failed": 0,
+      "tide_case": "600 s, GGM03C 20x20 plus solid tide only; both Earth mains"
+    }
+  },
+  "cross_platform": {
+    "candidate_commit": "f27671d1a6dfe9596eeab4d84461596811fc2d3a",
+    "programs": 13,
+    "scientific_files": 55,
+    "identical": 55,
+    "differences": [],
+    "mac_platform": "macOS-26.6.2-arm64-arm-64bit",
+    "linux_platform": "Linux-6.17.0-1017-oem-x86_64-with-glibc2.39"
+  },
+  "file_checks": {
+    "iod_gl/gl_residuals.txt": {
+      "mac": "903fdf068a50bfc5b483d3062d4b7850435cd5a9e7782a69202827acfb94642e",
+      "linux": "903fdf068a50bfc5b483d3062d4b7850435cd5a9e7782a69202827acfb94642e",
+      "rows": 10
+    },
+    "iod_gl/gl_solution.txt": {
+      "mac": "973143134f7b6f1b1c54098eff532e36a051aec99e6adb79aba48ea38a7c20b6",
+      "linux": "973143134f7b6f1b1c54098eff532e36a051aec99e6adb79aba48ea38a7c20b6",
+      "rows": 7
+    },
+    "iod_glml/glml_residuals.txt": {
+      "mac": "9a4ad10def28060f23e9821717ee25d69619a64d86d05dd23b96d45a24816ad9",
+      "linux": "9a4ad10def28060f23e9821717ee25d69619a64d86d05dd23b96d45a24816ad9",
+      "rows": 10
+    },
+    "iod_glml/glml_candidates.csv": {
+      "mac": "fe28a7d23e7b058a3e5c5a3d95a698c1f4dda503331dc0976137158586d892da",
+      "linux": "fe28a7d23e7b058a3e5c5a3d95a698c1f4dda503331dc0976137158586d892da",
+      "rows": 10002
+    },
+    "iod_glml/glml_solution.txt": {
+      "mac": "db8ed943b25e58ccc09b9c45c46090bf71cc80d789d57cbb955003b774367fb5",
+      "linux": "db8ed943b25e58ccc09b9c45c46090bf71cc80d789d57cbb955003b774367fb5",
+      "rows": 10
+    },
+    "odn_batch/bodn_residuals.txt": {
+      "mac": "bd39e608aa3b0bf771995218ff412b4da9a7df79606a56149375ec4c870267c2",
+      "linux": "bd39e608aa3b0bf771995218ff412b4da9a7df79606a56149375ec4c870267c2",
+      "rows": 182
+    },
+    "opn_cartesian/propagation_ephemeris_nsg2.txt": {
+      "mac": "d21ff6934408cae1f6fb4b573872cdcdf61ea0d051376ade2e2349b38032e5ad",
+      "linux": "d21ff6934408cae1f6fb4b573872cdcdf61ea0d051376ade2e2349b38032e5ad",
+      "rows": 61
+    },
+    "opn_cartesian/propagation_ephemeris_cartesian.txt": {
+      "mac": "d949c74ae64067ead89af2ae85efa90e6641ba685116179745ae80b3b2f94049",
+      "linux": "d949c74ae64067ead89af2ae85efa90e6641ba685116179745ae80b3b2f94049",
+      "rows": 61
+    },
+    "opn_cartesian/propagation_ephemeris_keplerian.txt": {
+      "mac": "cce21ca3304c5f1f720e60d1f76c448d119f2e815b37cdec2cc0685642e4f757",
+      "linux": "cce21ca3304c5f1f720e60d1f76c448d119f2e815b37cdec2cc0685642e4f757",
+      "rows": 61
+    },
+    "opn_nonsingular2/propagation_ephemeris_nsg2.txt": {
+      "mac": "4fdd8061a323a333291a348dc3df450b477ce218534364344f808d01da460ab9",
+      "linux": "4fdd8061a323a333291a348dc3df450b477ce218534364344f808d01da460ab9",
+      "rows": 61
+    },
+    "opn_nonsingular2/propagation_ephemeris_cartesian.txt": {
+      "mac": "e6ab85dbd3e78d825e11c7311bc769f415728cdcd226fc5abb394da5a73b957e",
+      "linux": "e6ab85dbd3e78d825e11c7311bc769f415728cdcd226fc5abb394da5a73b957e",
+      "rows": 61
+    },
+    "opn_nonsingular2/propagation_ephemeris_keplerian.txt": {
+      "mac": "d457001a74cb8104409d9781d1f0ce285fc2291d8fceb756a695e82067642cfe",
+      "linux": "d457001a74cb8104409d9781d1f0ce285fc2291d8fceb756a695e82067642cfe",
+      "rows": 61
+    },
+    "opn_cislunar/propagation_ephemeris_cartesian.txt": {
+      "mac": "ca7cfc40a4056f71fb11918af4d2acf4e6f800c6323b69e097f30f60befca120",
+      "linux": "ca7cfc40a4056f71fb11918af4d2acf4e6f800c6323b69e097f30f60befca120",
+      "rows": 11
+    },
+    "convert_osculating_to_mean/o2m_ephemeris_mean_keplerian.txt": {
+      "mac": "3e51aa88d99eff192dc123c2f215c4e1dcb7aaf7da4f2a84546572294631620b",
+      "linux": "3e51aa88d99eff192dc123c2f215c4e1dcb7aaf7da4f2a84546572294631620b",
+      "rows": 20
+    },
+    "convert_keplerian_to_cartesian/result.txt": {
+      "mac": "7906e011bf326710defd1ad756f388411149383a8074aca6a803fdbe46d20260",
+      "linux": "7906e011bf326710defd1ad756f388411149383a8074aca6a803fdbe46d20260",
+      "rows": 1
+    },
+    "convert_cartesian_to_keplerian/result.txt": {
+      "mac": "91d72ec815720eb7b89b8da84c96660a7dab9fcbb04f9cf04cb8c3c29b5b09f7",
+      "linux": "91d72ec815720eb7b89b8da84c96660a7dab9fcbb04f9cf04cb8c3c29b5b09f7",
+      "rows": 1
+    },
+    "generate_observations/all_LEO_2body_0001_60927.5063541667.txt": {
+      "mac": "bffef33b4b5eea0aa00eb4735c9cd465c5a141593083ffe005c7b6543175f8d8",
+      "linux": "bffef33b4b5eea0aa00eb4735c9cd465c5a141593083ffe005c7b6543175f8d8",
+      "rows": 8641
+    },
+    "generate_observations/cart_LEO_2body_0001_00001_60927.8496412037.txt": {
+      "mac": "8f4a666ce81d0fe8252a35cd94a146883f6ccecbe0c93a3e055915510f6b3881",
+      "linux": "8f4a666ce81d0fe8252a35cd94a146883f6ccecbe0c93a3e055915510f6b3881",
+      "rows": 41
+    },
+    "generate_observations/cart_LEO_2body_0001_00002_60927.9185069445.txt": {
+      "mac": "b154c3824f6fc8a047a4285b512d846ab83da1602c2ceb98b8de16d1a1dadc1e",
+      "linux": "b154c3824f6fc8a047a4285b512d846ab83da1602c2ceb98b8de16d1a1dadc1e",
+      "rows": 65
+    },
+    "generate_observations/cart_LEO_2body_0001_00003_60927.9891087963.txt": {
+      "mac": "ab427e2a6ff88518c1158cb51a4bc2f9f7ea766d8a4249f681f297d3876bbdfc",
+      "linux": "ab427e2a6ff88518c1158cb51a4bc2f9f7ea766d8a4249f681f297d3876bbdfc",
+      "rows": 68
+    },
+    "generate_observations/cart_LEO_2body_0001_00004_60928.0601736111.txt": {
+      "mac": "b75034b1dfcfe6715ff987834bf16346517c0a9674453f1d46ed515f58c81042",
+      "linux": "b75034b1dfcfe6715ff987834bf16346517c0a9674453f1d46ed515f58c81042",
+      "rows": 67
+    },
+    "generate_observations/cart_LEO_2body_0001_00005_60928.1311226852.txt": {
+      "mac": "69da684957bcf5b8d9ef8a90b9fe0be331f66050d28859d7fa5b490f7b9e814c",
+      "linux": "69da684957bcf5b8d9ef8a90b9fe0be331f66050d28859d7fa5b490f7b9e814c",
+      "rows": 67
+    },
+    "generate_observations/cart_LEO_2body_0001_00006_60928.2021875000.txt": {
+      "mac": "97c69d7234ce7e8202fb7d239a01fa88275afe5a099c150bfbf10fc88a50be10",
+      "linux": "97c69d7234ce7e8202fb7d239a01fa88275afe5a099c150bfbf10fc88a50be10",
+      "rows": 56
+    },
+    "generate_observations/kep_LEO_2body_0001_00001_60927.8496412037.txt": {
+      "mac": "58fd4fde9589ce06dd8b474eb00abbb4541c581c0ecc8b5896075d28b927c014",
+      "linux": "58fd4fde9589ce06dd8b474eb00abbb4541c581c0ecc8b5896075d28b927c014",
+      "rows": 41
+    },
+    "generate_observations/kep_LEO_2body_0001_00002_60927.9185069445.txt": {
+      "mac": "b5303651ec41f7f48a494c19ffc9f526e2d59bcba4e813b2385384359428e2f9",
+      "linux": "b5303651ec41f7f48a494c19ffc9f526e2d59bcba4e813b2385384359428e2f9",
+      "rows": 65
+    },
+    "generate_observations/kep_LEO_2body_0001_00003_60927.9891087963.txt": {
+      "mac": "536cad14af74359125089758c724c76043c6830b25103d69da1e4c26770d9e77",
+      "linux": "536cad14af74359125089758c724c76043c6830b25103d69da1e4c26770d9e77",
+      "rows": 68
+    },
+    "generate_observations/kep_LEO_2body_0001_00004_60928.0601736111.txt": {
+      "mac": "d6ef65d30287d91ea515ff02e461fc9fb720870cd5db4fa558799aa784e36d42",
+      "linux": "d6ef65d30287d91ea515ff02e461fc9fb720870cd5db4fa558799aa784e36d42",
+      "rows": 67
+    },
+    "generate_observations/kep_LEO_2body_0001_00005_60928.1311226852.txt": {
+      "mac": "f540e0f985ef1c6405c875dbc0d709c1bd571f8c93d4f6fc66ba1e8cf2fa3e26",
+      "linux": "f540e0f985ef1c6405c875dbc0d709c1bd571f8c93d4f6fc66ba1e8cf2fa3e26",
+      "rows": 67
+    },
+    "generate_observations/kep_LEO_2body_0001_00006_60928.2021875000.txt": {
+      "mac": "4ade426e3e9baf2394c3554905c6a5ba321384a118c7363a9908e129d3520f01",
+      "linux": "4ade426e3e9baf2394c3554905c6a5ba321384a118c7363a9908e129d3520f01",
+      "rows": 56
+    },
+    "generate_observations/obs_LEO_2body_0001_00001_60927.8496412037.txt": {
+      "mac": "4999e21875ba36e096066ee8c27b6efa5b4a909422f5c9cdc833f144e4dc1df3",
+      "linux": "4999e21875ba36e096066ee8c27b6efa5b4a909422f5c9cdc833f144e4dc1df3",
+      "rows": 41
+    },
+    "generate_observations/obs_LEO_2body_0001_00002_60927.9185069445.txt": {
+      "mac": "5ae53c07ee590148c3973b6864a3f57569c0cd4657861b72862e39fdb2b3d20e",
+      "linux": "5ae53c07ee590148c3973b6864a3f57569c0cd4657861b72862e39fdb2b3d20e",
+      "rows": 65
+    },
+    "generate_observations/obs_LEO_2body_0001_00003_60927.9891087963.txt": {
+      "mac": "f414d01e65e78f7ea768afface27771d67eb5734599f5e72213505ed9ab03224",
+      "linux": "f414d01e65e78f7ea768afface27771d67eb5734599f5e72213505ed9ab03224",
+      "rows": 68
+    },
+    "generate_observations/obs_LEO_2body_0001_00004_60928.0601736111.txt": {
+      "mac": "dfcccebeb1b1270b970aa9ce31353d501766a7fd6f19738cb419cee64bb5a5b3",
+      "linux": "dfcccebeb1b1270b970aa9ce31353d501766a7fd6f19738cb419cee64bb5a5b3",
+      "rows": 67
+    },
+    "generate_observations/obs_LEO_2body_0001_00005_60928.1311226852.txt": {
+      "mac": "fc79bf77f767dc5308e583fe80df2831aaf7a72c90743f3293c70a0b065f52b1",
+      "linux": "fc79bf77f767dc5308e583fe80df2831aaf7a72c90743f3293c70a0b065f52b1",
+      "rows": 67
+    },
+    "generate_observations/obs_LEO_2body_0001_00006_60928.2021875000.txt": {
+      "mac": "9adb8b24fd8bd47d9dfafcb9a6a08bf5cb9d61372e2b8b62b9b1b398a935af18",
+      "linux": "9adb8b24fd8bd47d9dfafcb9a6a08bf5cb9d61372e2b8b62b9b1b398a935af18",
+      "rows": 56
+    },
+    "generate_cislunar_observations/observations.txt": {
+      "mac": "d97debe5924afaf5b769f809def10c8d2ce4ece7bf6223e9465b07e4f1c2f0f5",
+      "linux": "d97debe5924afaf5b769f809def10c8d2ce4ece7bf6223e9465b07e4f1c2f0f5",
+      "rows": 3
+    },
+    "generate_cislunar_observations/components.csv": {
+      "mac": "8d2a3883d936d8d8be18253e9855d28ba735bbb5466aec8baac87055f7575840",
+      "linux": "8d2a3883d936d8d8be18253e9855d28ba735bbb5466aec8baac87055f7575840",
+      "rows": 4
+    },
+    "convert_coordinates/geodetic_to_itrs.txt": {
+      "mac": "d4667f3ed3bb29f69dcf5264dfeb58ab06308bcb938b31622fbd11a49ece4234",
+      "linux": "d4667f3ed3bb29f69dcf5264dfeb58ab06308bcb938b31622fbd11a49ece4234",
+      "rows": 11
+    },
+    "convert_coordinates/geodetic_to_gcrs.txt": {
+      "mac": "c1b44f09986476a0922f4697d17e7caaf5132132999ad035d4ab2391edd2d9e4",
+      "linux": "c1b44f09986476a0922f4697d17e7caaf5132132999ad035d4ab2391edd2d9e4",
+      "rows": 11
+    },
+    "convert_coordinates/itrs_to_geodetic.txt": {
+      "mac": "581557b596570a0ed92c839af28961261fcf829324a00aa6d45d792fa7e11993",
+      "linux": "581557b596570a0ed92c839af28961261fcf829324a00aa6d45d792fa7e11993",
+      "rows": 11
+    },
+    "convert_coordinates/itrs_to_gcrs.txt": {
+      "mac": "37e389b73105dc10ea53524c420e4c366e60142452081ae48ad17de3c04e568d",
+      "linux": "37e389b73105dc10ea53524c420e4c366e60142452081ae48ad17de3c04e568d",
+      "rows": 11
+    },
+    "convert_coordinates/gcrs_to_itrs.txt": {
+      "mac": "b74b1e05889c43fda68bd0e9da0b2e784e83ea8257c9116b4b257a1b59cad5ef",
+      "linux": "b74b1e05889c43fda68bd0e9da0b2e784e83ea8257c9116b4b257a1b59cad5ef",
+      "rows": 11
+    },
+    "convert_coordinates/gcrs_to_geodetic.txt": {
+      "mac": "7d1091c2bd62538fe78c925f3d47c0391c670e2eb9869990f19373cd40a9ba5f",
+      "linux": "7d1091c2bd62538fe78c925f3d47c0391c670e2eb9869990f19373cd40a9ba5f",
+      "rows": 11
+    },
+    "convert_states/kep_to_cart.txt": {
+      "mac": "b17066d599108c1204097ca4e7e329cf54db622cf0a599b5aae06e2efd0a7a21",
+      "linux": "b17066d599108c1204097ca4e7e329cf54db622cf0a599b5aae06e2efd0a7a21",
+      "rows": 4
+    },
+    "convert_states/kep_to_nsg2.txt": {
+      "mac": "d7596271c171dab0b032f31f9d95bcc64c112ff545e98983c7b1c93b376336b8",
+      "linux": "d7596271c171dab0b032f31f9d95bcc64c112ff545e98983c7b1c93b376336b8",
+      "rows": 4
+    },
+    "convert_states/cart_to_kep.txt": {
+      "mac": "7004556386f00572d36011c00ddef09f37811fa9febcd4d3cbc6ad37e634e142",
+      "linux": "7004556386f00572d36011c00ddef09f37811fa9febcd4d3cbc6ad37e634e142",
+      "rows": 4
+    },
+    "convert_states/cart_to_nsg2.txt": {
+      "mac": "992097b04e95466ad30bfa403e7bd2bfbd674660fc400ea861567f02fc41d156",
+      "linux": "992097b04e95466ad30bfa403e7bd2bfbd674660fc400ea861567f02fc41d156",
+      "rows": 4
+    },
+    "convert_states/nsg2_to_cart.txt": {
+      "mac": "3a9d9d2313f1d89da41756c8e3d50b27c77c6b85baa1821ef5beeb24e5f434ab",
+      "linux": "3a9d9d2313f1d89da41756c8e3d50b27c77c6b85baa1821ef5beeb24e5f434ab",
+      "rows": 4
+    },
+    "convert_states/nsg2_to_kep.txt": {
+      "mac": "bbe6c66b4a5766d474e2dbd0baadbaf13c40cdab56b500ebb7df93ea851e484a",
+      "linux": "bbe6c66b4a5766d474e2dbd0baadbaf13c40cdab56b500ebb7df93ea851e484a",
+      "rows": 4
+    },
+    "solid_tide_cartesian/cart.txt": {
+      "mac": "90e3ffe1ab879537a4f33d04894917746028d0cf9d3496025aee0ed122609b81",
+      "linux": "90e3ffe1ab879537a4f33d04894917746028d0cf9d3496025aee0ed122609b81",
+      "rows": 61
+    },
+    "solid_tide_cartesian/kep.txt": {
+      "mac": "a0d21217f0d0af360015ff283fdfacf9aa6f4c6266b754d5976e6446a0e5b1c5",
+      "linux": "a0d21217f0d0af360015ff283fdfacf9aa6f4c6266b754d5976e6446a0e5b1c5",
+      "rows": 61
+    },
+    "solid_tide_cartesian/nsg2.txt": {
+      "mac": "743b498e034c07e4446d5eebd5e3c63ec1fc731a9c5acf94ca2b98ac0e8cf7b0",
+      "linux": "743b498e034c07e4446d5eebd5e3c63ec1fc731a9c5acf94ca2b98ac0e8cf7b0",
+      "rows": 61
+    },
+    "solid_tide_nonsingular2/cart.txt": {
+      "mac": "abb75934c117f22a8a702319bc53576272b4e60331a418e920b4b4882f9d20d7",
+      "linux": "abb75934c117f22a8a702319bc53576272b4e60331a418e920b4b4882f9d20d7",
+      "rows": 61
+    },
+    "solid_tide_nonsingular2/kep.txt": {
+      "mac": "5835d9eb6116eec82ae64cb60a66ddb13940a97f7ff4826f0252de2da766354b",
+      "linux": "5835d9eb6116eec82ae64cb60a66ddb13940a97f7ff4826f0252de2da766354b",
+      "rows": 61
+    },
+    "solid_tide_nonsingular2/nsg2.txt": {
+      "mac": "f70fa7e022e08af244085ae4fc0c5db06f672714666bb920914c70bf71b6bd51",
+      "linux": "f70fa7e022e08af244085ae4fc0c5db06f672714666bb920914c70bf71b6bd51",
+      "rows": 61
+    }
+  },
+  "input_manifest_sha256": "697e7ec3ae3f0e0143c49a71701f1a9430ae9d2993b1644dfcc96d2a3517dbc5",
+  "figure": {
+    "path": "doc/validation/figures/solid_tide_20_comparison.png",
+    "sha256": "f7e3a4ff3acc378f321fca48a09c733135b86a4a95f4a48294c5adb13ec87ee0"
+  },
+  "cleanup": {
+    "removed": [
+      "tests/__pycache__",
+      "/tmp/aster-station-conversion"
+    ],
+    "preserved": [
+      "CLion configuration",
+      "versioned builds",
+      "manual cislunar outputs",
+      "solid-tide validation inputs, outputs and figure source"
+    ]
+  },
+  "raw_records": {
+    "mac": "build/v1.4.0/acceptance/",
+    "linux": "/home/cdc/projects/ASTER/build/v1.4.0/acceptance/"
+  }
+}

@@ -10,7 +10,7 @@ cd /home/cdc/projects/ASTER
 git status --short --branch
 ```
 
-服务器源码目录固定为 `/home/cdc/projects/ASTER`，日常使用 main。当前正式版本为 1.3.0，两端在相同发布源码上分别构建；[发布验收](validation/11_release-1.3.0.md)记录编译器和科学输出核对结果。程序在各自的 `build/v1.4.0/bin/`，旧版源码通过标签查看，旧版构建可继续保留在对应 `build/` 子目录。
+服务器源码目录固定为 `/home/cdc/projects/ASTER`，日常使用 main。当前正式版本为 1.4.0，两端在相同发布源码上分别构建；[发布验收](validation/14_release-1.4.0.md)记录编译器和科学输出核对结果。程序在各自的 `build/v1.4.0/bin/`，旧版源码通过标签查看，旧版构建可继续保留在对应 `build/` 子目录。
 
 在服务器执行：
 

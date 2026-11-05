@@ -1,8 +1,8 @@
-# ASTER 1.3.0
+# ASTER 1.4.0
 
 ASTER 是用于轨道研究的个人 C++ 程序库，包含 GL/GLML 初轨确定、地球与地月数值预报、批处理定轨、轨道状态转换、瞬转平，以及地基光学观测生成、地月双向单程测距仿真和配套加噪工具。
 
-当前正式版本为 1.3.0。Mac 和 Linux 共用源码，各自在本机编译；日常使用 main，正式版本由标签保存。
+当前正式版本为 1.4.0。Mac 和 Linux 共用源码，各自在本机编译；日常使用 main，正式版本由标签保存。
 
 ## 使用入口
 
@@ -13,7 +13,7 @@ ASTER 是用于轨道研究的个人 C++ 程序库，包含 GL/GLML 初轨确定
 3. [配置参考](doc/04_configuration.md)与[数据格式](doc/05_data-formats.md)：关键词、列序、单位、参考系、时间尺度与结果字段。
 4. [公共接口参考](doc/07_interfaces.md)：在自己的 C++ 主程序中调用计算，包含参数说明和示例。
 
-常数的来源、计算用途和旧名称迁移见[物理常数与模型参数](doc/11_constants.md)。本版的验证汇总见[1.3.0 发布验收](doc/validation/11_release-1.3.0.md)。
+常数的来源、计算用途和旧名称迁移见[物理常数与模型参数](doc/11_constants.md)。本版的验证汇总见[1.4.0 发布验收](doc/validation/14_release-1.4.0.md)。
 
 从星历开始做仿真可直接读[观测生成](doc/06_observations.md)。源码组织、测试和简单 Git 工作流见[开发维护](doc/09_development.md)，既有 Linux 环境的操作见[服务器指南](doc/10_server.md)。
 
@@ -47,4 +47,4 @@ build/v1.4.0/bin/aster_convert_keplerian_to_cartesian \
 | `tools/` | 测角加噪工具 |
 | `build/` | 本机编译与运行结果，Git 忽略 |
 
-版本内容统一见 [CHANGELOG](CHANGELOG.md)，当前发布见 [v1.3.0](https://github.com/CDC-Official/ASTER/releases/tag/v1.3.0)，代码修改规则见 [AGENTS.md](AGENTS.md)。
+版本内容统一见 [CHANGELOG](CHANGELOG.md)，当前发布见 [v1.4.0](https://github.com/CDC-Official/ASTER/releases/tag/v1.4.0)，代码修改规则见 [AGENTS.md](AGENTS.md)。
