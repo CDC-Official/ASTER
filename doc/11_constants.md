@@ -21,11 +21,12 @@ ASTER 用命名空间管理固定参数，继续用现有 `LunarGravityField` �
 | `constants`（通用） | AU=149597870700 m | [IAU 2012 B2](https://www.iau.org/static/resolutions/IAU2012_English.pdf)，用于解析日月模型中的长度换算 |
 | `IERS2010` | TT 地球 GM=3.986004415×10¹⁴ m³/s²；名义地球角速度 7.292115×10⁻⁵ rad/s | [IERS 2010](https://iers-conventions.obspm.fr/content/tn36.pdf) 第 1 章表 1.1 及其后的 TT 换算说明、第 6.1 节；分别用于 GCRS/TT 动力学和共转大气速度近似 |
 | `DE440` | 11 个 TDB 相容 GM，m³/s² | [Park 等，2021，表 2](https://doi.org/10.3847/1538-3881/abd414)；数组按 JPL 编号 1—11 排列，火星至冥王星采用行星系统 GM |
-| `GGM03C` | GM、参考半径、完全归一化 C/S，以及由 C20 得到的 J2 | [CSR GGM03 发布资料](https://download.csr.utexas.edu/pub/grace/GGM03/GGM03_Archive.zip)；GM=3.986004415×10¹⁴ m³/s²，参考半径 6378136.3 m；系数位于 `data_gravityfield.hpp` |
+| `GGM03C` | GM、参考半径、完全归一化 C/S、由 C20 得到的 J2，以及永久潮 C20=-4.173×10⁻⁹ | [CSR GGM03 发布资料](https://download.csr.utexas.edu/pub/grace/GGM03/GGM03_Archive.zip)；GM=3.986004415×10¹⁴ m³/s²，参考半径 6378136.3 m；系数位于 `data_gravityfield.hpp` |
 | `Wgs84` | 赤道半径 6378137 m，扁率 1/298.257223563，第一偏心率平方 | WGS84 参考椭球；与固定版本 SOFA 的 `eform.c`、Orekit WGS84 参数一致，用于测站大地坐标、大气参考面与地影几何 |
 | `SolarRadiation` | 参考距离 149597870000 m，参考压力 4.56×10⁻⁶ N/m² | [Orekit 13.1 SolarRadiationPressure](https://github.com/CS-SI/Orekit/blob/13.1/src/main/java/org/orekit/forces/radiation/SolarRadiationPressure.java) 默认参数；数值预报和解析光压共同使用 |
 | `Scale` | 长度、GM、时间、质量尺度及归一化后的天体 GM | 长度取 GGM03C 参考半径，GM 取 IERS TT 地球 GM；时间为 `sqrt(UNIT_LENGTH_M³/UNIT_GM_M3_S2)`，质量为 `UNIT_GM_M3_S2/G` |
 | `Conversion` | 速度、长度、时间、角度、面质比换算系数 | 从 `Scale` 和单位定义推导 |
+| `constants`（通用） | `EARTH_SOLID_TIDE_LOVE_K2=0.3`，无量纲 | 用于日月二阶弹性固体潮，采用本机 NAO General 模型实际使用的频率无关 Love 数，滞后角为零；势函数依据 IERS 第6.2节 |
 | `constants`（通用） | 日长、世纪长度、日期原点、TT/TDB 比例及 π | 日期常数与 L_G、L_B 使用固定版本 SOFA 定义；π 为数学常数 |
 
 `Scale::NORMALIZED_BODY_GM_TDB` 用 DE440 GM 除以程序 GM 尺度。`Scale::NORMALIZED_MOON_GM_TT` 和 `Scale::NORMALIZED_SUN_GM_TT` 则先做 TT 相容换算，再除以尺度。两者对应不同的动力学时间变量。
@@ -40,6 +41,7 @@ GGM03C 和 IERS 的地球 GM 数值相同，但分别表示重力场模型的配
 | E-BCRS/TDB 地球质点引力、行星摄动、后牛顿项 | `Scale::NORMALIZED_BODY_GM_TDB`；地月程序的根数输入还换算中心 GM 对速度的影响 | `accel_complete.cpp`、`main_opn_cislunar.cpp` |
 | GCRS/TT 日月摄动 | `Scale::NORMALIZED_MOON_GM_TT`、`Scale::NORMALIZED_SUN_GM_TT` | `accel_thirdbody.cpp`、`accel_complete.cpp` |
 | 地球球谐引力 | `GGM03C::GM`、`REFERENCE_RADIUS`、`COEFFICIENTS`；TDB 入口同时缩放 GM 与半径 | `accel_gravity.cpp`、`accel_complete.cpp` |
+| GCRS/TT 地球固体潮附加修正 | `EARTH_SOLID_TIDE_LOVE_K2`、GGM03C 参考半径及永久 C20、TT 相容日月 GM；永久贡献在新增加速度中扣除，原始系数表保持不变 | `accel_gravity.cpp`、`accel_complete.cpp` |
 | 初轨 J2、解析 STM、瞬转平 | J2 从同一 C20 推导；GM 比与参考半径幂显式参与归一化 | `core_iod.cpp`、`orbit_stm.hpp`、`analyt_averaging.cpp` |
 | 月球球谐引力 | `LunarGravityField` 中从文件读取的 GM、参考半径和 C/S；用于二阶及以上项 | `accel_gravity.hpp/.cpp`、`accel_complete.cpp` |
 | 测站大地坐标与地固坐标 | `Wgs84` 半径、扁率及偏心率 | `frame_definition.cpp` |
@@ -49,6 +51,8 @@ GGM03C 和 IERS 的地球 GM 数值相同，但分别表示重力场模型的配
 | 地影 | `Wgs84` 半径除以长度尺度 | `in_shadow`、`Check_OrbitEclipse`；数值预报采用地球圆柱地影，进入阴影后光压为零 |
 | 单程测距及引力传播时延 | 真空光速、DE440 TDB GM | `model_cislunar_observation.cpp` |
 | 时间转换 | SOFA 的定义常数和 HF2002 的模型系数 | `time_transform.cpp` |
+
+GGM03C 的原始 C20 已包含永久潮贡献。`GGM03C::PERMANENT_TIDE_C20` 采用 [CSR GGM03 官方说明](https://download.csr.utexas.edu/pub/grace/GGM03/GGM03_Notes.pdf)给出的完全归一化差值，只用于从完整潮汐加速度中扣除这部分贡献。模型开关控制附加修正，关闭后原始静态场照常计算。模型与一天轨道的受控比较见[固体潮验证](validation/12_earth-solid-tide.md)。
 
 ## 专用模型参数与数据
 

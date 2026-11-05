@@ -110,6 +110,7 @@ struct OrbitPropagationNModel
 	bool use_earth_NSG = false;                    // 是否使用中心天体非球形引力摄动，不使用即为二体质点
 	bool use_SRP = false;                    // 是否使用光压摄动
 	bool use_drag = false;                   // 是否使用大气阻力摄动
+	bool UseSolidTide = false;               // 是否叠加原始 GGM03C 之外的日月二阶固体潮修正
 	int earth_zonal_order = 0;                     // 地球带谐项 C_n0 的最高 n；0 关闭该部分
 	int earth_tesseral_degree = 0;                 // 地球田谐项的最高 n（含扇谐项，m=1..n）；0 关闭该部分
 	int solar_gravity_config = SOLAR_GRAVITY_OFF;  // 太阳第三体质点摄动
@@ -128,7 +129,6 @@ struct OrbitPropagationNModel
 	model::common::SphereSatellite sat;
 
 	/* ----------------------- 未启用预留参数 ---------------------- */
-	bool UseSolidTide = false;               // 是否使用中心天体固体潮摄动
 	bool UseOceanTide = false;               // 是否使用中心天体海潮摄动
 	bool UsePoleTide = false;                // 是否使用中心天体极潮摄动
 	bool UseNoise = false;                   // 是否使用过程噪声
@@ -137,14 +137,15 @@ struct OrbitPropagationNModel
 	bool SolveVarEq = false;                 // 是否积分变分方程
 
 	/**
-	 * @brief 显示实际启用的引力、阻力和光压模型及其物理参数。
+	 * @brief 显示实际启用的引力、固体潮、阻力和光压模型及其物理参数。
 	 * @param[in,out] tracer 记录显示过程和输出错误；已有错误时直接返回。
 	 * @param[in,out] output 接收模型文本的输出流；函数保持该流原有的格式状态。
 	 * @param[in] precision 面积、AMR、系数和大气表头条件等普通数值的有效数字位数。
 	 * @param[in] label_width 冒号前的字段显示列宽，包含层级符号和缩进，最小采用 31。
-	 * @details 读取地月非球形开关及截断、日月历表模式、阻力和光压开关、sat 和密度表条件。
+	 * @details 读取地月非球形开关及截断、日月历表模式、固体潮、阻力和光压开关、sat 和密度表条件。
 	 * 面积乘 ae² 恢复为 m²，AMR 乘 ae²/MASS_OF_EARTH 恢复为 m²/kg。
 	 * 月球引力截断为 0 / 0 时注明仅考虑质点引力；缺少密度表头条件时显示 Not provided。
+	 * 固体潮采用 k2=0.3 的日月二阶弹性模型，使用 JPL 位置并扣除 GGM03C 已含的永久贡献。
 	 * 光压使用 Cannonball 模型，采用地球圆柱地影，进入阴影后光压为零。函数不修改动力学参数。
 	 */
 	void Display(bastion::Overwatch& tracer, std::ostream& output = std::cerr, int precision = 14, int label_width = 31) const;
@@ -175,7 +176,7 @@ namespace DefaultOrbitPropagationNModel
 		model.solar_gravity_config = SOLAR_GRAVITY_JPL;     // 使用JPL星历（参考导师）
 		model.lunar_gravity_config = LUNAR_GRAVITY_JPL;     // 使用JPL星历
 
-		// 固体潮，暂未支持，开了也没用（参考导师LEO配置使用固体潮）
+		// 在 GGM03C 静态场上叠加日月二阶固体潮修正。
 		model.UseSolidTide = true;
 
 		return model;
@@ -217,7 +218,7 @@ namespace DefaultOrbitPropagationNModel
 		model.solar_gravity_config = SOLAR_GRAVITY_JPL;     // 使用JPL星历
 		model.lunar_gravity_config = LUNAR_GRAVITY_JPL;
 
-		// 不使用固体潮，暂未支持，开了也没用（参考导师GEO配置）
+		// GEO 预设关闭固体潮附加修正。
 		model.UseSolidTide = false;
 
 		return model;
@@ -238,7 +239,7 @@ namespace DefaultOrbitPropagationNModel
 		model.solar_gravity_config = SOLAR_GRAVITY_JPL;     // 使用JPL星历
 		model.lunar_gravity_config = LUNAR_GRAVITY_JPL;
 
-		// 使用固体潮，暂未支持，开了也没用（参考导师HEO配置）
+		// 在 GGM03C 静态场上叠加日月二阶固体潮修正。
 		model.UseSolidTide = true;
 
 		return model;

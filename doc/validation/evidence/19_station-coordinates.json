@@ -1,0 +1,210 @@
+{
+  "date": "2026-11-05",
+  "branch": "feature/earth-solid-tide",
+  "base_commit": "3e88b79cca030c65405bbd495234483a480ed832",
+  "source_state": "working tree with earth solid tide and station coordinate changes; not released",
+  "build": {
+    "all_targets": "passed",
+    "backend": "OPENLIBM-0.8.8",
+    "compiler": "AppleClang 21, arm64",
+    "directory": "build/release",
+    "program_version": "1.3.0"
+  },
+  "source_snapshot": "build/release/conversion-update/source-snapshot",
+  "source_sha256": {
+    "src/frame_definition.cpp": "848f1446ff9eea1158b36b89046511154901ee61f0978f65f852d4df60ebc7ea",
+    "include/frame_definition.hpp": "8796eae8fe2661864980cfe1156e15e13f1dbc9750f69f581b1f2a48ac25e78c",
+    "src/frame_earth.cpp": "43bb654e262f2479f2c3bd2526473b511973f0d08dd0bb45f046d51cba65d0f5",
+    "src/earth_eop.cpp": "47d238f91c2977eb2da4a630ea17fd52fd260b83a0f95a442f76e0fa8e263de9",
+    "include/utils_constants.hpp": "44059b0e69a824f9f26c90fdbd5fab27c5d1a90e0bef4e4c91070828c7fd8d69",
+    "apps/conversion/main_convert_coordinates.cpp": "eaaa738c6150e4ad005824336d06307e9ad1cbc0100aefe3e1b2ff34290250dd",
+    "apps/iod/main_iod_gl.cpp": "58f703966cf7d6ef0cad387a12cfb13d3b301019c8223ee9d12d98c721195951",
+    "apps/iod/main_iod_glml.cpp": "1ac7c38bda414babb54b4cea3fd48433acb8cbd80f7483ce28670d94b9793a5f",
+    "tests/core/station_coordinates.cpp": "019ba408978f1786e2ff072f384a1e14467910fd3b3fd591a676874299323351",
+    "tests/check_station_coordinates.py": "3ca901ad80c5bf31d4bee3143b6dd07d04dba4a21d18bc3f9589d28b96377a85",
+    "tests/release_smoke.py": "b185eaee7cc331a1b9d1ae97e2da107bf70594713e4cd20d2abf739e9ccec07e",
+    "apps/CMakeLists.txt": "966779e423a8773ed780699c71601586eb2553f716f1061f3b35f361815cebb2",
+    "tests/CMakeLists.txt": "04848fde0a2961b4b3782c048bcacf2b7257109a81e85ce192c0e10aa06a7364",
+    "CMakePresets.json": "faa0d5163ae46cebc3a438c315052863904d10c8aad895ebeb1dd222c6c2a1c7",
+    "apps/conversion/main_convert_states.cpp": "f49bec9b659d4c5f7dacdf017e4cd79306004f7f9c3a22a9e0c35bb1a590e893",
+    "tests/check_conversion_roundtrips.py": "373aba9fefd51cc2058ecd949fe292551160e85cc61e61268770bca36568a0fa"
+  },
+  "inputs": {
+    "data/eop/EOP-All_250516.txt": "d60ce7d6de3befd2699804d1069c29297604c270e05f13f27bf34ce95bb24882",
+    "tests/convert_coordinates/geodetic.txt": "8f2c16bc398bd517a0bf477a581ce974ba2780abca3ec233f21d6b607b5446f7",
+    "tests/iod_gl/input/observers.txt": "c6e72782bee0286b3893e48a44fa3f568d00d11c2dc25cc682137a1fbe2afe1b",
+    "tests/iod_gl/input/observations.obs": "af7162642cdc65ef2c30fa643b477dbec186935f4b4253eea9fd967d277b3881",
+    "tests/convert_coordinates/geodetic_km.txt": "24642933e54086a338f19c0bf5c4000507c5cf32ba0a157f61674376255ac938"
+  },
+  "model": {
+    "ellipsoid": "WGS84",
+    "equatorial_radius_m": 6378137.0,
+    "inverse_flattening": 298.257223563,
+    "rotation": "existing ASTER IAU2000B; polar motion and dX,dY from EOP",
+    "time": "UTC MJD; same time and EOP handling as IOD",
+    "eop_interface_units": "dut1 and dat: s; xp, yp, dx00 and dy00: rad",
+    "geodetic_file_columns": [
+      "MJD_UTC",
+      "longitude_deg",
+      "latitude_deg",
+      "height_m"
+    ],
+    "cartesian_file_columns": [
+      "MJD_UTC",
+      "X_m",
+      "Y_m",
+      "Z_m"
+    ],
+    "file_unit_options": [
+      "deg-m",
+      "deg-km"
+    ]
+  },
+  "memory": {
+    "sofa_wgs84_max_component_difference_m": 9.313225746154785e-10,
+    "sofa_iau2000b_max_component_difference_m": 9.313225746154785e-10,
+    "round_trip_max_component_difference_m": 2.1243461323372513e-09,
+    "recovered_height_max_difference_m": 1.7395223039784469e-09,
+    "direct_vs_iod_two_step": "all components identical",
+    "exact_north_and_south_poles": "passed"
+  },
+  "runtime": {
+    "baseline": "C++ memory API; WGS84 and SOFA IAU2000B assembly checked by probe",
+    "records": 9,
+    "directions": {
+      "geodetic_to_itrs": {
+        "max_component_difference_m": 0.0
+      },
+      "geodetic_to_gcrs": {
+        "max_component_difference_m": 0.0
+      },
+      "itrs_to_geodetic": {
+        "max_height_difference_m": 1.6349304132745601e-09,
+        "max_latitude_difference_deg": 7.105427357601002e-15,
+        "max_longitude_difference_deg_excluding_poles": 1.4210854715202004e-14
+      },
+      "itrs_to_gcrs": {
+        "max_component_difference_m": 9.313225746154785e-10
+      },
+      "gcrs_to_itrs": {
+        "max_component_difference_m": 1.862645149230957e-09
+      },
+      "gcrs_to_geodetic": {
+        "max_height_difference_m": 2.7137048164149746e-09,
+        "max_latitude_difference_deg": 1.4210854715202004e-14,
+        "max_longitude_difference_deg_excluding_poles": 1.4210854715202004e-14
+      }
+    },
+    "units": {
+      "deg-m": {
+        "geodetic_to_itrs": {
+          "max_length_component_difference_m": 0.0
+        },
+        "geodetic_to_gcrs": {
+          "max_length_component_difference_m": 0.0
+        },
+        "itrs_to_geodetic": {
+          "max_length_component_difference_m": 0.0
+        },
+        "itrs_to_gcrs": {
+          "max_length_component_difference_m": 0.0
+        },
+        "gcrs_to_itrs": {
+          "max_length_component_difference_m": 0.0
+        },
+        "gcrs_to_geodetic": {
+          "max_length_component_difference_m": 0.0
+        }
+      },
+      "deg-km": {
+        "geodetic_to_itrs": {
+          "max_length_component_difference_m": 9.313225746154785e-10
+        },
+        "geodetic_to_gcrs": {
+          "max_length_component_difference_m": 9.313225746154785e-10
+        },
+        "itrs_to_geodetic": {
+          "max_length_component_difference_m": 7.080416253302246e-10
+        },
+        "itrs_to_gcrs": {
+          "max_length_component_difference_m": 9.313225746154785e-10
+        },
+        "gcrs_to_itrs": {
+          "max_length_component_difference_m": 9.313225746154785e-10
+        },
+        "gcrs_to_geodetic": {
+          "max_length_component_difference_m": 1.9474555301712826e-09
+        }
+      }
+    },
+    "failure_cases": 18,
+    "iod_three_observation_gcrs_m": [
+      [
+        58406.8859375,
+        1698803.440193041,
+        4457900.520865699,
+        4220621.665928426
+      ],
+      [
+        58406.8859722222,
+        1697828.152982138,
+        4458270.392272018,
+        4220623.425701802
+      ],
+      [
+        58406.8860069444,
+        1696852.784676133,
+        4458640.050389498,
+        4220625.18561533
+      ]
+    ]
+  },
+  "ctest": {
+    "passed": 6,
+    "failed": 0,
+    "tests": [
+      "core_frame_coordinates",
+      "iod_batch_handoff",
+      "observation_geometry",
+      "gravity_conventions",
+      "core_station_coordinates",
+      "station_coordinates_runtime"
+    ]
+  },
+  "release_smoke": {
+    "programs": 12,
+    "scientific_files": 43,
+    "summary_path": "build/release/station-coordinate-smoke/summary.json",
+    "baseline": "v1.3.0 Mac release evidence, doc/validation/evidence/15_release-1.3.0.json",
+    "compared_existing_files": 37,
+    "byte_identical_existing_files": 37,
+    "differences": []
+  },
+  "reference_outputs": {
+    "tests/convert_coordinates/reference_itrs.txt": "d4667f3ed3bb29f69dcf5264dfeb58ab06308bcb938b31622fbd11a49ece4234",
+    "tests/convert_coordinates/reference_gcrs.txt": "c1b44f09986476a0922f4697d17e7caaf5132132999ad035d4ab2391edd2d9e4"
+  },
+  "latest_minimal_validation": {
+    "test": "conversion_roundtrips",
+    "scope": "current coordinate and state executables, round trips only; no external program comparison",
+    "units": {
+      "deg-m": {
+        "coordinate_round_trip_max_length_difference_m": 2.7137048164149746e-09,
+        "state_round_trip_max_semimajor_axis_difference_m": 1.1175870895385742e-08,
+        "state_round_trip_max_position_component_difference_m": 1.0011717677116394e-08,
+        "state_round_trip_max_velocity_component_difference_m_s": 1.0231815394945443e-12
+      },
+      "deg-km": {
+        "coordinate_round_trip_max_length_difference_m": 1.8189894035458565e-09,
+        "state_round_trip_max_semimajor_axis_difference_m": 1.0913936421275139e-08,
+        "state_round_trip_max_position_component_difference_m": 9.777068044058979e-09,
+        "state_round_trip_max_velocity_component_difference_m_s": 9.992007221626409e-13
+      }
+    },
+    "state_arguments": [
+      "cart",
+      "kep",
+      "nsg2"
+    ]
+  }
+}

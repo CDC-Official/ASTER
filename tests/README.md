@@ -21,6 +21,7 @@ ctest --test-dir build/v1.3.0 \
 | `core_batch_determination` / `core_batch_parameters` | 批处理轨道、权重、剔除、协方差及附加 AMR |
 | `core_rkf78_safety` / `core_adams_safety` | 实际阶段历元、反向/零时长、接受步长、起步与错误状态 |
 | `core_iod_eccentricity` | 偏心率约束与独立参考表 |
+| `core_earth_solid_tide` | 固定位置与参数的 NAO 二阶潮汐参考、独立势梯度、两极位置、永久部分及两套动力学接入 |
 | `math_backend_sofa` | SOFA 本身的验证入口，与当前后端一起构建 |
 | `invalid_inputs` | 九个原有主程序的格式、有限值、版本和写出失败路径；新增生成器的输入检查由 observation_runtime 覆盖 |
 | `data_integrity` | `data/manifest.json` 中的大小与 SHA-256 |
@@ -84,9 +85,25 @@ python3 tests/run_case.py --case opn_nonsingular2 \
 
 `observation_runtime` 的固定站址按 WGS84 配套，保留大地坐标与 ECEF 两种输入所得科学输出的逐字节比较。发布条件见[1.3.0 发布验收](../doc/validation/11_release-1.3.0.md)。
 
+## 测站位置转换算例
+
+[`convert_coordinates/`](convert_coordinates/README.md)保存九条经纬高输入，前三条来自 GL 的测站与观测时刻。`core_station_coordinates` 对照 SOFA 的 WGS84 与 IAU 2000B 组装结果，检查六向接口、往返和精确极点；`station_coordinates_runtime` 检查六向文件入口与内存结果一致，并覆盖坏输入、EOP 范围和错误追踪。两项检查已纳入当前回归预设。
+
+```sh
+ctest --test-dir build/release -R '^(core_station_coordinates|station_coordinates_runtime)$' --output-on-failure
+```
+
+## 坐标与轨道状态的最小往返
+
+[`convert_states/`](convert_states/README.md)提供两条椭圆轨道。`conversion_roundtrips` 仅运行当前坐标和状态入口的往返转换，覆盖每个入口的三对表示及度米、度千米两套单位，结果保存在 `build/release/test-output/conversion_roundtrips/`。
+
+## 地球固体潮算例
+
+[`earth_solid_tide/`](earth_solid_tide/README.md)提供一颗低轨卫星的一天预报配置，复用公共 EOP、JPL 和原始 GGM03C。自动核心检查已纳入当前回归预设；`invalid_inputs` 同时检查两套地球入口的开关与资料错误。模型设置、与导师 NAO 的加速度及轨道比较见[固体潮验证](../doc/validation/12_earth-solid-tide.md)。
+
 ## 发布代表算例与跨平台核对
 
-`release_smoke.py` 复用九个既有程序的最小输入，并运行地基测角与双向单程测距。它检查十一程序的版本与帮助，保存科学文件的 SHA-256、行数和实际运行配置。
+`release_smoke.py` 复用九个既有程序的最小输入，并运行地基测角、双向单程测距及六向位置坐标、轨道状态转换。它检查各程序的版本与帮助，保存科学文件的 SHA-256、行数和实际运行配置。
 
 ```sh
 python3 tests/release_smoke.py --bin-dir build/v1.3.0/bin \

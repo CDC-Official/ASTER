@@ -10,3 +10,5 @@ aster_add_app(aster_convert_osculating_to_mean conversion/main_convert_osculatin
 aster_add_app(aster_generate_observations observation/main_generate_observations.cpp)
 target_link_libraries(aster_iod_glml PRIVATE OpenMP::OpenMP_CXX)
 aster_add_app(aster_generate_cislunar_observations observation/main_generate_cislunar_observations.cpp)
+aster_add_app(aster_convert_coordinates conversion/main_convert_coordinates.cpp)
+aster_add_app(aster_convert_states conversion/main_convert_states.cpp)

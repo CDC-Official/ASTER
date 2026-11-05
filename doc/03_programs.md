@@ -1,6 +1,6 @@
 # 程序使用
 
-ASTER 的十一个主程序按任务选择。配置关键词见[配置参考](04_configuration.md)，文件列序和单位见[数据格式](05_data-formats.md)。以下命令从仓库根目录执行，程序已按[构建指南](02_quick-start.md)生成。
+ASTER 的主程序按任务选择。配置关键词见[配置参考](04_configuration.md)，文件列序和单位见[数据格式](05_data-formats.md)。以下命令从仓库根目录执行，程序已按[构建指南](02_quick-start.md)生成。
 
 ## 选择入口
 
@@ -14,11 +14,13 @@ ASTER 的十一个主程序按任务选择。配置关键词见[配置参考](04
 | 地球 NSG2 数值预报 | `aster_opn_nonsingular2` | [opn_nonsingular2/setting.txt](../tests/opn_nonsingular2/setting.txt) | 同上，以 NSG2 积分 |
 | 地月空间数值预报 | `aster_opn_cislunar` | [opn_cislunar/setting.txt](../tests/opn_cislunar/setting.txt) | E-BCRS/TDB Cartesian 星历 |
 | 批处理定轨 | `aster_odn_batch` | [odn_batch/setting.txt](../tests/odn_batch/setting.txt) | 后验轨道、残差、形式协方差、可选 AMR |
+| 三种轨道状态互转 | `aster_convert_states` | [两条 Keplerian 状态](../tests/convert_states/keplerian_km.txt) | Cartesian、Keplerian、NSG2 |
 | Kepler 根数转直角坐标 | `aster_convert_keplerian_to_cartesian` | [七列根数](../tests/convert_keplerian_to_cartesian/input.txt) | 七列 Cartesian，m、m/s |
 | 直角坐标转 Kepler 根数 | `aster_convert_cartesian_to_keplerian` | [七列 Cartesian](../tests/convert_cartesian_to_keplerian/input.txt) | 七列根数，km、deg |
+| 坐标转换 | `aster_convert_coordinates` | [经纬高与各观测时刻](../tests/convert_coordinates/geodetic.txt) | 大地坐标、ITRS、GCRS 位置 |
 | 密切根数转均根数 | `aster_convert_osculating_to_mean` | [convert_osculating_to_mean/setting.txt](../tests/convert_osculating_to_mean/setting.txt) | 同历元七列均根数 |
 
-每个程序支持 `--version` 和 `--help`。九个配置型程序通过 `-I setting.txt` 启动；两项直接转换通过位置参数接收文件名。配置内的输入和输出相对路径从 setting 所在目录解释，普通程序的父目录由运行前创建；单程测距程序会创建配置指定的输出目录。
+每个程序支持 `--version` 和 `--help`。九个配置型程序通过 `-I setting.txt` 启动；直接转换程序通过位置参数接收方向或单位、输入和输出文件名。配置内的输入和输出相对路径从 setting 所在目录解释，普通程序的父目录由运行前创建；单程测距程序会创建配置指定的输出目录。
 
 ## 先准备七套独立配置
 
@@ -59,7 +61,7 @@ PYTHON
 ## GL：从测角资料求初轨
 
 ```sh
-build/v1.3.0/bin/aster_iod_gl -I build/examples/trial-001/iod_gl/setting.txt
+build/v1.4.0/bin/aster_iod_gl -I build/examples/trial-001/iod_gl/setting.txt
 ```
 
 输入是一份同目标的地基 RA/Dec 观测、一份测站表和 EOP。可选 `file_initial_orbit` 提供同参考历元的 GCRS 初值；未填写时使用默认线性初值。至少选用三条观测，`observations_to_use` 可指定前 N 条或 `All`。
@@ -69,7 +71,7 @@ build/v1.3.0/bin/aster_iod_gl -I build/examples/trial-001/iod_gl/setting.txt
 ## GLML：生成候选并按 J 选轨
 
 ```sh
-OMP_NUM_THREADS=2 OMP_DYNAMIC=FALSE build/v1.3.0/bin/aster_iod_glml \
+OMP_NUM_THREADS=2 OMP_DYNAMIC=FALSE build/v1.4.0/bin/aster_iod_glml \
     -I build/examples/trial-001/iod_glml/setting.txt
 ```
 
@@ -82,9 +84,9 @@ OMP_NUM_THREADS=2 OMP_DYNAMIC=FALSE build/v1.3.0/bin/aster_iod_glml \
 ## 地球预报：Cartesian 或 NSG2
 
 ```sh
-build/v1.3.0/bin/aster_opn_cartesian \
+build/v1.4.0/bin/aster_opn_cartesian \
     -I build/examples/trial-001/opn_cartesian/setting.txt
-build/v1.3.0/bin/aster_opn_nonsingular2 \
+build/v1.4.0/bin/aster_opn_nonsingular2 \
     -I build/examples/trial-001/opn_nonsingular2/setting.txt
 ```
 
@@ -97,7 +99,7 @@ build/v1.3.0/bin/aster_opn_nonsingular2 \
 ## 地月预报：E-BCRS / TDB
 
 ```sh
-build/v1.3.0/bin/aster_opn_cislunar \
+build/v1.4.0/bin/aster_opn_cislunar \
     -I build/examples/trial-001/opn_cislunar/setting.txt
 ```
 
@@ -108,7 +110,7 @@ build/v1.3.0/bin/aster_opn_cislunar \
 ## BODN：用观测改正已有轨道
 
 ```sh
-build/v1.3.0/bin/aster_odn_batch -I build/examples/trial-001/odn_batch/setting.txt
+build/v1.4.0/bin/aster_odn_batch -I build/examples/trial-001/odn_batch/setting.txt
 ```
 
 BODN 接收同一目标的地基测角（类型 1）、天基测角（类型 6）和 GCRS 位置（类型 7），允许多测站及同历元多条记录。资料按 UTC 非递减排列。程序准备首观测历元的先验轨道，通过加权批处理估计六状态，按配置增加一个阻力或光压面积质量比 AMR。
@@ -121,13 +123,39 @@ BODN 接收同一目标的地基测角（类型 1）、天基测角（类型 6�
 
 可通过 `file_orbit_solution_BODN` 保存后验轨道；三个 `file_aposteriori_eph_..._BODN` 字段分别控制星历。这里的轨道文件是 SimpleInput 文本，源码注释有时简称“SI”；它的单位由 `state_units` 指明。BODN 固定写 `state_units=2`，即 km、km/s、deg。
 
+## 坐标转换：统一 Gooding 与 ASTER 的站址
+
+`aster_convert_coordinates` 支持大地经纬高、ITRS 和 GCRS 之间的六个方向。复用现有位置类，地球定向矩阵与初轨程序相同。下面将每条观测时刻的大地站址转换为 GCRS 位置：
+
+```sh
+mkdir -p build/station-demo
+build/release/bin/aster_convert_coordinates geodetic gcrs \
+    tests/convert_coordinates/geodetic.txt build/station-demo/gcrs.txt \
+    data/eop/EOP-All_250516.txt
+```
+
+默认输入为 `MJD_UTC 经度(deg) 大地纬度(deg) 椭球高(m)`，输出为 `MJD_UTC X(m) Y(m) Z(m)`。命令末尾可选 `--units deg-m`（度、米）或 `--units deg-km`（度、千米）；所选单位同时用于输入和输出。椭球采用 WGS84，涉及 GCRS 时在输出文件名后填写 EOP 路径；`geodetic` 与 `itrs` 相互转换时省略 EOP。三种坐标名均用小写，文件允许空行和 `#` 注释。输出按输入顺序保存，数值采用 17 位有效数字。
+
+[最小算例](../tests/convert_coordinates/README.md)给出六向命令和 Python 调用方式。前三行取自 GL 算例，可将得到的三行米制 GCRS 站址交给 Gooding。该入口转换位置；输出父目录在运行前创建，同名输出会在全部输入转换成功后覆盖。
+
+## 轨道状态转换：Cartesian、Keplerian、NSG2
+
+`aster_convert_states <源表示> <目标表示> <输入文件> <输出文件> [--units deg-m|deg-km]` 提供三种表示的六个转换方向。表示名称为 `cart`、`kep`、`nsg2`，每行输入输出均为 UTC MJD 和六分量状态，转换保留参考系。
+
+```sh
+build/release/bin/aster_convert_states kep nsg2 \
+    tests/convert_states/keplerian_km.txt build/states_nsg2.txt --units deg-km
+```
+
+默认的 `deg-m` 使用度、米和 m/s；`deg-km` 使用度、千米和 km/s。两类根数的 a 采用所选长度单位，Keplerian 的 i、OMEGA、omega、M 为度；NSG2 只有 lambda 是角度，xi、eta、h、k 均无量纲。转换直接调用库内轨道类，使用配套的地球 GM。[最小算例](../tests/convert_states/README.md)列出各分量和运行命令。
+
 ## 两项直接状态转换
 
 ```sh
 mkdir -p build/conversion-demo
-build/v1.3.0/bin/aster_convert_keplerian_to_cartesian \
+build/v1.4.0/bin/aster_convert_keplerian_to_cartesian \
     tests/convert_keplerian_to_cartesian/input.txt build/conversion-demo/cartesian.txt
-build/v1.3.0/bin/aster_convert_cartesian_to_keplerian \
+build/v1.4.0/bin/aster_convert_cartesian_to_keplerian \
     build/conversion-demo/cartesian.txt build/conversion-demo/keplerian.txt m
 ```
 
@@ -138,7 +166,7 @@ build/v1.3.0/bin/aster_convert_cartesian_to_keplerian \
 ## 瞬转平：密切根数转均根数
 
 ```sh
-build/v1.3.0/bin/aster_convert_osculating_to_mean \
+build/v1.4.0/bin/aster_convert_osculating_to_mean \
     -I build/examples/trial-001/convert_osculating_to_mean/setting.txt
 ```
 
@@ -154,7 +182,7 @@ build/v1.3.0/bin/aster_convert_osculating_to_mean \
 | --- | --- |
 | GL / GLML、三套预报 | 科学结果和报告覆盖写入；`file_programlog` 已存在时拒绝 |
 | BODN | 启用的输出按覆盖方式写入，包括事件日志 |
-| 两项直接转换 | 覆盖输出文件 |
+| 两项状态转换、测站位置转换 | 覆盖输出文件 |
 | 瞬转平 | 结果和日志拒绝覆盖 |
 | 观测生成 / 加噪 | 生成器覆盖同名弧段；加噪要求新的结果目录 |
 
@@ -180,7 +208,7 @@ for key in ['file_navigation_state', 'file_user_state', 'file_receive_events', '
 settings['directory_output'] = str(run / 'output')
 (run / 'setting.txt').write_text('\n'.join(f'{key} = {value}' for key, value in settings.items()) + '\n')
 PYTHON
-build/v1.3.0/bin/aster_generate_cislunar_observations \
+build/v1.4.0/bin/aster_generate_cislunar_observations \
     -I build/examples/trial-001/cislunar/setting.txt
 ```
 

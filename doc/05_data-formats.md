@@ -17,6 +17,7 @@ MJD 是以日为单位的历元数值，`MJD = JD − 2400000.5`。UTC、TT、TD
 | 地基光学观测生成 | UTC MJD | 逐点读轨道，逐历元准备 EOP；JPL 太阳采用 TDB |
 | 地月单程测距 | 输入真实 TDB 年月日时分秒；输出接收钟年月日时分秒 | 光行时迭代及地球 BCRS 位置平移 |
 | 瞬转平 | UTC MJD | 岁差章动用 TT，日月解析平位置与格林尼治角取 UT1=UTC |
+| 测站位置转换 | UTC MJD | 涉及 GCRS 时按同历元 EOP 计算地球定向；其余转换保留历元 |
 | 两项直接状态转换 | 入口约定为 UTC MJD | 保留历元数值，逐行转换状态 |
 | `Get_JPLEPH` / `Get_Libration` | TDB MJD | JPL 二进制星历插值 |
 
@@ -52,6 +53,18 @@ AMR_norm = AMR_m2_kg * UNIT_MASS_KG / UNIT_LENGTH_M^2
 | 3 | m、m/s | a 为 m，角度 deg | a 为 m，lambda 为 deg，其余无量纲 |
 
 这张表用于 GL/GLML 的 `state_units`、`output_state_units` 以及三套预报的输出。其他入口有固定文件单位：两项直接转换、观测生成真值、BODN 和瞬转平分别按下文读取。
+
+## 统一轨道状态转换表
+
+`aster_convert_states` 每行保存 UTC MJD 和[下表](#轨道状态的分量顺序)所列的六个状态分量。`--units deg-m`（默认）或 `--units deg-km` 同时决定输入输出的长度、速度单位；角度均为度。Cartesian 的位置、速度分别为 m、m/s 或 km、km/s；Keplerian 和 NSG2 的 a 为 m 或 km。NSG2 的 lambda 为度，xi、eta、h、k 无量纲。
+
+## 位置坐标转换表
+
+`aster_convert_coordinates` 的输入、输出都为四列。大地坐标排列为 `MJD_UTC longitude_deg latitude_deg height_m`，ITRS、GCRS 排列为 `MJD_UTC X_m Y_m Z_m`。上述列名采用默认的 `--units deg-m`。可选 `--units deg-km` 时，经纬度仍为度，输入输出的高度及 XYZ 均改为千米，输出列名相应使用 `_km`。东经为正，纬度是 WGS84 椭球法线定义的大地纬度，高度是椭球高。反算经度为 −180° 至 180°，精确自转轴上取 0。
+
+历元列始终按 UTC MJD 原值保存；同一行的 EOP 由现有读取器插值取得。文件采用空白分隔，允许空行、整行或行末 `#` 注释。输出带有说明坐标、单位和转换模型的 `#` 表头，可直接用 `numpy.loadtxt` 读取。
+
+此文件的经纬高顺序是经度、纬度、高度；`frame::Geodetic` 构造函数及 `ToArray` 的顺序为高度、经度、纬度，批量主程序在入口和出口完成排列转换。
 
 ## 轨道状态的分量顺序
 

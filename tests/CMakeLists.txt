@@ -101,3 +101,33 @@ add_test(NAME gravity_conventions COMMAND aster_test_gravity_conventions
     "${PROJECT_SOURCE_DIR}/data/eop/EOP-All_250516.txt"
     "${PROJECT_SOURCE_DIR}/data/ephemeris/JPLEPH_C.430")
 set_tests_properties(gravity_conventions PROPERTIES TIMEOUT 30)
+
+# 固定点 NAO、独立势梯度及两套 GCRS 动力学的固体潮附加修正。
+add_executable(aster_test_earth_solid_tide core/earth_solid_tide.cpp)
+target_link_libraries(aster_test_earth_solid_tide PRIVATE ASTER::core)
+add_test(NAME core_earth_solid_tide COMMAND aster_test_earth_solid_tide
+    "${PROJECT_SOURCE_DIR}/data/eop/EOP-All_250516.txt"
+    "${PROJECT_SOURCE_DIR}/data/ephemeris/JPLEPH_C.430"
+    "${PROJECT_SOURCE_DIR}/tests/earth_solid_tide/nao_acceleration.tsv")
+set_tests_properties(core_earth_solid_tide PROPERTIES TIMEOUT 30)
+
+# 六个方向的测站位置转换，与 SOFA 及现有初轨站址计算交叉核对。
+add_executable(aster_test_station_coordinates core/station_coordinates.cpp)
+target_link_libraries(aster_test_station_coordinates PRIVATE ASTER::core)
+add_test(NAME core_station_coordinates COMMAND aster_test_station_coordinates
+    "${PROJECT_SOURCE_DIR}/data/eop/EOP-All_250516.txt")
+set_tests_properties(core_station_coordinates PROPERTIES TIMEOUT 30)
+
+add_test(NAME station_coordinates_runtime COMMAND "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/check_station_coordinates.py"
+    --binary $<TARGET_FILE:aster_convert_coordinates>
+    --probe $<TARGET_FILE:aster_test_station_coordinates>
+    --output "${PROJECT_BINARY_DIR}/test-output/station_coordinates")
+set_tests_properties(station_coordinates_runtime PROPERTIES TIMEOUT 60)
+
+# 坐标和状态转换入口仅用两套单位的小样本检查往返。
+add_test(NAME conversion_roundtrips COMMAND "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/check_conversion_roundtrips.py"
+    --bin-dir "${PROJECT_BINARY_DIR}/bin"
+    --output "${PROJECT_BINARY_DIR}/test-output/conversion_roundtrips")
+set_tests_properties(conversion_roundtrips PROPERTIES TIMEOUT 60)

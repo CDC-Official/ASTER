@@ -9,7 +9,7 @@ ASTER 是用于轨道研究的个人 C++ 程序库，包含 GL/GLML 初轨确定
 从[文档首页](doc/01_overview.md)选择任务。第一次使用按下面的顺序阅读：
 
 1. [快速上手与构建](doc/02_quick-start.md)：Mac/Linux 编译、CLion、跑出第一份结果。
-2. [程序使用](doc/03_programs.md)：十一个主程序怎样选，如何准备配置、运行和查看结果。
+2. [程序使用](doc/03_programs.md)：各主程序怎样选，如何准备配置、运行和查看结果。
 3. [配置参考](doc/04_configuration.md)与[数据格式](doc/05_data-formats.md)：关键词、列序、单位、参考系、时间尺度与结果字段。
 4. [公共接口参考](doc/07_interfaces.md)：在自己的 C++ 主程序中调用计算，包含参数说明和示例。
 
@@ -22,11 +22,11 @@ ASTER 是用于轨道研究的个人 C++ 程序库，包含 GL/GLML 初轨确定
 在现有 Mac 环境的仓库根目录执行：
 
 ```sh
-cmake -S . -B build/v1.3.0 -DCMAKE_BUILD_TYPE=Release
-cmake --build build/v1.3.0 --parallel 3
-build/v1.3.0/bin/aster_iod_gl --version
+cmake -S . -B build/v1.4.0 -DCMAKE_BUILD_TYPE=Release
+cmake --build build/v1.4.0 --parallel 3
+build/v1.4.0/bin/aster_iod_gl --version
 mkdir -p build/quick-start
-build/v1.3.0/bin/aster_convert_keplerian_to_cartesian \
+build/v1.4.0/bin/aster_convert_keplerian_to_cartesian \
     tests/convert_keplerian_to_cartesian/input.txt build/quick-start/cartesian.txt
 ```
 
@@ -38,7 +38,7 @@ build/v1.3.0/bin/aster_convert_keplerian_to_cartesian \
 
 | 位置 | 用途 |
 | --- | --- |
-| `apps/` | 十一个主程序 |
+| `apps/` | 各主程序 |
 | `include/`、`src/` | 公共接口与科学实现 |
 | `cmake/`、`third_party/` | 构建接入、固定第三方源码与许可 |
 | `tests/` | 最小输入、参考结果与[检查说明](tests/README.md) |

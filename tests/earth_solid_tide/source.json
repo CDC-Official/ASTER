@@ -1,0 +1,33 @@
+{
+  "program": "NAO AccelSolidTideGeneral, compiled directly from the local source",
+  "source_root": "/Users/chendingcun/CLionProjects/NAO",
+  "source_sha256": {
+    "gaussLib/accel_solidtide.cpp": "b54abdf0979d8c3393e5533b7fb7027a074ec87d9ffe048d9d42639c88bdad4d",
+    "gaussLib/accel_solidtide.hpp": "c47d2212a84a63580ff8e9a6ca24703cfe21240f9479a54333c7cb1fe832318a",
+    "gaussLib/utils_errorhandler.cpp": "df0559b17f21ac1a147c22f1e5f70374b8a75070476fa4eb67c2d4e472e7032c"
+  },
+  "parameters": {
+    "k2": 0.3,
+    "lag_rad": 0.0,
+    "length_unit_m": 6378136.3,
+    "gm_unit_m3_s2": 398600441500000.0,
+    "sun_gm_tdb_m3_s2": 1.3271244004127942e+20,
+    "moon_gm_tdb_m3_s2": 4902800118000.0,
+    "tdb_to_tt_scale": "(1-6.969290134e-10)/(1-1.550519768e-8)"
+  },
+  "columns": [
+    "satellite_x_m",
+    "satellite_y_m",
+    "satellite_z_m",
+    "sun_x_m",
+    "sun_y_m",
+    "sun_z_m",
+    "moon_x_m",
+    "moon_y_m",
+    "moon_z_m",
+    "full_tide_ax_mps2",
+    "full_tide_ay_mps2",
+    "full_tide_az_mps2"
+  ],
+  "reference_sha256": "d1bd7ad8089b64bfc0e8f5501fa2c0fd3bbd63e6ed9a5cab0fe168804e6f6465"
+}

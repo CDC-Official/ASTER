@@ -114,6 +114,8 @@ int main()
 }
 ```
 
+文件批量转换可使用 `aster_convert_states`，通过参数选择三种状态表示和度米、度千米两套单位，见[程序使用](03_programs.md#轨道状态转换cartesiankepleriannsg2)。
+
 NSG2 定义为 xi=e·cos(omega+OMEGA)、eta=e·sin(omega+OMEGA)、h=sin(i/2)·cos(OMEGA)、k=sin(i/2)·sin(OMEGA)、lambda=M+omega+OMEGA。当前常用转换链使用椭圆轨道，瞬转平另有 a、i 等范围要求。低层近点角函数位于 [orbit_basic.hpp](../include/orbit_basic.hpp)，输入输出角度为 rad，`MeanAnomaly2EccentricAnomaly(M,e)` 等函数用于同一轨道的角度转换。
 
 <a id="frames"></a>
@@ -132,6 +134,21 @@ NSG2 定义为 xi=e·cos(omega+OMEGA)、eta=e·sin(omega+OMEGA)、h=sin(i/2)·co
 | `Geodetic(height,lambda,phi,false)` | 高度 m、经度 deg、大地纬度 deg | 构造站址；顺序与测站表不同 |
 | `site.Normalize(tracer,UNIT_LENGTH_M)` / `site.ToGCRS(...)` | 输入输出站址归一化；输入 UTC MJD 和同历元 EOP | 输出归一化 GCRS 位置，无速度 |
 | `GCRS_to_ITRS_Matrix(utc,eop,matrix)` | UTC MJD、s/rad 的 aEOP | 输出 3×3 位置旋转矩阵，`r_itrs=matrix*r_gcrs`；反向接口使用转置 |
+
+六个方向均由现有位置对象直接提供：
+
+| 方向 | 内存调用 | 输入与输出单位 |
+| --- | --- | --- |
+| 大地 → ITRS | `geodetic.ToITRS(tracer,itrs)` | 输入高度/UNIT_LENGTH_M、rad；输出 XYZ/UNIT_LENGTH_M |
+| ITRS → 大地 | `itrs.ToGeodetic(tracer,geodetic)` | 输入 XYZ/UNIT_LENGTH_M；输出高度/UNIT_LENGTH_M、rad |
+| ITRS → GCRS | `itrs.ToGCRS(tracer,utc,eop,gcrs)` | 保持米制或归一化长度及标志 |
+| GCRS → ITRS | `gcrs.ToITRS(tracer,utc,eop,itrs)` | 保持米制或归一化长度及标志 |
+| 大地 → GCRS | `geodetic.ToGCRS(tracer,utc,eop,gcrs)` | 输入已归一化的大地坐标；输出 XYZ/UNIT_LENGTH_M |
+| GCRS → 大地 | `gcrs.ToGeodetic(tracer,utc,eop,geodetic)` | 输入 XYZ/UNIT_LENGTH_M；输出高度/UNIT_LENGTH_M、rad |
+
+大地坐标使用 `constants::Wgs84` 的半径、扁率，反算调用 SOFA `iauGc2gde`。`Geodetic::Normalize` 把高度由 m 转成归一化值、角度由 deg 转成 rad；`Restore` 做反向恢复。ITRS/GCRS 的 `Restore(tracer,UNIT_LENGTH_M)` 可将归一化输出恢复为米。四个涉及 GCRS 的方向均要求 UTC MJD 和同历元 EOP，使用当前 IAU 2000B 地球定向矩阵。
+
+文件入口见[坐标转换](03_programs.md#坐标转换统一-gooding-与-aster-的站址)，可以在 Python 中调用并批量取得与初轨相同的 GCRS 站址。
 
 EOP 插值要求连续日记录，非整日通常还要有下一日；超出覆盖时失败。站址类的 ITRS/GCRS 相互转换保持长度单位，椭球与归一化约定见[数据格式](05_data-formats.md)。
 
@@ -480,6 +497,7 @@ bool ExampleReadStep(bastion::Overwatch& tracer, std::string setting_file, doubl
 | 入口与声明 | 科学关系、单位和返回方式 |
 | --- | --- |
 | [Acceleration_Cart / Acceleration_NSG2](../include/accel_complete.hpp) | 输入 tracer、GCRS 任务、实际阶段 MJD(TT)、n=6、归一化状态 x；输出相对归一化时间的六维导数 f，Cartesian 为 `[vx,vy,vz,ax,ay,az]` |
+| [Earth_Solid_Tide_Acceleration](../include/accel_gravity.hpp) | 输入同一时刻的卫星、太阳和月球地心地固位置，均以 `Scale::UNIT_LENGTH_M` 归一化；输出同系附加加速度，以 `Scale::UNIT_GM_M3_S2/Scale::UNIT_LENGTH_M²` 归一化。采用日月二阶弹性模型，扣除原始 GGM03C 已含的永久贡献，与保留 C20 的静态场相加 |
 | [Acceleration_Cart_EBCRS](../include/accel_complete.hpp) | 相同结构，时刻为 TDB、状态为 E-BCRS；预先加载 JPL 与 EOP，按开关加入 EIH 修正 |
 | [RKF78_Cart / RKF78_NSG2 / RKF78_Cart_EBCRS](../include/integrator_rkf78.hpp) | 输入当前 TT/TDB MJD、任务、归一化非零试探步长，输入输出六状态；返回实际接受步长，可选返回归一化局部误差。失败时步长为 0、误差 NaN、状态保持原值并设置 tracer |
 | [Adams_Cart / Adams_NSG2 / Adams_Cart_EBCRS](../include/integrator_adams.hpp) | 输入固定 TT/TDB 起点、归一化经过时间和固定步长，输入输出六状态与 AdamsHistory，输出实际步长及起步误差；每条轨道使用自己的历史，切换模型/资料后 Reset |

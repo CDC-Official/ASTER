@@ -1,6 +1,9 @@
-//
-// Created by 陈酊存 on 2024/1/23.
-//
+/**
+ * @file accel_gravity.hpp
+ * @brief 计算地月非球形引力及地球固体潮附加加速度。
+ * @details 提供归一化勒让德函数、球谐引力及日月二阶固体潮计算。
+ * 固体潮接收同一时刻的地固系卫星、日月位置，输出在原始 GGM03C 上额外叠加的加速度。
+ */
 
 #ifndef CDC_ACCEL_GRAVITY_HPP
 #define CDC_ACCEL_GRAVITY_HPP
@@ -12,6 +15,7 @@
 #include "utils_constants.hpp"
 #include "orbit_statedef.hpp"
 #include "data_gravityfield.hpp"
+#include "utils_overwatch.hpp"
 
 using namespace Eigen;
 
@@ -179,6 +183,22 @@ double Norm_LPD_Single(int l, double mu);
 double Norm_LPA_Single(int l, int m, double mu);
 
 double Norm_LPAD_Single(int l, int m, double mu);
+
+/**
+ * @brief 计算在原始 GGM03C 上额外叠加的日月二阶固体潮加速度。
+ * @param[in,out] tracer 记录位置无效或加速度计算失败的错误，并维护调用追踪。
+ * @param[out] acceleration_itrs_norm 地固系三维附加加速度 [ax, ay, az]，以 Scale::UNIT_GM_M3_S2/Scale::UNIT_LENGTH_M² 归一化。
+ * @param[in] satellite_itrs_norm 卫星的地心地固位置 [x, y, z]，以 Scale::UNIT_LENGTH_M 归一化。
+ * @param[in] sun_itrs_norm 同一时刻太阳的地心地固位置 [x, y, z]，以 Scale::UNIT_LENGTH_M 归一化。
+ * @param[in] moon_itrs_norm 同一时刻月球的地心地固位置 [x, y, z]，以 Scale::UNIT_LENGTH_M 归一化。
+ * @details 采用频率无关的二阶弹性模型，Love 数为 EARTH_SOLID_TIDE_LOVE_K2，滞后角为零。
+ * 日月 GM 使用已有 TT 相容值，地球参考半径使用 GGM03C 配套值；位置均采用 GCRS/TT 的长度尺度。
+ * 先计算日月的完整二阶潮汐贡献，再扣除 GGM03C::PERMANENT_TIDE_C20 对应的加速度。
+ * 输出与包含 C20 的原始 GGM03C 静态场相加；本函数保持静态球谐系数不变。
+ */
+void Earth_Solid_Tide_Acceleration(bastion::Overwatch& tracer, double acceleration_itrs_norm[3],
+    const double satellite_itrs_norm[3], const double sun_itrs_norm[3], const double moon_itrs_norm[3]);
+
 
 //计算非球形引力加速度，归一化
 int Earth_Nonspherical_Gravitational_Acceleration(double* a_celestial,

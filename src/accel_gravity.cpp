@@ -1,6 +1,9 @@
-//
-// Created by 陈酊存 on 2024/1/23.
-//
+/**
+ * @file accel_gravity.cpp
+ * @brief 计算地月非球形引力及地球固体潮附加加速度。
+ * @details 提供归一化勒让德函数、球谐引力及日月二阶固体潮计算。
+ * 固体潮接收同一时刻的地固系卫星、日月位置，输出在原始 GGM03C 上额外叠加的加速度。
+ */
 
 #include "accel_gravity.hpp"
 
@@ -8,6 +11,85 @@
 // [补丁修改] 全局变量实体定义
 LunarGravityField moon_gravity_field;
 
+
+/**
+ * @brief 计算在原始 GGM03C 上额外叠加的日月二阶固体潮加速度。
+ * @param[in,out] tracer 记录位置无效或加速度计算失败的错误，并维护调用追踪。
+ * @param[out] acceleration_itrs_norm 地固系三维附加加速度 [ax, ay, az]，以 Scale::UNIT_GM_M3_S2/Scale::UNIT_LENGTH_M² 归一化。
+ * @param[in] satellite_itrs_norm 卫星的地心地固位置 [x, y, z]，以 Scale::UNIT_LENGTH_M 归一化。
+ * @param[in] sun_itrs_norm 同一时刻太阳的地心地固位置 [x, y, z]，以 Scale::UNIT_LENGTH_M 归一化。
+ * @param[in] moon_itrs_norm 同一时刻月球的地心地固位置 [x, y, z]，以 Scale::UNIT_LENGTH_M 归一化。
+ * @details 采用频率无关的二阶弹性模型，Love 数为 EARTH_SOLID_TIDE_LOVE_K2，滞后角为零。
+ * 日月 GM 使用已有 TT 相容值，地球参考半径使用 GGM03C 配套值；位置均采用 GCRS/TT 的长度尺度。
+ * 先计算日月的完整二阶潮汐贡献，再扣除 GGM03C::PERMANENT_TIDE_C20 对应的加速度。
+ * 输出与包含 C20 的原始 GGM03C 静态场相加；本函数保持静态球谐系数不变。
+ */
+void Earth_Solid_Tide_Acceleration(bastion::Overwatch& tracer, double acceleration_itrs_norm[3],
+    const double satellite_itrs_norm[3], const double sun_itrs_norm[3], const double moon_itrs_norm[3])
+{
+    if (tracer.Code() != bastion::ERR_NOERROR) return;
+
+    tracer.CheckIn(__FILE__, __func__, __LINE__);
+
+    // 三个位置均以地心为原点，太阳和月球的方向决定此刻地球形变的方向。
+    const Vector3d satellite(satellite_itrs_norm[0], satellite_itrs_norm[1], satellite_itrs_norm[2]);
+    const Vector3d bodies[2] = {
+        Vector3d(sun_itrs_norm[0], sun_itrs_norm[1], sun_itrs_norm[2]),
+        Vector3d(moon_itrs_norm[0], moon_itrs_norm[1], moon_itrs_norm[2])};
+    const double radius = satellite.norm();
+    const double body_radii[2] = {bodies[0].norm(), bodies[1].norm()};
+
+    // 求单位方向和距离幂之前，检查各位置及其地心距离。
+    if (!satellite.allFinite() || !bodies[0].allFinite() || !bodies[1].allFinite()
+        || !std::isfinite(radius) || !std::isfinite(body_radii[0]) || !std::isfinite(body_radii[1])
+        || radius <= 0.0 || body_radii[0] <= 0.0 || body_radii[1] <= 0.0)
+    {
+        tracer.LogEvent(__FILE__, __func__, __LINE__,
+            "Earth solid tide requires finite nonzero geocentric satellite, Sun and Moon positions.", bastion::EventType::ERROR);
+        return;
+    }
+
+    // 模型参考半径以积分长度单位表示，其五次幂决定二阶潮汐响应的尺度。
+    using namespace constants::Scale;
+    const double reference_radius_norm = constants::GGM03C::REFERENCE_RADIUS / UNIT_LENGTH_M;
+    const double body_gm_norm[2] = {NORMALIZED_SUN_GM_TT, NORMALIZED_MOON_GM_TT};
+    const Vector3d direction = satellite / radius;
+    Vector3d acceleration = Vector3d::Zero();
+
+    // 对二阶潮汐势 k2*GM_body*R^5*P2(cos_angle)/(body_radius^3*radius^3) 求位置梯度。
+    // 直接使用方向向量计算，赤道和两极位置采用同一表达式。
+    for (int body = 0; body < 2; ++body)
+    {
+        const Vector3d body_direction = bodies[body] / body_radii[body];
+        const double cos_angle = direction.dot(body_direction);
+
+        // 每个日月天体贡献一项加速度，输出尺度与地球质点和非球形引力相同。
+        const double factor = 1.5 * constants::EARTH_SOLID_TIDE_LOVE_K2 * body_gm_norm[body]
+            * std::pow(reference_radius_norm, 5) / (std::pow(body_radii[body], 3) * std::pow(radius, 4));
+        acceleration += factor * (2.0 * cos_angle * body_direction + (1.0 - 5.0 * cos_angle * cos_angle) * direction);
+    }
+
+    // GGM03C 的 C20 已含永久潮；用 J2=-sqrt(5)*C20 得到其加速度，再从完整潮汐贡献中扣除。
+    const double z_fraction = direction[2] * direction[2];
+    const double permanent_factor = -1.5 * std::sqrt(5.0) * constants::GGM03C::PERMANENT_TIDE_C20
+        * (constants::GGM03C::GM / UNIT_GM_M3_S2) * std::pow(reference_radius_norm, 2) / std::pow(radius, 5);
+    const Vector3d permanent_acceleration = permanent_factor * Vector3d(
+        satellite[0] * (5.0 * z_fraction - 1.0), satellite[1] * (5.0 * z_fraction - 1.0),
+        satellite[2] * (5.0 * z_fraction - 3.0));
+    acceleration -= permanent_acceleration;
+
+    // 将本次额外修正写给动力学方程，静态 GGM03C 仍由原有非球形引力函数计算。
+    if (!acceleration.allFinite())
+    {
+        tracer.LogEvent(__FILE__, __func__, __LINE__, "Non-finite Earth solid-tide acceleration.", bastion::EventType::ERROR);
+        return;
+    }
+
+    acceleration_itrs_norm[0] = acceleration[0];
+    acceleration_itrs_norm[1] = acceleration[1];
+    acceleration_itrs_norm[2] = acceleration[2];
+    tracer.CheckOut(__func__);
+}
 
 int Norm_LP_Array(int l, double mu, double* LP)
 {

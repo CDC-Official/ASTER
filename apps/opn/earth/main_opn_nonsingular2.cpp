@@ -194,6 +194,7 @@ int main(int argc, char* argv[])
 		string sat_id;
 		double sat_mass, sat_area_drag, sat_area_SRP, sat_eta_SRP, sat_Cd_drag;
 		int adams_steps = 9;
+		int use_solid_tide = 0; // 固体潮附加修正由可选关键词单独开启。
 		int integrator_id, earth_zonal_order, earth_tesseral_degree, solar_gravity_config, lunar_gravity_config, use_drag = 0, use_SRP = 0;
 		// 地球与月球非球形引力分别配置，月球项还需要外部重力场。
 		int use_lunar_NSG = 0, lunar_zonal_order = 0, lunar_tesseral_degree = 0;
@@ -314,7 +315,7 @@ int main(int argc, char* argv[])
 		si_opnInput.GetString(tracer, "file_EOP", fn_EOP);
 		if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
-		// JPLEPH file
+		// 【条件必选】file_JPLEPH：JPL 日月、月球非球形或固体潮附加修正所需的二进制历表。
 		si_opnInput.GetString(tracer, "file_JPLEPH", fn_JPL);
 		if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
@@ -367,6 +368,33 @@ int main(int argc, char* argv[])
 		// lunar gravity field file for lunar NSG
 		si_opnInput.GetString(tracer, "file_lunar_gravity_field", fn_lunar_gravity_field);
 		if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
+
+		// 【可选】use_solidtide_perturb：0 关闭，1 开启 GGM03C 之外的二阶固体潮修正；省略时为 0。
+		if (si_opnInput.HasKeyword("use_solidtide_perturb"))
+		{
+			si_opnInput.GetIntegerStrict(tracer, "use_solidtide_perturb", use_solid_tide);
+			if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
+		}
+
+		// 原始 GGM03C 的 C20 与附加修正配套使用，历表供每次动力学计算查询日月位置。
+		if (use_solid_tide != 0 && use_solid_tide != 1)
+		{
+			tracer.LogEvent(__FILE__, __func__, __LINE__, "use_solidtide_perturb must be 0 or 1.", EventType::ERROR);
+			tracer.EmergencyExit(program_log);
+		}
+
+		if (use_solid_tide && earth_zonal_order < 2)
+		{
+			tracer.LogEvent(__FILE__, __func__, __LINE__,
+				"Earth solid-tide correction requires GGM03C C20: earth_zonal_order must be at least 2.", EventType::ERROR);
+			tracer.EmergencyExit(program_log);
+		}
+
+		if (use_solid_tide && fn_JPL.empty())
+		{
+			tracer.LogEvent(__FILE__, __func__, __LINE__, "file_JPLEPH is required for Earth solid-tide correction.", EventType::ERROR);
+			tracer.EmergencyExit(program_log);
+		}
 
 		// drag perturbation
 		si_opnInput.GetInteger(tracer, "use_drag_perturb", use_drag);
@@ -501,10 +529,12 @@ int main(int argc, char* argv[])
 			opn_model.earth_tesseral_degree = earth_tesseral_degree;
 		}
 
-		// 设置第三体摄动
+		// 设置日月直接引力及固体潮附加修正，并加载这些模型实际需要的 JPL 历表。
+		opn_model.UseSolidTide = use_solid_tide == 1;
 		opn_model.solar_gravity_config = solar_gravity_config;
 		opn_model.lunar_gravity_config = lunar_gravity_config;
-		if (solar_gravity_config == SOLAR_GRAVITY_JPL || lunar_gravity_config == LUNAR_GRAVITY_JPL)
+
+		if (solar_gravity_config == SOLAR_GRAVITY_JPL || lunar_gravity_config == LUNAR_GRAVITY_JPL || opn_model.UseSolidTide)
 		{
 			tracer.LogEvent(__FILE__, __func__, __LINE__, "Reading JPL ephemeris from: " + fn_JPL, EventType::MESSAGE, FORCE_ALERT_ON);
 			status = Read_JPLEPH(fn_JPL);    // 有需要再读JPL

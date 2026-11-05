@@ -18,6 +18,8 @@
 | 各自采用大气、地影和地球姿态模型时，一天预报相差多少；近地月球间接项是否补齐 | [独立模型对照及月球间接项](09_orekit-models.md) | [独立模型结果](evidence/11_orekit-models.json)、[间接项修正验证](evidence/12_lunar-indirect-fix.json) |
 | 当前 ASTER 与导师程序的百天 ADAMS 预报随步长变化的差异 | [百天预报对照及曲线](10_adams-100days.md) | [运行配置、星历及图件校验](evidence/13_adams-100days.json) |
 | 1.3.0 的构建、十一程序和跨平台检查 | [1.3.0 发布验收](11_release-1.3.0.md) | [两端构建、回归及37份科学输出校验](evidence/15_release-1.3.0.json) |
+| GGM03C 之外的固体潮修正、NAO 固定点及一天轨道的永久潮控制比较 | [固体潮实现与验证](12_earth-solid-tide.md) | [源码、配置、开关增量和永久潮诊断](evidence/16_earth-solid-tide.json)、[Orekit 20×20 对照](evidence/17_solid-tide-orekit.json)、[四曲线图件](evidence/18_solid-tide-figure.json) |
+| 六向测站位置转换是否与初轨、SOFA 一致，以及现有程序的结果是否变化 | [测站位置转换](13_station-coordinates.md) | [六向、往返、来源与现有输出校验](evidence/19_station-coordinates.json) |
 
 <a id="migration"></a>
 ## 1.0.0 迁移来源与核对

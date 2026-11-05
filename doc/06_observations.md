@@ -7,10 +7,10 @@
 从 ASTER 根目录执行：
 
 ```sh
-cmake -S . -B build/v1.3.0 -DCMAKE_BUILD_TYPE=Release
-cmake --build build/v1.3.0 --parallel 3
+cmake -S . -B build/v1.4.0 -DCMAKE_BUILD_TYPE=Release
+cmake --build build/v1.4.0 --parallel 3
 mkdir -p build/observation-demo
-build/v1.3.0/bin/aster_generate_observations -I tests/generate_observations/setting.txt
+build/v1.4.0/bin/aster_generate_observations -I tests/generate_observations/setting.txt
 python3 tools/add_angular_noise.py build/observation-demo/obs_*.txt \
     --sigma-arcsec 3 --samples 2 --seed 42 --output build/observation-noisy
 ```
@@ -65,9 +65,9 @@ Dec = Dec0 + ηN
 ## 检查
 
 ```sh
-ctest --test-dir build/v1.3.0 -R '^observation_' --output-on-failure
-python3 tests/check_observation_handoff.py --bin-dir build/v1.3.0/bin \
-    --output build/v1.3.0/acceptance/observations
+ctest --test-dir build/v1.4.0 -R '^observation_' --output-on-failure
+python3 tests/check_observation_handoff.py --bin-dir build/v1.4.0/bin \
+    --output build/v1.4.0/acceptance/observations
 ```
 
 交接检查的输出目录须为新目录。它复用原 LEO 配置，两次生成理论值、以 seed 42 生成两组 3″ 样本，并将理论及首组带噪观测分别交给现有 GL、GLML 的十条观测配置。完整科学输出、日志和 `summary.json` 保存到指定构建目录。几何、输入约束和加噪检查复用 CDC_lib 原验收脚本。
@@ -96,7 +96,7 @@ python3 tests/check_observation_handoff.py --bin-dir build/v1.3.0/bin \
 [程序使用](03_programs.md#cislunar)提供独立运行副本的准备命令；[配置参考](04_configuration.md#地月单程测距仿真)列出全部关键词；[数据格式](05_data-formats.md#cislunar)解释输入输出历元。核心接口见 [Cislunar 科学计算](07_interfaces.md#cislunar)。
 
 ```sh
-ctest --test-dir build/v1.3.0 \
+ctest --test-dir build/v1.4.0 \
     -R '^(cislunar_interpolation|core_cislunar_observation|cislunar_observation_runtime)$' \
     --output-on-failure
 ```

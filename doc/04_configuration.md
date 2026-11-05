@@ -77,7 +77,7 @@ GLML 的指定偏心率网格在主程序中固定为 `[0,0.8)` 的 10,000 点�
 | 关键词 | 取值、单位与用途 |
 | --- | --- |
 | `file_EOP` | 必填，地球定向参数；应覆盖实际计算中的 UTC 时段 |
-| `file_JPLEPH` | 地球入口在使用 JPL 日月、SRP 或月球非球形时需要；地月入口始终加载；兼容 JPL 二进制文件，非 SPICE BSP |
+| `file_JPLEPH` | 地球预报入口在使用 JPL 日月、月球非球形或固体潮附加修正时需要；地月入口始终加载；兼容 JPL 二进制文件，非 SPICE BSP |
 | `file_atmosphere_density` | 开启阻力时需要，大气密度表 |
 | `earth_zonal_order` | 地球带谐最高 n，0—80；0 关闭这一部分 |
 | `earth_tesseral_degree` | 地球田谐最高 n，0—80，含 m=1…n；0 关闭这一部分 |
@@ -85,12 +85,15 @@ GLML 的指定偏心率网格在主程序中固定为 `[0,0.8)` 的 10,000 点�
 | `use_lunar_NSG` | 预报入口的月球非球形开关，0/1；开启需 JPL 月球状态、天平动和月球重力场 |
 | `lunar_zonal_order` / `lunar_tesseral_degree` | 开启月球非球形时使用的截断设置，按现有重力场表范围填写 |
 | `file_lunar_gravity_field` | 月球非球形系数文件 |
+| `use_solidtide_perturb` | 两套地球预报入口可选，0 关闭、1 开启 GGM03C 之外的日月二阶固体潮修正；省略时为 0；开启需 JPL 和至少二阶的地球带谐项 |
 | `use_drag_perturb` / `use_SRP_perturb` | 0 关闭，1 开启大气阻力/太阳光压 |
 | `satellite_id` | 预报入口的卫星标识，用于模型显示 |
 | `satellite_mass` | 质量，kg；启用阻力或光压时为正 |
 | `satellite_drag_cross_area` / `satellite_srp_cross_area` | 迎风/受光面积，m²；AMR 由面积除以质量得到 |
 | `satellite_drag_Cd` | 阻力系数 Cd，无量纲 |
 | `satellite_srp_eta` | 光压反射参数 eta，无量纲；此字段沿用当前动力学实现，和瞬转平 `reflectivity` 分别设置 |
+
+地球固体潮采用频率无关的二阶弹性模型，Love 数为 0.3、滞后角为零。程序保留原始 GGM03C 系数，在附加加速度中扣除其已含的永久潮贡献。关闭该开关后，静态场中的永久贡献照常保留。该开关独立于日月直接引力开关；固体潮始终使用 JPL 位置，直接引力仍按各自的历表设置计算。最小配置见[固体潮算例](../tests/earth_solid_tide/README.md)。
 
 数值预报的光压采用地球圆柱地影：进入阴影后光压为零，离开后恢复。测角观测生成中的 `use_earth_shadow` 则用于筛选受光目标。月球非球形加速度采用卫星处与地心处加速度之差。
 

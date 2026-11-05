@@ -43,6 +43,7 @@ struct OrbitPropagationJob_EBCRS;
  * @param[out] f 六维状态对归一化时间的导数，时间尺度为 Scale::UNIT_TIME_S。
  * @details 将状态转为 Cartesian 后求各项摄动，投影到 RTN，再通过高斯行星方程得到根数导数。
  *          月球非球形项采用卫星处与地心处的加速度之差；近地 JPL 查询以 TT 近似 TDB。
+ *          固体潮按开关叠加原始 GGM03C 之外的二阶修正，静态 C20 的永久贡献由 GGM03C 保留。
  */
 void Acceleration_NSG2(bastion::Overwatch& tracer, const OrbitPropagationJob& thisjob, const double MJD_TT, int n, const double* x, double* f);
 
@@ -54,8 +55,9 @@ void Acceleration_NSG2(bastion::Overwatch& tracer, const OrbitPropagationJob& th
  * @param[in] n 状态维数，当前使用 6 维状态。
  * @param[in] x GCRS 状态 [x,y,z,vx,vy,vz]；位置尺度为 Scale::UNIT_LENGTH_M，速度尺度为 Scale::UNIT_LENGTH_M/Scale::UNIT_TIME_S。
  * @param[out] f 状态对归一化时间的导数 [vx,vy,vz,ax,ay,az]，时间尺度为 Scale::UNIT_TIME_S。
- * @details 在地球中心引力上按开关叠加各项摄动。
+ * @details 在地球质点引力上按开关叠加各项摄动。
  *          月球非球形项采用卫星处与地心处的加速度之差；近地 JPL 查询以 TT 近似 TDB。
+ *          固体潮按开关叠加原始 GGM03C 之外的二阶修正，静态 C20 的永久贡献由 GGM03C 保留。
  */
 void Acceleration_Cart(bastion::Overwatch& tracer, const OrbitPropagationJob& thisjob, const double MJD_TT, int n, const double* x, double* f);
 

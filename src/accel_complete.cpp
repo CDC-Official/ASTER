@@ -398,11 +398,21 @@ void PostNewtonian_EIH_EBCRS(bastion::Overwatch& tracer,
  * @param[out] f 六维状态对归一化时间的导数，时间尺度为 Scale::UNIT_TIME_S。
  * @details 将状态转为 Cartesian 后求各项摄动，投影到 RTN，再通过高斯行星方程得到根数导数。
  *          月球非球形项采用卫星处与地心处的加速度之差；近地 JPL 查询以 TT 近似 TDB。
+ *          固体潮按开关叠加原始 GGM03C 之外的二阶修正，静态 C20 的永久贡献由 GGM03C 保留。
  */
 void Acceleration_NSG2(bastion::Overwatch& tracer, const OrbitPropagationJob& thisjob, const double MJD_TT, int n, const double* x, double* f)
 {
 
+	if (tracer.Code() != ERR_NOERROR) return;
+
 	tracer.CheckIn(__FILE__, __func__, __LINE__);
+
+	// 附加修正扣除了永久潮，因此静态场必须实际保留 GGM03C 的 C20。
+	if (thisjob.opn_model.UseSolidTide && (!thisjob.opn_model.use_earth_NSG || thisjob.opn_model.earth_zonal_order < 2))
+	{
+		tracer.LogEvent(__FILE__, __func__, __LINE__, "Earth solid-tide correction requires an active GGM03C C20.", EventType::ERROR);
+		return;
+	}
 
 	// 先获取当前评估时刻的 EOP，用于计算各种时间系统和地固系转换。
 	aEOP EOP_t;
@@ -416,6 +426,16 @@ void Acceleration_NSG2(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 	int a; //用于部分函数的返回状态
 	// 用当前评估时刻的UTC和插值得到的dut1生成其它时间尺度。
 	MJDs_t = Utc2Else(EOP_t.dut1, MJD_UTC);
+
+	// 固体潮始终查询 JPL 日月位置，查询前检查已加载历表的覆盖范围。
+	if (thisjob.opn_model.UseSolidTide && (JPLEPH_R1.r1.ncon <= 0
+		|| MJDs_t.TT < JPLEPH_R1.r1.ss[0] - constants::MJD_OFFSET
+		|| MJDs_t.TT > JPLEPH_R1.r1.ss[1] - constants::MJD_OFFSET))
+	{
+		tracer.LogEvent(__FILE__, __func__, __LINE__,
+			"Earth solid-tide epoch outside loaded JPL ephemeris: TT MJD " + std::to_string(MJDs_t.TT), EventType::ERROR);
+		return;
+	}
 
 	//x[]定义/转换得到的三个等价的状态量
 	NonSingular2 nsg2;
@@ -442,6 +462,7 @@ void Acceleration_NSG2(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 	double axyz_sunGravity[3] = {0};//太阳引力
 	double axyz_moonGravity[3] = {0};//月球引力
 	double axyz_srp[3] = {0};//光压加速度
+	double axyz_solid_tide[3] = {0};//GGM03C 之外的固体潮附加加速度
 	double rho_atm = 0, axyz_atmDrag[3] = {0};//大气密度和大气阻力加速度
 	Vector3d axyz_sum(0.0, 0.0, 0.0);//总的xyz摄动加速度
 	Vector3d artn_sum(0.0, 0.0, 0.0);;//总的rtn(STW)摄动加速度
@@ -462,18 +483,22 @@ void Acceleration_NSG2(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 		}
 	}
 
-//计算非球形引力
-	if (thisjob.opn_model.use_earth_NSG)//开启非球形引力
-	{
-		Matrix3d gcrs_to_itrs_emat;    //	eigen matrix
-		GCRS_to_ITRS_Matrix(MJDs_t.UTC, EOP_t, gcrs_to_itrs_emat);
-		//	eigen vector
-		Vector3d position_gcrs_norm_evec(cart_array[0], cart_array[1], cart_array[2]);
-		Vector3d position_itrs_norm_evec = gcrs_to_itrs_emat * position_gcrs_norm_evec;//地固系
-		R[0] = position_itrs_norm_evec[0];
-		R[1] = position_itrs_norm_evec[1];
-		R[2] = position_itrs_norm_evec[2];
+	// 地球非球形与固体潮使用同一时刻的地固系位置及旋转矩阵。
+	Matrix3d gcrs_to_itrs_emat;
 
+	if (thisjob.opn_model.use_earth_NSG || thisjob.opn_model.UseSolidTide)
+	{
+		GCRS_to_ITRS_Matrix(MJDs_t.UTC, EOP_t, gcrs_to_itrs_emat);
+		const Vector3d position_gcrs_norm(cart_array[0], cart_array[1], cart_array[2]);
+		const Vector3d position_itrs_norm = gcrs_to_itrs_emat * position_gcrs_norm;
+		R[0] = position_itrs_norm[0];
+		R[1] = position_itrs_norm[1];
+		R[2] = position_itrs_norm[2];
+	}
+
+	// 原始 GGM03C 计算静态非球形引力，其中的永久潮贡献随静态场正常保留。
+	if (thisjob.opn_model.use_earth_NSG)
+	{
 		// 计算地固系下加速度
 		double a_nsGravity_terrestrial[3] = {0};
 		Earth_Nonspherical_Gravitational_Acceleration(a_nsGravity_terrestrial, R, 1, thisjob.opn_model.earth_zonal_order, thisjob.opn_model.earth_tesseral_degree);
@@ -503,6 +528,55 @@ void Acceleration_NSG2(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 	{
 		Cart_MeanMoon(MJDs_t.UT1, rv_moon);
 		Thirdbody_Gravity_Acceleration(axyz_moonGravity, cart_array, rv_moon, NORMALIZED_MOON_GM_TT);
+	}
+
+	// 固体潮使用 JPL 日月位置；其他摄动力继续使用各自选定的历表。
+	if (thisjob.opn_model.UseSolidTide)
+	{
+		double tide_sun_gcrs[6] = {0}, tide_moon_gcrs[6] = {0};
+
+		// 已有同一时刻的 JPL 太阳位置时直接复用，否则为固体潮单独查询。
+		if (thisjob.opn_model.solar_gravity_config == SOLAR_GRAVITY_JPL)
+		{
+			std::copy_n(rv_sun, 3, tide_sun_gcrs);
+		}
+		else
+		{
+			a = Get_JPLEPH(MJDs_t.TT, 11, 3, tide_sun_gcrs);
+			if (a <= 0)
+			{
+				tracer.LogEvent(__FILE__, __func__, __LINE__, "Cannot query JPL Sun position for Earth solid tide.", EventType::ERROR);
+				return;
+			}
+		}
+
+		// 月球直接引力关闭或采用解析历表时，也独立取得固体潮所需的 JPL 位置。
+		if (thisjob.opn_model.lunar_gravity_config == LUNAR_GRAVITY_JPL)
+		{
+			std::copy_n(rv_moon, 3, tide_moon_gcrs);
+		}
+		else
+		{
+			a = Get_JPLEPH(MJDs_t.TT, 10, 3, tide_moon_gcrs);
+			if (a <= 0)
+			{
+				tracer.LogEvent(__FILE__, __func__, __LINE__, "Cannot query JPL Moon position for Earth solid tide.", EventType::ERROR);
+				return;
+			}
+		}
+
+		// 将日月转到与卫星相同的地固系，再求 GGM03C 之外的固体潮加速度。
+		const Vector3d sun_itrs_norm = gcrs_to_itrs_emat * Vector3d(tide_sun_gcrs[0], tide_sun_gcrs[1], tide_sun_gcrs[2]);
+		const Vector3d moon_itrs_norm = gcrs_to_itrs_emat * Vector3d(tide_moon_gcrs[0], tide_moon_gcrs[1], tide_moon_gcrs[2]);
+		double tide_itrs_norm[3];
+		Earth_Solid_Tide_Acceleration(tracer, tide_itrs_norm, R, sun_itrs_norm.data(), moon_itrs_norm.data());
+		if (tracer.Code() != ERR_NOERROR) return;
+
+		// 返回 GCRS 后，与原有的静态引力及其他摄动一起进入积分器。
+		const Vector3d tide_gcrs_norm = gcrs_to_itrs_emat.transpose() * Vector3d(tide_itrs_norm[0], tide_itrs_norm[1], tide_itrs_norm[2]);
+		axyz_solid_tide[0] = tide_gcrs_norm[0];
+		axyz_solid_tide[1] = tide_gcrs_norm[1];
+		axyz_solid_tide[2] = tide_gcrs_norm[2];
 	}
 
 	// 月球非球形摄动采用卫星处与地心处的加速度之差，月球位置和天平动取自 JPL 历表。
@@ -587,13 +661,13 @@ void Acceleration_NSG2(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 
 	axyz_sum[0] =
 		axyz_nsGravity_earth[0] + (axyz_sunGravity[0] + axyz_moonGravity[0] + axyz_nsGravity_moon[0]) +
-		axyz_atmDrag[0] + axyz_srp[0];    //x\ddot
+		axyz_atmDrag[0] + axyz_srp[0] + axyz_solid_tide[0];    //x\ddot
 	axyz_sum[1] =
 		axyz_nsGravity_earth[1] + (axyz_sunGravity[1] + axyz_moonGravity[1] + axyz_nsGravity_moon[1]) +
-		axyz_atmDrag[1] + axyz_srp[1];    //y\ddot
+		axyz_atmDrag[1] + axyz_srp[1] + axyz_solid_tide[1];    //y\ddot
 	axyz_sum[2] =
 		axyz_nsGravity_earth[2] + (axyz_sunGravity[2] + axyz_moonGravity[2] + axyz_nsGravity_moon[2]) +
-		axyz_atmDrag[2] + axyz_srp[2];    //z\ddot
+		axyz_atmDrag[2] + axyz_srp[2] + axyz_solid_tide[2];    //z\ddot
 
 	Matrix3d inertial_to_rtn_emat;
 	RTN_Matrix_from_Cart(cart_array[0], cart_array[1], cart_array[2], cart_array[3], cart_array[4], cart_array[5], inertial_to_rtn_emat);//使用cart计算RTN矩阵，应当与kep得到的结果一致
@@ -619,13 +693,23 @@ void Acceleration_NSG2(bastion::Overwatch& tracer, const OrbitPropagationJob& th
  * @param[in] n 状态维数，当前使用 6 维状态。
  * @param[in] x GCRS 状态 [x,y,z,vx,vy,vz]；位置尺度为 Scale::UNIT_LENGTH_M，速度尺度为 Scale::UNIT_LENGTH_M/Scale::UNIT_TIME_S。
  * @param[out] f 状态对归一化时间的导数 [vx,vy,vz,ax,ay,az]，时间尺度为 Scale::UNIT_TIME_S。
- * @details 在地球中心引力上按开关叠加各项摄动。
+ * @details 在地球质点引力上按开关叠加各项摄动。
  *          月球非球形项采用卫星处与地心处的加速度之差；近地 JPL 查询以 TT 近似 TDB。
+ *          固体潮按开关叠加原始 GGM03C 之外的二阶修正，静态 C20 的永久贡献由 GGM03C 保留。
  */
 void Acceleration_Cart(bastion::Overwatch& tracer, const OrbitPropagationJob& thisjob, const double MJD_TT, int n, const double* x, double* f)
 {
 
+	if (tracer.Code() != ERR_NOERROR) return;
+
 	tracer.CheckIn(__FILE__, __func__, __LINE__);
+
+	// 附加修正扣除了永久潮，因此静态场必须实际保留 GGM03C 的 C20。
+	if (thisjob.opn_model.UseSolidTide && (!thisjob.opn_model.use_earth_NSG || thisjob.opn_model.earth_zonal_order < 2))
+	{
+		tracer.LogEvent(__FILE__, __func__, __LINE__, "Earth solid-tide correction requires an active GGM03C C20.", EventType::ERROR);
+		return;
+	}
 
 	// 先获取当前评估时刻的EOP，用于计算各种时间系统和地固系转换。
 	aEOP EOP_t;
@@ -640,6 +724,16 @@ void Acceleration_Cart(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 
 	// 用当前评估时刻的UTC和插值得到的dut1生成其它时间尺度。
 	MJDs_t = Utc2Else(EOP_t.dut1, t_UTC);
+
+	// 固体潮始终查询 JPL 日月位置，查询前检查已加载历表的覆盖范围。
+	if (thisjob.opn_model.UseSolidTide && (JPLEPH_R1.r1.ncon <= 0
+		|| MJDs_t.TT < JPLEPH_R1.r1.ss[0] - constants::MJD_OFFSET
+		|| MJDs_t.TT > JPLEPH_R1.r1.ss[1] - constants::MJD_OFFSET))
+	{
+		tracer.LogEvent(__FILE__, __func__, __LINE__,
+			"Earth solid-tide epoch outside loaded JPL ephemeris: TT MJD " + std::to_string(MJDs_t.TT), EventType::ERROR);
+		return;
+	}
 
 	//x[]定义/转换得到的三个等价的状态量
 	NonSingular2 nsg2;
@@ -664,6 +758,7 @@ void Acceleration_Cart(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 	double axyz_sunGravity[3] = {0};//太阳引力
 	double axyz_moonGravity[3] = {0};//月球引力
 	double axyz_srp[3] = {0};//光压加速度
+	double axyz_solid_tide[3] = {0};//GGM03C 之外的固体潮附加加速度
 	double rho_atm = 0, axyz_atmDrag[3] = {0};//大气密度和大气阻力加速度
 
 	// 先计算二体加速度
@@ -685,18 +780,22 @@ void Acceleration_Cart(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 		}
 	}
 
-	//计算地球非球形引力
-	if (thisjob.opn_model.use_earth_NSG)//开启非球形引力
-	{
-		Matrix3d gcrs_to_itrs_emat;//eigen matrix
-		GCRS_to_ITRS_Matrix(MJDs_t.UTC, EOP_t, gcrs_to_itrs_emat);
-		//eigen vector
-		Vector3d position_gcrs_norm_evec(cart_array[0], cart_array[1], cart_array[2]);
-		Vector3d position_itrs_norm_evec = gcrs_to_itrs_emat * position_gcrs_norm_evec;//地固系
-		R[0] = position_itrs_norm_evec[0];
-		R[1] = position_itrs_norm_evec[1];
-		R[2] = position_itrs_norm_evec[2];
+	// 地球非球形与固体潮使用同一时刻的地固系位置及旋转矩阵。
+	Matrix3d gcrs_to_itrs_emat;
 
+	if (thisjob.opn_model.use_earth_NSG || thisjob.opn_model.UseSolidTide)
+	{
+		GCRS_to_ITRS_Matrix(MJDs_t.UTC, EOP_t, gcrs_to_itrs_emat);
+		const Vector3d position_gcrs_norm(cart_array[0], cart_array[1], cart_array[2]);
+		const Vector3d position_itrs_norm = gcrs_to_itrs_emat * position_gcrs_norm;
+		R[0] = position_itrs_norm[0];
+		R[1] = position_itrs_norm[1];
+		R[2] = position_itrs_norm[2];
+	}
+
+	// 原始 GGM03C 计算静态非球形引力，其中的永久潮贡献随静态场正常保留。
+	if (thisjob.opn_model.use_earth_NSG)
+	{
 		// 计算地固系下加速度
 		double a_nsGravity_terrestrial[3] = {0};
 		Earth_Nonspherical_Gravitational_Acceleration(a_nsGravity_terrestrial, R, 1, thisjob.opn_model.earth_zonal_order, thisjob.opn_model.earth_tesseral_degree);
@@ -728,6 +827,55 @@ void Acceleration_Cart(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 	{
 		Cart_MeanMoon(MJDs_t.UT1, rv_moon);
 		Thirdbody_Gravity_Acceleration(axyz_moonGravity, cart_array, rv_moon, NORMALIZED_MOON_GM_TT);
+	}
+
+	// 固体潮使用 JPL 日月位置；其他摄动力继续使用各自选定的历表。
+	if (thisjob.opn_model.UseSolidTide)
+	{
+		double tide_sun_gcrs[6] = {0}, tide_moon_gcrs[6] = {0};
+
+		// 已有同一时刻的 JPL 太阳位置时直接复用，否则为固体潮单独查询。
+		if (thisjob.opn_model.solar_gravity_config == SOLAR_GRAVITY_JPL)
+		{
+			std::copy_n(rv_sun, 3, tide_sun_gcrs);
+		}
+		else
+		{
+			a = Get_JPLEPH(MJDs_t.TT, 11, 3, tide_sun_gcrs);
+			if (a <= 0)
+			{
+				tracer.LogEvent(__FILE__, __func__, __LINE__, "Cannot query JPL Sun position for Earth solid tide.", EventType::ERROR);
+				return;
+			}
+		}
+
+		// 月球直接引力关闭或采用解析历表时，也独立取得固体潮所需的 JPL 位置。
+		if (thisjob.opn_model.lunar_gravity_config == LUNAR_GRAVITY_JPL)
+		{
+			std::copy_n(rv_moon, 3, tide_moon_gcrs);
+		}
+		else
+		{
+			a = Get_JPLEPH(MJDs_t.TT, 10, 3, tide_moon_gcrs);
+			if (a <= 0)
+			{
+				tracer.LogEvent(__FILE__, __func__, __LINE__, "Cannot query JPL Moon position for Earth solid tide.", EventType::ERROR);
+				return;
+			}
+		}
+
+		// 将日月转到与卫星相同的地固系，再求 GGM03C 之外的固体潮加速度。
+		const Vector3d sun_itrs_norm = gcrs_to_itrs_emat * Vector3d(tide_sun_gcrs[0], tide_sun_gcrs[1], tide_sun_gcrs[2]);
+		const Vector3d moon_itrs_norm = gcrs_to_itrs_emat * Vector3d(tide_moon_gcrs[0], tide_moon_gcrs[1], tide_moon_gcrs[2]);
+		double tide_itrs_norm[3];
+		Earth_Solid_Tide_Acceleration(tracer, tide_itrs_norm, R, sun_itrs_norm.data(), moon_itrs_norm.data());
+		if (tracer.Code() != ERR_NOERROR) return;
+
+		// 返回 GCRS 后，与原有的静态引力及其他摄动一起进入积分器。
+		const Vector3d tide_gcrs_norm = gcrs_to_itrs_emat.transpose() * Vector3d(tide_itrs_norm[0], tide_itrs_norm[1], tide_itrs_norm[2]);
+		axyz_solid_tide[0] = tide_gcrs_norm[0];
+		axyz_solid_tide[1] = tide_gcrs_norm[1];
+		axyz_solid_tide[2] = tide_gcrs_norm[2];
 	}
 
 	// 月球非球形摄动采用卫星处与地心处的加速度之差，月球位置和天平动取自 JPL 历表。
@@ -817,13 +965,13 @@ void Acceleration_Cart(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 	f[2] = cart_array[5];    //	z\dot=vz
 	f[3] =
 		(axyz_tb[0] + axyz_nsGravity_earth[0]) + (axyz_sunGravity[0] + axyz_moonGravity[0] + axyz_nsGravity_moon[0]) +
-		axyz_atmDrag[0] + axyz_srp[0];    //x\ddot=ax
+		axyz_atmDrag[0] + axyz_srp[0] + axyz_solid_tide[0];    //x\ddot=ax
 	f[4] =
 		(axyz_tb[1] + axyz_nsGravity_earth[1]) + (axyz_sunGravity[1] + axyz_moonGravity[1] + axyz_nsGravity_moon[1]) +
-		axyz_atmDrag[1] + axyz_srp[1];    //y\ddot=ay
+		axyz_atmDrag[1] + axyz_srp[1] + axyz_solid_tide[1];    //y\ddot=ay
 	f[5] =
 		(axyz_tb[2] + axyz_nsGravity_earth[2]) + (axyz_sunGravity[2] + axyz_moonGravity[2] + axyz_nsGravity_moon[2]) +
-		axyz_atmDrag[2] + axyz_srp[2];    //z\ddot=az
+		axyz_atmDrag[2] + axyz_srp[2] + axyz_solid_tide[2];    //z\ddot=az
 
 	tracer.CheckOut(__func__);
 }

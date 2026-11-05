@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""运行十一个主程序的代表算例，保存科学输出校验值，供 Mac/Linux 发布对照。"""
+"""运行全部主程序的代表算例，保存科学输出校验值，供 Mac/Linux 发布对照。"""
 import argparse
 import hashlib
 import json
@@ -40,7 +40,7 @@ def record_file(case, path):
         'rows': len(data.splitlines()), 'path': str(path)}
 
 cases = json.loads((root / 'tests/cases.json').read_text())
-programs = [info['target'] for info in cases.values()] + ['aster_generate_observations', 'aster_generate_cislunar_observations']
+programs = [info['target'] for info in cases.values()] + ['aster_generate_observations', 'aster_generate_cislunar_observations', 'aster_convert_coordinates', 'aster_convert_states']
 
 # 每个入口检查版本和帮助，再运行已有的小算例。
 for name in programs:
@@ -85,6 +85,34 @@ config = directory / 'setting.txt'
 config.write_text('\n'.join(f'{key} = {value}' for key, value in settings.items()) + '\n')
 run_program('aster_generate_cislunar_observations', ['-I', config], directory)
 for name in ['observations.txt', 'components.csv']: record_file('generate_cislunar_observations', directory / 'output' / name)
+
+# 六个测站转换方向复用同一小算例，保留全部四列科学结果。
+directory = output / 'convert_coordinates'
+directory.mkdir()
+source_paths = {'geodetic': root / 'tests/convert_coordinates/geodetic.txt',
+                'itrs': directory / 'geodetic_to_itrs.txt',
+                'gcrs': directory / 'geodetic_to_gcrs.txt'}
+for source, target in [('geodetic', 'itrs'), ('geodetic', 'gcrs'),
+                       ('itrs', 'geodetic'), ('itrs', 'gcrs'),
+                       ('gcrs', 'itrs'), ('gcrs', 'geodetic')]:
+    path = directory / (source + '_to_' + target + '.txt')
+    command = [source, target, source_paths[source], path]
+    if 'gcrs' in (source, target): command.append(root / 'data/eop/EOP-All_250516.txt')
+    run_program('aster_convert_coordinates', command, directory)
+    record_file('convert_coordinates', path)
+
+# 三种轨道状态的六个方向使用两条现有小输入。
+directory = output / 'convert_states'
+directory.mkdir()
+source_paths = {'kep': root / 'tests/convert_states/keplerian_km.txt',
+                'cart': directory / 'kep_to_cart.txt',
+                'nsg2': directory / 'kep_to_nsg2.txt'}
+for source, target in [('kep', 'cart'), ('kep', 'nsg2'),
+                       ('cart', 'kep'), ('cart', 'nsg2'),
+                       ('nsg2', 'cart'), ('nsg2', 'kep')]:
+    path = directory / (source + '_to_' + target + '.txt')
+    run_program('aster_convert_states', [source, target, source_paths[source], path, '--units', 'deg-km'], directory)
+    record_file('convert_states', path)
 
 manifest['data_manifest_sha256'] = hashlib.sha256((root / 'data/manifest.json').read_bytes()).hexdigest()
 (output / 'summary.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')

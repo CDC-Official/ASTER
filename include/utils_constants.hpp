@@ -45,6 +45,10 @@ constexpr double J2000_MJD = DJM00;
 // 将 TT 重力场的 GM 和参考半径用于 TDB 方程时，两者都除以此比例；L_G、L_B 取自 SOFA。
 constexpr double TDB_TO_TT_SCALE = (1.0 - ELG) / (1.0 - ELB);
 
+// 用于日月二阶弹性固体潮，描述地球形变引起的引力场响应；无量纲。
+// 取 NAO AccelSolidTideGeneral 实际采用的频率无关 Love 数，模型滞后角为零。
+constexpr double EARTH_SOLID_TIDE_LOVE_K2 = 0.3;
+
 // 用于 E-BCRS/TDB 轨道预报中的天体引力，以及单程测距的引力传播时延。
 // GM 采用 Park 等（2021，AJ 161:105）DE440/DE441 论文表 2。
 namespace DE440
@@ -94,7 +98,7 @@ namespace Wgs84
 
 // 用于地球非球形引力计算，也供初轨、解析 STM 和瞬转平计算取球谐参数。
 // GM、参考半径与 data_gravityfield.hpp 中的系数配套，取自 CSR GGM03C 文件。
-// 来源：https://download.csr.utexas.edu/puace/GGM03/GGM03_Archive.zip
+// 来源：https://download.csr.utexas.edu/pub/grace/GGM03/GGM03_Archive.zip
 namespace GGM03C
 {
     // 确定球谐引力势及加速度的整体大小，单位 m³/s²，为 TT 相容值。
@@ -102,6 +106,10 @@ namespace GGM03C
 
     // 球谐展开中 (REFERENCE_RADIUS / r)^n 的参考半径，单位 m。
     constexpr double REFERENCE_RADIUS = 6378136.3;
+
+    // 静态 C20 已包含的永久潮贡献；计算固体潮附加加速度时扣除这一项，系数表保持原值。
+    // 采用 CSR GGM03_Notes.pdf 给出的完全归一化系数差，无量纲。
+    constexpr double PERMANENT_TIDE_C20 = -4.173e-9;
 }
 
 // 用于数值轨道预报的光压加速度和瞬转平计算的光压摄动项。

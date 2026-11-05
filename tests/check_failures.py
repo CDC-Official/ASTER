@@ -67,6 +67,36 @@ def main():
             stream.write('\nrandom_seed = ' + value + '\n')
         execute('seed-' + label, info['target'], argv, cwd=run)
 
+    # 两套地球入口都应通过 Tracer 拒绝错误开关和缺失的配套模型资料。
+    tide_failures = {
+        'bad-value': {'use_solidtide_perturb': '2'},
+        'fraction': {'use_solidtide_perturb': '0.5'},
+        'missing-jpl': {'use_solidtide_perturb': '1', 'file_JPLEPH': ''},
+        'unreadable-jpl': {'use_solidtide_perturb': '1', 'file_JPLEPH': 'missing-jpl.bin'},
+        'missing-c20': {'use_solidtide_perturb': '1', 'earth_zonal_order': '0'},
+    }
+    for case in ['opn_cartesian', 'opn_nonsingular2']:
+        for label, changes in tide_failures.items():
+            info, _, run, argv = prepare(case, root / (case + '-tide-' + label))
+            setting = run / 'setting.txt'
+            values = dict(line.split(' = ', 1) for line in setting.read_text().splitlines())
+            values.update(changes)
+            setting.write_text(''.join(key + ' = ' + value + '\n' for key, value in values.items()))
+            proc = execute(case + '-tide-' + label, info['target'], argv, cwd=run)
+            assert b'ERROR' in proc.stderr and b'main' in proc.stderr, (case, label, proc.stderr)
+
+    # 仅开启固体潮时，入口仍须加载 JPL；静态场取 2/0 即可提供所需 C20。
+    for case in ['opn_cartesian', 'opn_nonsingular2']:
+        info, _, run, argv = prepare(case, root / (case + '-tide-only'))
+        setting = run / 'setting.txt'
+        values = dict(line.split(' = ', 1) for line in setting.read_text().splitlines())
+        values.update(use_solidtide_perturb='1', propagation_length='10', earth_zonal_order='2',
+                      earth_tesseral_degree='0', solar_gravity='0', lunar_gravity='0',
+                      use_lunar_NSG='0', use_drag_perturb='0', use_SRP_perturb='0')
+        setting.write_text(''.join(key + ' = ' + value + '\n' for key, value in values.items()))
+        proc = execute(case + '-tide-only', info['target'], argv, good=True, cwd=run)
+        assert b'Degree-2 elastic, Sun and Moon' in proc.stderr
+
     info, _, run, argv = prepare('iod_gl', root / 'late-failure')
     setting = run / 'setting.txt'
     lines = setting.read_text().splitlines()

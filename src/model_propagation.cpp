@@ -69,14 +69,15 @@ void OrbitPropagationSetting::Display(bastion::Overwatch& tracer, int integrator
 }
 
 /**
- * @brief 显示实际启用的引力、阻力和光压模型及其物理参数。
+ * @brief 显示实际启用的引力、固体潮、阻力和光压模型及其物理参数。
  * @param[in,out] tracer 记录显示过程和输出错误；已有错误时直接返回。
  * @param[in,out] output 接收模型文本的输出流；函数保持该流原有的格式状态。
  * @param[in] precision 面积、AMR、系数和大气表头条件等普通数值的有效数字位数。
  * @param[in] label_width 冒号前的字段显示列宽，包含层级符号和缩进，最小采用 31。
- * @details 读取地月非球形开关及截断、日月历表模式、阻力和光压开关、sat 和密度表条件。
+ * @details 读取地月非球形开关及截断、日月历表模式、固体潮、阻力和光压开关、sat 和密度表条件。
  * 面积乘 ae² 恢复为 m²，AMR 乘 ae²/MASS_OF_EARTH 恢复为 m²/kg。
  * 月球引力截断为 0 / 0 时注明仅考虑质点引力；缺少密度表头条件时显示 Not provided。
+ * 固体潮采用 k2=0.3 的日月二阶弹性模型，使用 JPL 位置并扣除 GGM03C 已含的永久贡献。
  * 光压使用 Cannonball 模型，采用地球圆柱地影，进入阴影后光压为零。函数不修改动力学参数。
  */
 void OrbitPropagationNModel::Display(bastion::Overwatch& tracer, std::ostream& output, int precision, int label_width) const
@@ -96,6 +97,17 @@ void OrbitPropagationNModel::Display(bastion::Overwatch& tracer, std::ostream& o
     {
         text << '\n' << std::setw(label_width) << "  > Gravity model" << ": GGM03C"
              << '\n' << std::setw(label_width) << "  > Zonal / Tesseral" << ": " << earth_zonal_order << " / " << earth_tesseral_degree;
+    }
+
+    // 固体潮开关只控制额外修正，原始 GGM03C 中的永久贡献由静态场保留。
+    text << "\n\n" << std::setw(label_width) << "- Earth solid-tide correction" << ": " << (UseSolidTide ? "ON" : "OFF");
+
+    if (UseSolidTide)
+    {
+        text << '\n' << std::setw(label_width) << "  > Model" << ": Degree-2 elastic, Sun and Moon"
+             << '\n' << std::setw(label_width) << "  > Love number k2" << ": " << constants::EARTH_SOLID_TIDE_LOVE_K2
+             << '\n' << std::setw(label_width) << "  > Ephemeris" << ": JPL (TT approximates TDB)"
+             << '\n' << std::setw(label_width) << "  > Permanent tide" << ": Subtracted from correction; GGM03C unchanged";
     }
 
     // 月球质点与非球形项共同归入月球引力；仅启用质点项时截断为 0 / 0。

@@ -1,0 +1,85 @@
+{
+  "baseline": "Current ASTER feature/earth-solid-tide implementation",
+  "conditions": "GGM03C 20x20 and solid Earth tide only; the same physical initial Cartesian state; 86400 s, 10 s output interval",
+  "measure": "Three-dimensional Euclidean position difference from ASTER, in m",
+  "rows_used": 8641,
+  "rows_excluded": 0,
+  "nao_comparison": {
+    "original_model": "Original General solid-tide response and native NAO constants/orientation; includes the repeated permanent tide.",
+    "corrected_model": "Same settings, with the permanent C20=-4.173e-9 acceleration subtracted.",
+    "shared_plotting_adaptation": "Both temporary NAO RHS copies skip direct Sun/Moon point attraction while retaining their ephemerides for solid tides.",
+    "original_nao_source_unchanged": true,
+    "original_accel_complete_sha256": "373eac5d6a0f4884fce655eaa81209ffbe24dee4548694d46944729fb0ec4112"
+  },
+  "curves": {
+    "nao_original_model": {
+      "sha256": "a8c546c2fa9d01297ec87e9fa2136965ef68abc9d486672250f1b806b8aaca4b",
+      "rows": 8641,
+      "maximum_position_difference_m": 10.67640643905877,
+      "final_position_difference_m": 10.579915183555276,
+      "maximum_printed_epoch_difference_s": 5.029141902923584e-06
+    },
+    "nao_corrected_model": {
+      "sha256": "4691d5d50862e2ee640359092688392be0e4ef35d2e388a965987c274be0db7c",
+      "rows": 8641,
+      "maximum_position_difference_m": 1.0277491421880889,
+      "final_position_difference_m": 1.0277491421880889,
+      "maximum_printed_epoch_difference_s": 5.029141902923584e-06
+    },
+    "orekit_simple": {
+      "sha256": "b71f718c28c506d13fd27026cfcf07fd83c4fc8e47b5b43a3952fe66d1ab3bdd",
+      "rows": 8641,
+      "maximum_position_difference_m": 1.873598359701295e-06,
+      "final_position_difference_m": 9.83132293425713e-07,
+      "maximum_printed_epoch_difference_s": 0.0
+    },
+    "orekit_iers2010": {
+      "sha256": "0a9f26cff8906f1177a4c2f8723b6ad57974edd8818305c5ee9661514ab50eec",
+      "rows": 8641,
+      "maximum_position_difference_m": 0.7768815631555938,
+      "final_position_difference_m": 0.7764131717452071,
+      "maximum_printed_epoch_difference_s": 0.0
+    }
+  },
+  "figure": {
+    "source_csv": "doc/validation/figures/solid_tide_20_comparison.csv",
+    "rows_used": 8641,
+    "rows_excluded": 0,
+    "measure": "Euclidean position difference relative to current ASTER; not an external truth error",
+    "x_axis": "Elapsed hours from the common initial event",
+    "y_axis": "m; symmetric log scale below 1e-6 m is linear",
+    "archetype": "quantitative grid, single comparison panel",
+    "backend": "Python/matplotlib",
+    "conclusion": "The repeated permanent tide dominates the NAO raw-model difference; independent implementations of the same degree-2 model closely agree.",
+    "nao_native_settings_retained": true
+  },
+  "artifacts": {
+    "doc/validation/figures/solid_tide_20_comparison.csv": {
+      "bytes": 820974,
+      "sha256": "b53536169e66c4c2f12cb5c43ab2222eb9776622e02b8caaebabd3b66ccf272c"
+    },
+    "doc/validation/figures/solid_tide_20_comparison.png": {
+      "bytes": 395250,
+      "sha256": "f7e3a4ff3acc378f321fca48a09c733135b86a4a95f4a48294c5adb13ec87ee0"
+    },
+    "doc/validation/figures/solid_tide_20_comparison.pdf": {
+      "bytes": 66086,
+      "sha256": "665f427894f9d6685d8811a0274cc22ee496f6a084d59f790f2aa393e59868e1"
+    },
+    "doc/validation/figures/solid_tide_20_comparison.svg": {
+      "bytes": 29665,
+      "sha256": "9e0fe485286c3210fcb2094fef04f15fa1a58d96d99fa95b7ac03b557ab3326f"
+    },
+    "doc/validation/figures/plot_solid_tide_comparison.py": {
+      "bytes": 4046,
+      "sha256": "f0b44fd4ca292a3520a5e9e161d97632603a466c8d7d3c8640fbf721325a17ed"
+    }
+  },
+  "qa": {
+    "source_preflight": "PASS",
+    "pdf_minimum_glyph_size_pt": 6.3,
+    "pdf_collisions": "PASS",
+    "panel_alignment": "Single panel; multi-panel alignment not applicable",
+    "visual_inspection": "Checked at exported size; four curves and legends are legible"
+  }
+}

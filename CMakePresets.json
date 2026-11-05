@@ -27,7 +27,7 @@
       },
       "filter": {
         "include": {
-          "name": "^(core_|math_backend_sofa|invalid_inputs|data_integrity|iod_batch_handoff|observation_|cislunar_|gravity_conventions)"
+          "name": "^(core_|math_backend_sofa|invalid_inputs|data_integrity|iod_batch_handoff|observation_|cislunar_|gravity_conventions|station_coordinates_|conversion_roundtrips)"
         }
       }
     }
