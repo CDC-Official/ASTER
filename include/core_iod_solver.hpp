@@ -16,6 +16,17 @@
 namespace iod_solver
 {
 /**
+ * @brief 将一轮已保存的 IOD 数值记录格式化为报告文字。
+ * @param[in] record 参考历元 GCRS 状态及改正量 [x,y,z,vx,vy,vz]，位置以 ae、速度以 ae/UNITTIME 归一化；
+ *     读取轮次、最大归一化改正量和合成测角 RMS(rad)，起始记录的改正量为 NaN。
+ * @param[in] state_tolerance 判断六个归一化改正分量最大绝对值是否收敛的正阈值。
+ * @param[in] iteration_limit 最大迭代轮数，用于显示是否达到迭代上限。
+ * @return 本轮改正量、Cartesian(km、km/s)、Keplerian(km、deg)、RMS(rad、arcsec) 和停止状态的文字。
+ * @details 仅将已保存的状态转换为显示根数，不重新求解或计算残差；可在候选选优后按历史顺序调用。
+ */
+std::string Format_IterationRecord(const iod::IodIterationRecord &record, double state_tolerance, int iteration_limit);
+
+/**
  * @brief 使用 GL 方法迭代求解参考历元的轨道，并保存计算结果。
  * @param[in,out] tracer 记录计算事件和错误；调用方通过 Code() 检查是否发生错误。
  * @param[in,out] job 输入初值、动力学模型、约束类型、迭代设置和 N 条 RA/Dec 观测。
@@ -25,17 +36,20 @@ namespace iod_solver
  *     结果写入 job.solution，包括轨道、O-C 残差、RMS、求解状态、每轮迭代记录和诊断指标。
  * @param[in,out] iteration_output 可选的逐轮报告输出流；非空时写入与屏幕显示相同的迭代文字。
  *     传入 nullptr 时不额外写出报告；屏幕显示仍由 job.printIterInfo 控制。
+ * @param[in] third_body_distances 可选的 N 条只读日月距离记录，按观测顺序对应；
+ *     须由相同 dynamicsModel、epochMJDUTC 和 obs.tau 准备，传入 nullptr 时现场计算日月位置。
  *
  * @details
  * 先取得起始状态，再逐轮计算残差、保存迭代记录并检查停止条件。
- * 逐轮文字另存 solution.iteration_report，供任务报告和 GLML 所选来源显示使用。
+ * saveIterationReport 为 true 时逐轮文字另存 solution.iteration_report；为 false 时保留数值历史，供选优后生成报告。
  * 需要继续迭代时，组装全部观测的方程，通过列主元 QR 求解并更新状态。
  * 简单迭代直接求下一轮状态；微分改正求状态改正量，并可加入选定的约束。
  * 残差和 RMS 的单位为 rad。solution.flag 为正数时表示收敛轮次，
  * 为 -1 时表示达到迭代上限，为 -2 时表示数值失败；具体错误由 tracer 记录。
  * job.obs.sigma_RaDec 为东西、南北独立高斯误差共同的标准差（rad）；J_likelihood 保存该模型的负对数似然。
  */
-void InitialOrbitDetermination(bastion::Overwatch &tracer, iod::IodJob &job, std::ostream* iteration_output = nullptr);
+void InitialOrbitDetermination(bastion::Overwatch &tracer, iod::IodJob &job, std::ostream* iteration_output = nullptr,
+    const std::vector<iod::IodThirdBodyDistances>* third_body_distances = nullptr);
 
 /**
  * @brief 根据初值类型，取得参考历元的起始位置和速度。
@@ -70,6 +84,8 @@ void Solve_FirstIteration(bastion::Overwatch &tracer, const iod::IodJob &job,
  * @param[out] matCoeff mN×6 的系数矩阵，每条观测占连续 m 行，六列依次对应位置和速度分量。
  * @param[out] vecRHS mN 维方程右端，行顺序与 matCoeff 一致。
  *     简单迭代求解 matCoeff*r0v0_next=vecRHS；微分改正求解 matCoeff*dr0v0=vecRHS。
+ * @param[in] third_body_distances 可选的 N 条只读日月距离记录，按观测顺序对应；
+ *     须由相同 dynamicsModel、epochMJDUTC 和 obs.tau 准备，传入 nullptr 时现场计算日月位置。
  *
  * @details
  * 简单迭代每条观测使用三个基本行。微分改正按约束组合使用 3、4、5 或 6 行。
@@ -78,7 +94,8 @@ void Solve_FirstIteration(bastion::Overwatch &tracer, const iod::IodJob &job,
  */
 void Build_LinearSystem(bastion::Overwatch &tracer, const iod::IodJob &job,
                         const Eigen::MatrixXd &L, const Eigen::VectorXd &r0v0_norm,
-                        Eigen::MatrixXd &matCoeff, Eigen::VectorXd &vecRHS);
+                        Eigen::MatrixXd &matCoeff, Eigen::VectorXd &vecRHS,
+    const std::vector<iod::IodThirdBodyDistances>* third_body_distances = nullptr);
 
 /**
  * @brief 构造第 k 条观测的基本方程及所选约束方程。
@@ -92,6 +109,8 @@ void Build_LinearSystem(bastion::Overwatch &tracer, const iod::IodJob &job,
  *     位置以 ae 归一化，速度以 ae/UNITTIME 归一化。
  * @param[out] matCoeff m×6 的系数矩阵，前三行为基本方程，其后为约束方程。
  * @param[out] vecRHS m 维方程右端，与 matCoeff 逐行对应；各行使用相应方程的归一化尺度。
+ * @param[in] third_body_distances 可选的 N 条只读日月距离记录，按观测顺序对应；
+ *     须由相同 dynamicsModel、epochMJDUTC 和 obs.tau 准备，传入 nullptr 时现场计算日月位置。
  *
  * @details
  * 先根据当前参考状态计算该观测时刻的传播系数，再构造三个基本方程。
@@ -100,7 +119,8 @@ void Build_LinearSystem(bastion::Overwatch &tracer, const iod::IodJob &job,
  */
 void Build_ObservationEquations(bastion::Overwatch &tracer, const iod::IodJob &job, int k,
                                 const Eigen::Vector3d &los, const Eigen::VectorXd &r0v0_norm,
-                                Eigen::MatrixXd &matCoeff, Eigen::VectorXd &vecRHS);
+                                Eigen::MatrixXd &matCoeff, Eigen::VectorXd &vecRHS,
+    const std::vector<iod::IodThirdBodyDistances>* third_body_distances = nullptr);
 
 /**
  * @brief 根据站心相对位置与观测视线平行的条件，构造三个 GL 基本方程。
@@ -165,6 +185,8 @@ void Append_ConstraintEquations(bastion::Overwatch &tracer, int constraint_type,
  *     位置以 ae 归一化，速度以 ae/UNITTIME 归一化。
  * @param[out] rms_ra_cosdec_rad N 个东西方向残差 resRa 的均方根，单位 rad。
  * @param[out] rms_dec_rad N 个南北方向残差 resDec 的均方根，单位 rad。
+ * @param[in] third_body_distances 可选的 N 条只读日月距离记录，按观测顺序对应；
+ *     须由相同 dynamicsModel、epochMJDUTC 和 obs.tau 准备，传入 nullptr 时现场计算日月位置。
  *
  * @details
  * 每次调用都根据输入状态重新计算传播系数与观测量，使状态、残差和 RMS 对应同一条轨道。
@@ -173,6 +195,7 @@ void Append_ConstraintEquations(bastion::Overwatch &tracer, int constraint_type,
  */
 void Compute_Residuals(bastion::Overwatch &tracer, iod::IodJob &job,
                        const Eigen::VectorXd &r0v0_norm, double &rms_ra_cosdec_rad,
-                       double &rms_dec_rad);
+                       double &rms_dec_rad,
+    const std::vector<iod::IodThirdBodyDistances>* third_body_distances = nullptr);
 } // namespace iod_solver
 #endif // CDC_EXPERIMENTAL_IOD_HPP

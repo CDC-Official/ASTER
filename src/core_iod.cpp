@@ -206,10 +206,89 @@ void iod::IodSolution::PrintSummary(std::ostream& output, bool include_iteration
 	output << summary.str();
 }
 
-void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, double* X, double* LagCoeff)
+/**
+ * @brief 计算各观测历元所需的日月地心距离倒数三次方。
+ * @param[in,out] tracer 记录模型、历元、相对时间或第三体距离中的错误。
+ * @param[in] dynamics_model 取 IOD_DYNAMICS_*，仅计算该模型启用的太阳或月球。
+ * @param[in] epoch_mjd_utc 轨道参考历元，单位 UTC MJD。
+ * @param[in] tau N 个观测相对参考历元的时间差，以 UNITTIME 归一化；顺序与观测一致。
+ * @param[out] distances N 条第三体距离记录，距离以 ae 归一化；未启用的第三体填零。
+ * @details 在 epoch_mjd_utc+tau*NORMALIZED_TIME_TO_DAY 处调用平均日月位置模型，
+ * 使用其地心赤道坐标的长度。UTC 历元直接代入解析模型的近似与 IOD 传播系数一致。
+ * 各条记录不依赖待估轨道，可在相同历元、相对时间和动力学模型的候选间只读共享。
+ */
+void Prepare_ThirdBodyDistances(Overwatch &tracer, int dynamics_model, double epoch_mjd_utc,
+                               const ArrayXd &tau, std::vector<IodThirdBodyDistances> &distances)
 {
-	//只考虑地心二体，计算拉格朗日系数LagCoeff:F,G,Fz,Gz
-	// dynamicsModel    1-二体    2-J2    3-J2+日月 4—J2+日  5-J2+月
+	tracer.CheckIn(__FILE__, __func__, __LINE__);
+
+	// 每条观测使用与传播系数完全相同的历元表达式，输入应为有限值和有效模型。
+	if (dynamics_model < IOD_DYNAMICS_TWOBODY || dynamics_model > IOD_DYNAMICS_J2_SOLAR_LUNAR ||
+		!std::isfinite(epoch_mjd_utc) || !tau.allFinite())
+	{
+		tracer.LogEvent(__FILE__, __func__, __LINE__, "Invalid IOD model, reference epoch or normalized time offsets for third-body distances.", EventType::ERROR);
+		return;
+	}
+
+	const bool use_sun = dynamics_model == IOD_DYNAMICS_J2_SOLAR || dynamics_model == IOD_DYNAMICS_J2_SOLAR_LUNAR;
+	const bool use_moon = dynamics_model == IOD_DYNAMICS_J2_LUNAR || dynamics_model == IOD_DYNAMICS_J2_SOLAR_LUNAR;
+	distances.assign(tau.size(), IodThirdBodyDistances{});
+
+	for (Eigen::Index k = 0; k < tau.size(); ++k)
+	{
+		const double mjd = epoch_mjd_utc + tau(k) * NORMALIZED_TIME_TO_DAY;
+
+		if (!std::isfinite(mjd))
+		{
+			tracer.LogEvent(__FILE__, __func__, __LINE__, "Non-finite third-body epoch in observation " + std::to_string(k + 1), EventType::ERROR);
+			return;
+		}
+
+		// 太阳与月球分别计算；距离的平方根和连续除法按传播函数的顺序执行。
+		if (use_sun)
+		{
+			double position[3];
+			Cart_MeanSun(mjd, position);
+			const double radius = sqrt(position[0] * position[0] + position[1] * position[1] + position[2] * position[2]);
+			distances[k].sun_inverse_radius_cubed = 1.0 / radius / radius / radius;
+		}
+
+		if (use_moon)
+		{
+			double position[3];
+			Cart_MeanMoon(mjd, position);
+			const double radius = sqrt(position[0] * position[0] + position[1] * position[1] + position[2] * position[2]);
+			distances[k].moon_inverse_radius_cubed = 1.0 / radius / radius / radius;
+		}
+
+		// 第三体距离必须有限且为正；未启用的分量保留零值。
+		if ((use_sun && (!std::isfinite(distances[k].sun_inverse_radius_cubed) || distances[k].sun_inverse_radius_cubed <= 0.0)) ||
+			(use_moon && (!std::isfinite(distances[k].moon_inverse_radius_cubed) || distances[k].moon_inverse_radius_cubed <= 0.0)))
+		{
+			tracer.LogEvent(__FILE__, __func__, __LINE__, "Invalid third-body distance in observation " + std::to_string(k + 1), EventType::ERROR);
+			return;
+		}
+	}
+
+	tracer.CheckOut(__func__);
+}
+
+/**
+ * @brief 由参考状态和相对时间计算 GL 的拉格朗日传播系数。
+ * @param[in] dynamics_model 取 IOD_DYNAMICS_*，选择二体、J2 及平均日月摄动组合。
+ * @param[in] epoch_of_IOD 轨道参考历元，单位 UTC MJD。
+ * @param[in] tau 观测相对参考历元的时间差，以 UNITTIME 归一化。
+ * @param[in] X 六维 GCRS 参考状态 [x,y,z,vx,vy,vz]，位置以 ae、速度以 ae/UNITTIME 归一化。
+ * @param[out] LagCoeff 四个传播系数 [f,g,fz,gz]，与归一化状态和时间配套使用。
+ * @param[in] third_body_distances 可选的本条观测日月距离记录，须由相同模型、参考历元和 tau 准备。
+ *     传入 nullptr 时现场计算所需的日月位置；二体及 J2 模型不读取此记录。
+ * @details 以参考状态展开 f/g，x/y 与 z 分量分别使用 [f,g] 和 [fz,gz]。
+ * 复用第三体距离仅替代与待估轨道无关的解析位置及距离计算，后续浮点表达式保持不变。
+ */
+void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, double* X, double* LagCoeff,
+                           const IodThirdBodyDistances* third_body_distances)
+{
+	// 从当前参考状态构造径向倒数、位置速度内积和时间幂，供所选动力学展开使用。
 	double J, u1, u2, u3, u4, u5, u6, u7, u8, u9, sigma, sigma2, v02;
 	u1 = 1.0 / sqrt(X[0] * X[0] + X[1] * X[1] + X[2] * X[2]);
 	u2 = u1 * u1;
@@ -342,12 +421,22 @@ void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, 
 			LagCoeff[3] = LagCoeff[1] +
 						  J * (tau3 / 2.0 * (-2 * u5) + tau4 / 24.0 * (20 * u7 * sigma));
 
-			//这里开始考虑日摄动，要计算每一时刻的日位置
-			double MJD = epoch_of_IOD + tau * NORMALIZED_TIME_TO_DAY;  //对应时刻的MJD
-			double r_sun[3], u3_sun, r0_sun;
-			Cart_MeanSun(MJD, r_sun);  //该函数返回归一化单位
-			r0_sun = sqrt(r_sun[0] * r_sun[0] + r_sun[1] * r_sun[1] + r_sun[2] * r_sun[2]);
-			u3_sun = 1.0 / r0_sun / r0_sun / r0_sun;
+			// 读取本次观测的太阳距离，用于 f/g 中的太阳摄动项。
+			double MJD = epoch_of_IOD + tau * NORMALIZED_TIME_TO_DAY;  // 观测历元，UTC MJD。
+			double u3_sun;
+
+			if (third_body_distances != nullptr)
+			{
+				u3_sun = third_body_distances->sun_inverse_radius_cubed;
+			}
+			else
+			{
+				double r_sun[3];
+				Cart_MeanSun(MJD, r_sun);
+				const double r0_sun = sqrt(r_sun[0] * r_sun[0] + r_sun[1] * r_sun[1] + r_sun[2] * r_sun[2]);
+				u3_sun = 1.0 / r0_sun / r0_sun / r0_sun;
+			}
+
 			LagCoeff[0] +=
 				tau2 / 2.0 * (-NORMALIZED_SUN_GM_TT * u3_sun)
 				+ tau4 / 24.0 * (u3 * NORMALIZED_SUN_GM_TT * u3_sun);    // F
@@ -395,12 +484,22 @@ void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, 
 			LagCoeff[3] = LagCoeff[1] +
 						  J * (tau3 / 2.0 * (-2 * u5) + tau4 / 24.0 * (20 * u7 * sigma));
 
-			//这里开始考虑日摄动，要计算每一时刻的日位置
-			double MJD = epoch_of_IOD + tau * NORMALIZED_TIME_TO_DAY;  //对应时刻的MJD
-			double r_moon[3], u3_moon, r0_moon;
-			Cart_MeanMoon(MJD, r_moon);     //该函数返回归一化单位
-			r0_moon = sqrt(r_moon[0] * r_moon[0] + r_moon[1] * r_moon[1] + r_moon[2] * r_moon[2]);
-			u3_moon = 1.0 / r0_moon / r0_moon / r0_moon;
+			// 读取本次观测的月球距离，用于 f/g 中的月球摄动项。
+			double MJD = epoch_of_IOD + tau * NORMALIZED_TIME_TO_DAY;  // 观测历元，UTC MJD。
+			double u3_moon;
+
+			if (third_body_distances != nullptr)
+			{
+				u3_moon = third_body_distances->moon_inverse_radius_cubed;
+			}
+			else
+			{
+				double r_moon[3];
+				Cart_MeanMoon(MJD, r_moon);
+				const double r0_moon = sqrt(r_moon[0] * r_moon[0] + r_moon[1] * r_moon[1] + r_moon[2] * r_moon[2]);
+				u3_moon = 1.0 / r0_moon / r0_moon / r0_moon;
+			}
+
 
 			//日月分开加，便于剥离；只有FG的低次幂有三体摄动
 			LagCoeff[0] += tau2 / 2.0 * (-NORMALIZED_MOON_GM_TT * u3_moon)
@@ -448,24 +547,44 @@ void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, 
 			// Gz
 			LagCoeff[3] = LagCoeff[1] +
 						  J * (tau3 / 2.0 * (-2 * u5) + tau4 / 24.0 * (20 * u7 * sigma));
-			//这里开始考虑日月摄动，要计算每一时刻的日月位置;日月分开
-			//日
-			double MJD = epoch_of_IOD + tau * NORMALIZED_TIME_TO_DAY;  //对应时刻的MJD
-			double r_sun[3], u3_sun, r0_sun;
-			Cart_MeanSun(MJD, r_sun);  //该函数返回归一化单位
-			r0_sun = sqrt(r_sun[0] * r_sun[0] + r_sun[1] * r_sun[1] + r_sun[2] * r_sun[2]);
-			u3_sun = 1.0 / r0_sun / r0_sun / r0_sun;
+			// 太阳、月球的距离按观测历元复用，两个摄动贡献分别加入 f/g。
+			double MJD = epoch_of_IOD + tau * NORMALIZED_TIME_TO_DAY;  // 观测历元，UTC MJD。
+			double u3_sun;
+
+			if (third_body_distances != nullptr)
+			{
+				u3_sun = third_body_distances->sun_inverse_radius_cubed;
+			}
+			else
+			{
+				double r_sun[3];
+				Cart_MeanSun(MJD, r_sun);
+				const double r0_sun = sqrt(r_sun[0] * r_sun[0] + r_sun[1] * r_sun[1] + r_sun[2] * r_sun[2]);
+				u3_sun = 1.0 / r0_sun / r0_sun / r0_sun;
+			}
+
 			LagCoeff[0] +=
 				tau2 / 2.0 * (-NORMALIZED_SUN_GM_TT * u3_sun)
 				+ tau4 / 24.0 * (u3 * NORMALIZED_SUN_GM_TT * u3_sun);    // F
 			LagCoeff[1] +=
 				tau3 / 6.0
 				* (-NORMALIZED_SUN_GM_TT * u3_sun);                                                        // G
-			//月
-			double r_moon[3], u3_moon, r0_moon;
-			Cart_MeanMoon(MJD, r_moon);     //该函数返回归一化单位
-			r0_moon = sqrt(r_moon[0] * r_moon[0] + r_moon[1] * r_moon[1] + r_moon[2] * r_moon[2]);
-			u3_moon = 1.0 / r0_moon / r0_moon / r0_moon;
+
+			// 月球摄动使用同一观测历元。
+			double u3_moon;
+
+			if (third_body_distances != nullptr)
+			{
+				u3_moon = third_body_distances->moon_inverse_radius_cubed;
+			}
+			else
+			{
+				double r_moon[3];
+				Cart_MeanMoon(MJD, r_moon);
+				const double r0_moon = sqrt(r_moon[0] * r_moon[0] + r_moon[1] * r_moon[1] + r_moon[2] * r_moon[2]);
+				u3_moon = 1.0 / r0_moon / r0_moon / r0_moon;
+			}
+
 
 			//日月分开加，便于剥离；只有FG的低次幂有三体摄动
 			LagCoeff[0] += tau2 / 2.0 * (-NORMALIZED_MOON_GM_TT * u3_moon)

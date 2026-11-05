@@ -131,3 +131,9 @@ add_test(NAME conversion_roundtrips COMMAND "${Python3_EXECUTABLE}"
     --bin-dir "${PROJECT_BINARY_DIR}/bin"
     --output "${PROJECT_BINARY_DIR}/test-output/conversion_roundtrips")
 set_tests_properties(conversion_roundtrips PROPERTIES TIMEOUT 60)
+
+# 日月距离复用与延后报告须保持五种动力学的数值迭代和显示内容一致。
+add_executable(aster_test_iod_reuse core/iod_reuse.cpp)
+target_link_libraries(aster_test_iod_reuse PRIVATE ASTER::core)
+add_test(NAME core_iod_reuse COMMAND aster_test_iod_reuse)
+set_tests_properties(core_iod_reuse PROPERTIES TIMEOUT 60)

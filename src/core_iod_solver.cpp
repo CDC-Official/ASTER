@@ -376,6 +376,8 @@ void iod_solver::Append_ConstraintEquations(Overwatch &tracer, int constraint_ty
  *     位置以 ae 归一化，速度以 ae/UNITTIME 归一化。
  * @param[out] matCoeff m×6 的系数矩阵，前三行为基本方程，其后为约束方程。
  * @param[out] vecRHS m 维方程右端，与 matCoeff 逐行对应；各行使用相应方程的归一化尺度。
+ * @param[in] third_body_distances 可选的 N 条只读日月距离记录，按观测顺序对应；
+ *     须由相同 dynamicsModel、epochMJDUTC 和 obs.tau 准备，传入 nullptr 时现场计算日月位置。
  *
  * @details
  * 先根据当前参考状态计算该观测时刻的传播系数，再构造三个基本方程。
@@ -384,9 +386,17 @@ void iod_solver::Append_ConstraintEquations(Overwatch &tracer, int constraint_ty
  */
 void iod_solver::Build_ObservationEquations(Overwatch &tracer, const IodJob &job, int k,
 	const Vector3d &los, const VectorXd &r0v0_norm,
-	MatrixXd &matCoeff, VectorXd &vecRHS)
+	MatrixXd &matCoeff, VectorXd &vecRHS,
+	const std::vector<iod::IodThirdBodyDistances>* third_body_distances)
 {
 	tracer.CheckIn(__FILE__, __func__, __LINE__);
+
+	// 复用数组必须与本次观测逐条对应；后续按观测下标直接读取。
+	if (third_body_distances != nullptr && third_body_distances->size() != static_cast<std::size_t>(job.obs.number))
+	{
+		tracer.LogEvent(__FILE__, __func__, __LINE__, "Third-body distance count does not match IOD observations.", ERROR);
+		return;
+	}
 
 	// 每列给出一条观测对应的测站位置，单位为 ae。
 	const MatrixXd &R_gcrs_norm = job.observer.positions_gcrs_norm_emat;
@@ -417,7 +427,8 @@ void iod_solver::Build_ObservationEquations(Overwatch &tracer, const IodJob &job
 	for (int j = 0; j < 6; ++j) state[j] = r0v0_norm(j);
 
 	double fg[4]; // [f,g,fz,gz]：归一化状态与归一化时间下的拉格朗日系数。
-	Lagrange_Coefficients(job.dynamicsModel, job.epochMJDUTC, tau, state, fg);
+	Lagrange_Coefficients(job.dynamicsModel, job.epochMJDUTC, tau, state, fg,
+		third_body_distances == nullptr ? nullptr : &(*third_body_distances)[k]);
 
 	// 先建立三条共同的几何条件，再按约束种类追加相应行。
 	Build_BasicEquations(tracer, job.iterMethod, tau, los, Rk_gcrs_norm, r0v0_norm, fg, matCoeff, vecRHS);
@@ -462,6 +473,8 @@ void iod_solver::Build_ObservationEquations(Overwatch &tracer, const IodJob &job
  * @param[out] matCoeff mN×6 的系数矩阵，每条观测占连续 m 行，六列依次对应位置和速度分量。
  * @param[out] vecRHS mN 维方程右端，行顺序与 matCoeff 一致。
  *     简单迭代求解 matCoeff*r0v0_next=vecRHS；微分改正求解 matCoeff*dr0v0=vecRHS。
+ * @param[in] third_body_distances 可选的 N 条只读日月距离记录，按观测顺序对应；
+ *     须由相同 dynamicsModel、epochMJDUTC 和 obs.tau 准备，传入 nullptr 时现场计算日月位置。
  *
  * @details
  * 简单迭代每条观测使用三个基本行。微分改正按约束组合使用 3、4、5 或 6 行。
@@ -470,9 +483,17 @@ void iod_solver::Build_ObservationEquations(Overwatch &tracer, const IodJob &job
  */
 void iod_solver::Build_LinearSystem(Overwatch &tracer, const IodJob &job, const MatrixXd &L,
 	const VectorXd &r0v0_norm, MatrixXd &matCoeff,
-	VectorXd &vecRHS)
+	VectorXd &vecRHS,
+	const std::vector<iod::IodThirdBodyDistances>* third_body_distances)
 {
 	tracer.CheckIn(__FILE__, __func__, __LINE__);
+
+	// 复用数组必须与本次观测逐条对应；后续按观测下标直接读取。
+	if (third_body_distances != nullptr && third_body_distances->size() != static_cast<std::size_t>(job.obs.number))
+	{
+		tracer.LogEvent(__FILE__, __func__, __LINE__, "Third-body distance count does not match IOD observations.", ERROR);
+		return;
+	}
 
 	const int obs_count = job.obs.number;
 	if (obs_count < 1 || L.rows() != 3 || L.cols() != obs_count || !L.allFinite())
@@ -522,7 +543,7 @@ void iod_solver::Build_LinearSystem(Overwatch &tracer, const IodJob &job, const 
 		const Vector3d los = L.col(k);
 
 		// 用该条观测的视线、时刻和测站位置构造完整的小方程组。
-		Build_ObservationEquations(tracer, job, k, los, r0v0_norm, matObservation, vecObservationRHS);
+		Build_ObservationEquations(tracer, job, k, los, r0v0_norm, matObservation, vecObservationRHS, third_body_distances);
 		if (tracer.Code() != ERR_NOERROR) return;
 
 		// 第 k 条记录放在 rows*k 起始的连续行中，所有行共同求六个未知量。
@@ -632,6 +653,8 @@ void iod_solver::Solve_FirstIteration(Overwatch &tracer, const IodJob &job, cons
  *     位置以 ae 归一化，速度以 ae/UNITTIME 归一化。
  * @param[out] rms_ra_cosdec_rad N 个东西方向残差 resRa 的均方根，单位 rad。
  * @param[out] rms_dec_rad N 个南北方向残差 resDec 的均方根，单位 rad。
+ * @param[in] third_body_distances 可选的 N 条只读日月距离记录，按观测顺序对应；
+ *     须由相同 dynamicsModel、epochMJDUTC 和 obs.tau 准备，传入 nullptr 时现场计算日月位置。
  *
  * @details
  * 每次调用都根据输入状态重新计算传播系数与观测量，使状态、残差和 RMS 对应同一条轨道。
@@ -639,9 +662,17 @@ void iod_solver::Solve_FirstIteration(Overwatch &tracer, const IodJob &job, cons
  * RMS_angle=sqrt((sum(resRa²)+sum(resDec²))/(2N))，RMS_sum 保存相同数值。
  */
 void iod_solver::Compute_Residuals(Overwatch &tracer, IodJob &job, const VectorXd &r0v0_norm,
-	double &rms_ra_cosdec_rad, double &rms_dec_rad)
+	double &rms_ra_cosdec_rad, double &rms_dec_rad,
+	const std::vector<iod::IodThirdBodyDistances>* third_body_distances)
 {
 	tracer.CheckIn(__FILE__, __func__, __LINE__);
+
+	// 复用数组必须与本次观测逐条对应；后续按观测下标直接读取。
+	if (third_body_distances != nullptr && third_body_distances->size() != static_cast<std::size_t>(job.obs.number))
+	{
+		tracer.LogEvent(__FILE__, __func__, __LINE__, "Third-body distance count does not match IOD observations.", ERROR);
+		return;
+	}
 
 	const int obs_count = job.obs.number;
 
@@ -676,7 +707,8 @@ void iod_solver::Compute_Residuals(Overwatch &tracer, IodJob &job, const VectorX
 		// 用当前状态重新计算fg系数，使下面的计算角度对应本轮更新后的轨道。
 		const double tau = job.obs.tau(k);
 		double fg[4];
-		Lagrange_Coefficients(job.dynamicsModel, job.epochMJDUTC, tau, state, fg);
+		Lagrange_Coefficients(job.dynamicsModel, job.epochMJDUTC, tau, state, fg,
+			third_body_distances == nullptr ? nullptr : &(*third_body_distances)[k]);
 
 		// 由当前状态和fg系数计算目标在观测时刻的位置
 		const Vector3d r_gcrs_norm(fg[0] * state[0] + fg[1] * state[3],
@@ -733,6 +765,130 @@ void iod_solver::Compute_Residuals(Overwatch &tracer, IodJob &job, const VectorX
 }
 
 /**
+ * @brief 将一轮已保存的 IOD 数值记录格式化为报告文字。
+ * @param[in] record 参考历元 GCRS 状态及改正量 [x,y,z,vx,vy,vz]，位置以 ae、速度以 ae/UNITTIME 归一化；
+ *     读取轮次、最大归一化改正量和合成测角 RMS(rad)，起始记录的改正量为 NaN。
+ * @param[in] state_tolerance 判断六个归一化改正分量最大绝对值是否收敛的正阈值。
+ * @param[in] iteration_limit 最大迭代轮数，用于显示是否达到迭代上限。
+ * @return 本轮改正量、Cartesian(km、km/s)、Keplerian(km、deg)、RMS(rad、arcsec) 和停止状态的文字。
+ * @details 仅将已保存的状态转换为显示根数，不重新求解或计算残差；可在候选选优后按历史顺序调用。
+ */
+std::string iod_solver::Format_IterationRecord(const IodIterationRecord &record, double state_tolerance, int iteration_limit)
+{
+	// 数值历史包含生成报告所需的状态与改正量，按原显示顺序读取。
+	const Eigen::Map<const Eigen::Matrix<double, 6, 1>> r0v0_norm(record.r0v0_norm.data());
+	const Eigen::Map<const Eigen::Matrix<double, 6, 1>> dr0v0_norm(record.dr0v0_norm.data());
+	const double max_dr0v0_norm = record.max_dr0v0_norm;
+
+	// 每轮依次显示改正量、更新后的状态和拟合质量；显示单位与结果文件的单位选择分别处理。
+	const int label_width = 40;
+	const int value_width = 18;
+	const std::string continuation(label_width + 2, ' ');
+	std::ostringstream message;
+	message << "\n------------------------------------- Iteration " << record.iteration << " -------------------------------------\n\n"
+			<< std::left << std::setw(label_width) << "- Correction of Cartesian [norm]" << ": ";
+
+	// 起始记录的六个改正分量均为 NaN，按 N/A 显示；每三个分量结束一行。
+	for (int j = 0; j < 6; ++j)
+	{
+		if (j == 3) message << '\n' << continuation;
+
+		if (j % 3 == 0) message << "[ ";
+
+		if (std::isfinite(dr0v0_norm(j)))
+		{
+			message << std::right << std::scientific << std::setprecision(6) << std::setw(value_width) << dr0v0_norm(j);
+		}
+		else
+		{
+			message << std::right << std::setw(value_width) << "N/A";
+		}
+
+		message << (j % 3 == 2 ? " ]" : ", ");
+	}
+
+	message << "\n\n" << std::left << std::setw(label_width) << "- Cartesian [km, km/s]" << ": [ "
+			<< std::right << std::fixed << std::setprecision(6)
+			<< std::setw(value_width) << r0v0_norm(0) * UNIT_LENGTH_M / 1000.0 << ", "
+			<< std::setw(value_width) << r0v0_norm(1) * UNIT_LENGTH_M / 1000.0 << ", "
+			<< std::setw(value_width) << r0v0_norm(2) * UNIT_LENGTH_M / 1000.0 << " ]\n"
+			<< continuation << "[ " << std::setw(value_width) << r0v0_norm(3) * UNIT_LENGTH_M / (1000.0 * UNIT_TIME_S) << ", "
+			<< std::setw(value_width) << r0v0_norm(4) * UNIT_LENGTH_M / (1000.0 * UNIT_TIME_S) << ", "
+			<< std::setw(value_width) << r0v0_norm(5) * UNIT_LENGTH_M / (1000.0 * UNIT_TIME_S) << " ]\n";
+
+	// 当前根数转换适用于非退化椭圆轨道；其他中间状态用 N/A 表示，不改变求解器的状态。
+	std::array<double, 6> display_kep;
+	display_kep.fill(std::numeric_limits<double>::quiet_NaN());
+	const Vector3d position = r0v0_norm.head<3>();
+	const Vector3d velocity = r0v0_norm.tail<3>();
+	const double inverse_a = 2.0 / position.norm() - velocity.squaredNorm();
+
+	if (inverse_a > 0.0 && position.cross(velocity).squaredNorm() > 0.0)
+	{
+		CartesianToKeplerian(r0v0_norm(0), r0v0_norm(1), r0v0_norm(2), r0v0_norm(3), r0v0_norm(4), r0v0_norm(5), display_kep.data());
+	}
+
+	const bool has_keplerian = std::all_of(display_kep.begin(), display_kep.end(), [](double value) { return std::isfinite(value); });
+	message << '\n' << std::left << std::setw(label_width) << "- Keplerian [km, deg]" << ": ";
+
+	for (int j = 0; j < 6; ++j)
+	{
+		if (j == 3) message << '\n' << continuation;
+
+		if (j % 3 == 0) message << "[ ";
+
+		if (has_keplerian)
+		{
+			const double scale = j == 0 ? UNIT_LENGTH_M / 1000.0 : (j >= 2 ? constants::Conversion::RAD_TO_DEGREE : 1.0);
+			message << std::right << std::setw(value_width) << display_kep[j] * scale;
+		}
+		else
+		{
+			message << std::right << std::setw(value_width) << "N/A";
+		}
+
+		message << (j % 3 == 2 ? " ]" : ", ");
+	}
+
+	message << "\n\n" << std::left << std::setw(label_width) << "- RMS [rad / arcsec]" << ": "
+			<< std::scientific << std::setprecision(2) << record.rms_angle_rad << " / "
+			<< std::fixed << std::setprecision(2) << record.rms_angle_rad / constants::Conversion::ARCSEC_TO_RAD
+			<< '\n' << std::setw(label_width) << "- Max absolute correction [norm]" << ": ";
+
+	if (std::isfinite(max_dr0v0_norm))
+	{
+		message << std::scientific << std::setprecision(6) << max_dr0v0_norm;
+	}
+	else
+	{
+		message << "N/A";
+	}
+
+	// 显示状态使用下方相同的停止条件，先判断收敛，再判断迭代上限。
+	message << '\n' << std::setw(label_width) << "- Iteration Status" << ": ";
+
+	if (std::isfinite(max_dr0v0_norm) && max_dr0v0_norm <= state_tolerance)
+	{
+		message << "CONVERGED";
+	}
+	else if (record.iteration >= iteration_limit)
+	{
+		message << (std::isfinite(max_dr0v0_norm) ? "NOT CONVERGED — ITERATION LIMIT" : "INITIALIZATION — ITERATION LIMIT");
+	}
+	else if (!std::isfinite(max_dr0v0_norm))
+	{
+		message << "INITIALIZATION";
+	}
+	else
+	{
+		message << "CONTINUE";
+	}
+
+	message << '\n';
+	return message.str();
+}
+
+/**
  * @brief 使用 GL 方法迭代求解参考历元的轨道，并保存计算结果。
  * @param[in,out] tracer 记录计算事件和错误；调用方通过 Code() 检查是否发生错误。
  * @param[in,out] job 输入初值、动力学模型、约束类型、迭代设置和 N 条 RA/Dec 观测。
@@ -742,23 +898,33 @@ void iod_solver::Compute_Residuals(Overwatch &tracer, IodJob &job, const VectorX
  *     结果写入 job.solution，包括轨道、O-C 残差、RMS、求解状态、每轮迭代记录和诊断指标。
  * @param[in,out] iteration_output 可选的逐轮报告输出流；非空时写入与屏幕显示相同的迭代文字。
  *     传入 nullptr 时不额外写出报告；屏幕显示仍由 job.printIterInfo 控制。
+ * @param[in] third_body_distances 可选的 N 条只读日月距离记录，按观测顺序对应；
+ *     须由相同 dynamicsModel、epochMJDUTC 和 obs.tau 准备，传入 nullptr 时现场计算日月位置。
  *
  * @details
  * 先取得起始状态，再逐轮计算残差、保存迭代记录并检查停止条件。
- * 逐轮文字另存 solution.iteration_report，供任务报告和 GLML 所选来源显示使用。
+ * saveIterationReport 为 true 时逐轮文字另存 solution.iteration_report；为 false 时保留数值历史，供选优后生成报告。
  * 需要继续迭代时，组装全部观测的方程，通过列主元 QR 求解并更新状态。
  * 简单迭代直接求下一轮状态；微分改正求状态改正量，并可加入选定的约束。
  * 残差和 RMS 的单位为 rad。solution.flag 为正数时表示收敛轮次，
  * 为 -1 时表示达到迭代上限，为 -2 时表示数值失败；具体错误由 tracer 记录。
  * job.obs.sigma_RaDec 为东西、南北独立高斯误差共同的标准差（rad）；J_likelihood 保存该模型的负对数似然。
  */
-void iod_solver::InitialOrbitDetermination(Overwatch &tracer, IodJob &job, std::ostream* iteration_output)
+void iod_solver::InitialOrbitDetermination(Overwatch &tracer, IodJob &job, std::ostream* iteration_output,
+	const std::vector<iod::IodThirdBodyDistances>* third_body_distances)
 {
 	// 旧残差检验停用后，每次任务都先标记为未计算，包括提前返回的任务。
 	job.solution.resRa_Q = job.solution.resRa_p = -1.0;
 	job.solution.resDec_Q = job.solution.resDec_p = -1.0;
 
 	tracer.CheckIn(__FILE__, __func__, __LINE__);
+
+	// 复用数组必须与本次观测逐条对应；后续按观测下标直接读取。
+	if (third_body_distances != nullptr && third_body_distances->size() != static_cast<std::size_t>(job.obs.number))
+	{
+		tracer.LogEvent(__FILE__, __func__, __LINE__, "Third-body distance count does not match IOD observations.", ERROR);
+		return;
+	}
 
 	// =================================== 01 初始化结果与检查输入 ===================================
 
@@ -866,7 +1032,7 @@ void iod_solver::InitialOrbitDetermination(Overwatch &tracer, IodJob &job, std::
 		// r0v0_norm 保存当前参考历元的完整状态。
 		// 先重新传播，取得同一条轨道的残差，再将状态和质量指标一起存入历史。
 		double rms_ra_cosdec_rad, rms_dec_rad;
-		Compute_Residuals(tracer, job, r0v0_norm, rms_ra_cosdec_rad, rms_dec_rad);
+		Compute_Residuals(tracer, job, r0v0_norm, rms_ra_cosdec_rad, rms_dec_rad, third_body_distances);
 		if (tracer.Code() != ERR_NOERROR) return;
 
 		// 状态、改正量和残差指标均属于同一轮，作为一条完整记录保存。
@@ -885,118 +1051,17 @@ void iod_solver::InitialOrbitDetermination(Overwatch &tracer, IodJob &job, std::
 		record.rms_angle_rad = job.solution.RMS_angle;
 		job.solution.iterations.push_back(record);
 
-		// 每轮依次显示改正量、更新后的状态和拟合质量；显示单位与结果文件的单位选择分别处理。
-		const int label_width = 40;
-		const int value_width = 18;
-		const std::string continuation(label_width + 2, ' ');
-		std::ostringstream message;
-		message << "\n------------------------------------- Iteration " << iteration_count << " -------------------------------------\n\n"
-				<< std::left << std::setw(label_width) << "- Correction of Cartesian [norm]" << ": ";
-
-		// 起始记录的六个改正分量均为 NaN，按 N/A 显示；每三个分量结束一行。
-		for (int j = 0; j < 6; ++j)
+		// 需要屏幕、流或即时文字留存时才格式化；候选可在选优后从数值记录生成报告。
+		if (job.saveIterationReport || job.printIterInfo || iteration_output != nullptr)
 		{
-			if (j == 3) message << '\n' << continuation;
+			const std::string message = Format_IterationRecord(record, job.iterTOL, job.iterCountMax);
 
-			if (j % 3 == 0) message << "[ ";
+			if (job.printIterInfo) std::cerr << message;
 
-			if (std::isfinite(dr0v0_norm(j)))
-			{
-				message << std::right << std::scientific << std::setprecision(6) << std::setw(value_width) << dr0v0_norm(j);
-			}
-			else
-			{
-				message << std::right << std::setw(value_width) << "N/A";
-			}
+			if (job.saveIterationReport) job.solution.iteration_report += message;
 
-			message << (j % 3 == 2 ? " ]" : ", ");
+			if (iteration_output != nullptr) *iteration_output << message;
 		}
-
-		message << "\n\n" << std::left << std::setw(label_width) << "- Cartesian [km, km/s]" << ": [ "
-				<< std::right << std::fixed << std::setprecision(6)
-				<< std::setw(value_width) << r0v0_norm(0) * UNIT_LENGTH_M / 1000.0 << ", "
-				<< std::setw(value_width) << r0v0_norm(1) * UNIT_LENGTH_M / 1000.0 << ", "
-				<< std::setw(value_width) << r0v0_norm(2) * UNIT_LENGTH_M / 1000.0 << " ]\n"
-				<< continuation << "[ " << std::setw(value_width) << r0v0_norm(3) * UNIT_LENGTH_M / (1000.0 * UNIT_TIME_S) << ", "
-				<< std::setw(value_width) << r0v0_norm(4) * UNIT_LENGTH_M / (1000.0 * UNIT_TIME_S) << ", "
-				<< std::setw(value_width) << r0v0_norm(5) * UNIT_LENGTH_M / (1000.0 * UNIT_TIME_S) << " ]\n";
-
-		// 当前根数转换适用于非退化椭圆轨道；其他中间状态用 N/A 表示，不改变求解器的状态。
-		std::array<double, 6> display_kep;
-		display_kep.fill(std::numeric_limits<double>::quiet_NaN());
-		const Vector3d position = r0v0_norm.head<3>();
-		const Vector3d velocity = r0v0_norm.tail<3>();
-		const double inverse_a = 2.0 / position.norm() - velocity.squaredNorm();
-
-		if (inverse_a > 0.0 && position.cross(velocity).squaredNorm() > 0.0)
-		{
-			CartesianToKeplerian(r0v0_norm(0), r0v0_norm(1), r0v0_norm(2), r0v0_norm(3), r0v0_norm(4), r0v0_norm(5), display_kep.data());
-		}
-
-		const bool has_keplerian = std::all_of(display_kep.begin(), display_kep.end(), [](double value) { return std::isfinite(value); });
-		message << '\n' << std::left << std::setw(label_width) << "- Keplerian [km, deg]" << ": ";
-
-		for (int j = 0; j < 6; ++j)
-		{
-			if (j == 3) message << '\n' << continuation;
-
-			if (j % 3 == 0) message << "[ ";
-
-			if (has_keplerian)
-			{
-				const double scale = j == 0 ? UNIT_LENGTH_M / 1000.0 : (j >= 2 ? constants::Conversion::RAD_TO_DEGREE : 1.0);
-				message << std::right << std::setw(value_width) << display_kep[j] * scale;
-			}
-			else
-			{
-				message << std::right << std::setw(value_width) << "N/A";
-			}
-
-			message << (j % 3 == 2 ? " ]" : ", ");
-		}
-
-		message << "\n\n" << std::left << std::setw(label_width) << "- RMS [rad / arcsec]" << ": "
-				<< std::scientific << std::setprecision(2) << record.rms_angle_rad << " / "
-				<< std::fixed << std::setprecision(2) << record.rms_angle_rad / constants::Conversion::ARCSEC_TO_RAD
-				<< '\n' << std::setw(label_width) << "- Max absolute correction [norm]" << ": ";
-
-		if (std::isfinite(max_dr0v0_norm))
-		{
-			message << std::scientific << std::setprecision(6) << max_dr0v0_norm;
-		}
-		else
-		{
-			message << "N/A";
-		}
-
-		// 显示状态使用下方相同的停止条件，先判断收敛，再判断迭代上限。
-		message << '\n' << std::setw(label_width) << "- Iteration Status" << ": ";
-
-		if (std::isfinite(max_dr0v0_norm) && max_dr0v0_norm <= job.iterTOL)
-		{
-			message << "CONVERGED";
-		}
-		else if (iteration_count >= job.iterCountMax)
-		{
-			message << (std::isfinite(max_dr0v0_norm) ? "NOT CONVERGED — ITERATION LIMIT" : "INITIALIZATION — ITERATION LIMIT");
-		}
-		else if (!std::isfinite(max_dr0v0_norm))
-		{
-			message << "INITIALIZATION";
-		}
-		else
-		{
-			message << "CONTINUE";
-		}
-
-		message << '\n';
-
-		if (job.printIterInfo) std::cerr << message.str();
-
-		// 屏幕和任务报告共用本轮文字，完整迭代不登记为运行事件。
-		job.solution.iteration_report += message.str();
-
-		if (iteration_output != nullptr) *iteration_output << message.str();
 
 		// =================================== 05 检查收敛条件与迭代上限 ===================================
 
@@ -1013,7 +1078,7 @@ void iod_solver::InitialOrbitDetermination(Overwatch &tracer, IodJob &job, std::
 		// =================================== 06 构造方程并求解状态更新 ===================================
 
 		// 如果未收敛且未达到迭代上限，则继续迭代。在内部会先reshape系数矩阵和RHS
-		Build_LinearSystem(tracer, job, L, r0v0_norm, matCoeff, vecRHS);
+		Build_LinearSystem(tracer, job, L, r0v0_norm, matCoeff, vecRHS, third_body_distances);
 		if (tracer.Code() != ERR_NOERROR) return;
 
 		// 使用列主元 QR 直接求解长矩阵的最小二乘问题。微分改正求 dr0v0；

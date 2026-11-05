@@ -296,10 +296,20 @@ void ExamplePropagation(bastion::Overwatch& tracer, std::vector<double>& epochs_
 <a id="iod"></a>
 ## GL 初轨求解
 
+论文实验分支增加两个相互独立的复用入口。`job.saveIterationReport` 默认 `true`；关闭时仍保存全部
+`solution.iterations`，屏幕和传入输出流继续按各自设置工作。可用
+`iod_solver::Format_IterationRecord(record, job.iterTOL, job.iterCountMax)` 从记录生成同样的单轮文字。
+
+`Prepare_ThirdBodyDistances(tracer, dynamics_model, epoch_mjd_utc, tau, distances)` 一次准备观测顺序的
+日月归一化距离倒数三次方。把该数组的只读指针传给求解、方程构造或残差接口即可复用；
+数组须与当前模型、参考历元及 `obs.tau` 匹配。省略指针时仍现场计算。调用方持有数组至全部候选完成，
+不跨任务保存隐式缓存；GLML 主程序按这一方式共享数组。
+
+
 声明：[core_iod_solver.hpp](../include/core_iod_solver.hpp)、[core_iod.hpp](../include/core_iod.hpp)；实现：[core_iod_solver.cpp](../src/core_iod_solver.cpp)。
 
 ```text
-iod_solver::InitialOrbitDetermination(tracer, job, iteration_output = nullptr)
+iod_solver::InitialOrbitDetermination(tracer, job, iteration_output = nullptr, third_body_distances = nullptr)
 ```
 
 tracer 和 job 为输入输出，第三项是可选 `std::ostream*`。函数写入 `job.solution`，包括参考历元轨道、O−C、RMS、J、flag 和逐轮历史。轨道/测站在 GCRS 中，位置除以 UNIT_LENGTH_M，速度以 UNIT_LENGTH_M/UNIT_TIME_S 归一化，测角与残差为 rad。

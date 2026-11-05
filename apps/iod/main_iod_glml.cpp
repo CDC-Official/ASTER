@@ -800,6 +800,11 @@ int main(int argc, char* argv[])
 							<< std::setw(label_width) << "- Scalar components" << ": " << 2 * used_count << '\n';
 		std::cerr << observation_summary.str();
 
+		// 日月距离只依赖观测历元；本次任务一次准备，基准、候选求解及边界评价只读共享。
+		vector<iod::IodThirdBodyDistances> third_body_distances;
+		Prepare_ThirdBodyDistances(tracer, thisJob.dynamicsModel, thisJob.epochMJDUTC, thisJob.obs.tau, third_body_distances);
+		if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
+
 		// 基准 GL 的设置、迭代和摘要连续显示，完成后再进入 GLML 候选阶段。
 		std::cerr << '\n';
 		msg = "Starting baseline GL orbit determination.";
@@ -812,7 +817,7 @@ int main(int argc, char* argv[])
 		// 求解事件单独保存，数值失败时仍可按下面的随机距离策略准备候选初值。
 		std::cerr << '\n';
 		Overwatch baseline_tracer(__FILE__, __func__, __LINE__);
-		iod_solver::InitialOrbitDetermination(baseline_tracer, thisJob);
+		iod_solver::InitialOrbitDetermination(baseline_tracer, thisJob, nullptr, &third_body_distances);
 		if (baseline_tracer.Code() != ERR_NOERROR) thisJob.solution.flag = -2;
 
 		// 立即汇总基准结果；数值失败时不把尚未完成的状态当作轨道解显示。
@@ -940,6 +945,7 @@ int main(int argc, char* argv[])
 				IodJob& candidate_job = candidate_jobs[k];
 				candidate_job = thisJob;
 				candidate_job.printIterInfo = false;
+				candidate_job.saveIterationReport = false;
 
 				// 从共用初值出发，指定当前候选的偏心率；每条观测使用三个基本行、一个偏心率行和一个方向行。
 				candidate_job.initValue.type = IOD_INITIAL_VALUE_SPECIFIED;
@@ -951,7 +957,7 @@ int main(int argc, char* argv[])
 
 				// 求解后保存来源状态：正数为收敛轮次，-1 为达到迭代上限，-2 为数值失败。
 				// 本层保留求解事件和任务中留存的轨道，后续统一进行边界处理与残差评价。
-				iod_solver::InitialOrbitDetermination(candidate_tracers[k], candidate_job);
+				iod_solver::InitialOrbitDetermination(candidate_tracers[k], candidate_job, nullptr, &third_body_distances);
 				if (candidate_tracers[k].Code() != ERR_NOERROR) candidate_job.solution.flag = -2;
 
 				// 按实际完成数更新进度；每完成 10% 或距上次显示达到一秒时输出。
@@ -1080,7 +1086,7 @@ int main(int argc, char* argv[])
 			const VectorXd state = Eigen::Map<VectorXd>(cart_norm, 6);
 			double rms_east, rms_north;
 
-			iod_solver::Compute_Residuals(evaluation_tracer, candidate_jobs[k], state, rms_east, rms_north);
+			iod_solver::Compute_Residuals(evaluation_tracer, candidate_jobs[k], state, rms_east, rms_north, &third_body_distances);
 			if (evaluation_tracer.Code() != ERR_NOERROR) continue;
 
 			// 从处理后的 Cartesian 状态取得对应根数，保证两种输出表示属于同一条轨道。
@@ -1168,6 +1174,14 @@ int main(int argc, char* argv[])
 
 		if (best_index > 0)
 		{
+			// 来源轨迹保持完整；只对获选候选生成逐轮文字，无需再次求解。
+			IodJob& source_job = candidate_jobs[best_index];
+
+			for (const iod::IodIterationRecord& record : source_job.solution.iterations)
+			{
+				source_job.solution.iteration_report += iod_solver::Format_IterationRecord(record, source_job.iterTOL, source_job.iterCountMax);
+			}
+
 			selected_source_report << "\n======================= Selected source IOD (before orbit bounds) =======================\n\n"
 								   << std::left << std::setw(label_width) << "- Candidate ID" << ": " << best_index << '\n'
 								   << candidate_jobs[best_index].solution.iteration_report;

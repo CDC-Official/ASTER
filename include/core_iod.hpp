@@ -69,6 +69,17 @@ using namespace bastion;
 #define IOD_INITIAL_VALUE_SPECIFIED 2     //指定初值，需要定轨前提供的
 namespace iod
 {
+	/**
+	 * @brief 一条观测历元的日月地心距离倒数三次方。
+	 * @details 距离以 ae 归一化，两个量均为无量纲值；未启用的第三体填零。
+	 * 数组按观测顺序准备，由同一参考历元、相对时间和动力学模型的候选只读复用。
+	 */
+	struct IodThirdBodyDistances
+	{
+		double sun_inverse_radius_cubed = 0.0;
+		double moon_inverse_radius_cubed = 0.0;
+	};
+
 	struct IodObservation
 	{
 		// 观测资料应该全部归一化
@@ -190,6 +201,9 @@ namespace iod
 		std::string objectId;
 		bool printIterInfo;
 
+		// 是否在求解时留存逐轮报告文字；数值迭代记录始终保存，屏幕显示由 printIterInfo 控制。
+		bool saveIterationReport = true;
+
 		int solutionUnit;//仅改变输出时的单位，不改变结构体的归一化单位
 
 		//int iterCountMaxEcc;    //约束的偏心率，241127
@@ -210,8 +224,34 @@ namespace iod
 
 }
 
-// 根据动力学模型计算拉格朗日传播系数。
-void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, double* X, double* LagCoeff);
+/**
+ * @brief 计算各观测历元所需的日月地心距离倒数三次方。
+ * @param[in,out] tracer 记录模型、历元、相对时间或第三体距离中的错误。
+ * @param[in] dynamics_model 取 IOD_DYNAMICS_*，仅计算该模型启用的太阳或月球。
+ * @param[in] epoch_mjd_utc 轨道参考历元，单位 UTC MJD。
+ * @param[in] tau N 个观测相对参考历元的时间差，以 UNITTIME 归一化；顺序与观测一致。
+ * @param[out] distances N 条第三体距离记录，距离以 ae 归一化；未启用的第三体填零。
+ * @details 在 epoch_mjd_utc+tau*NORMALIZED_TIME_TO_DAY 处调用平均日月位置模型，
+ * 使用其地心赤道坐标的长度。UTC 历元直接代入解析模型的近似与 IOD 传播系数一致。
+ * 各条记录不依赖待估轨道，可在相同历元、相对时间和动力学模型的候选间只读共享。
+ */
+void Prepare_ThirdBodyDistances(bastion::Overwatch &tracer, int dynamics_model, double epoch_mjd_utc,
+                               const Eigen::ArrayXd &tau, std::vector<iod::IodThirdBodyDistances> &distances);
+
+/**
+ * @brief 由参考状态和相对时间计算 GL 的拉格朗日传播系数。
+ * @param[in] dynamics_model 取 IOD_DYNAMICS_*，选择二体、J2 及平均日月摄动组合。
+ * @param[in] epoch_of_IOD 轨道参考历元，单位 UTC MJD。
+ * @param[in] tau 观测相对参考历元的时间差，以 UNITTIME 归一化。
+ * @param[in] X 六维 GCRS 参考状态 [x,y,z,vx,vy,vz]，位置以 ae、速度以 ae/UNITTIME 归一化。
+ * @param[out] LagCoeff 四个传播系数 [f,g,fz,gz]，与归一化状态和时间配套使用。
+ * @param[in] third_body_distances 可选的本条观测日月距离记录，须由相同模型、参考历元和 tau 准备。
+ *     传入 nullptr 时现场计算所需的日月位置；二体及 J2 模型不读取此记录。
+ * @details 以参考状态展开 f/g，x/y 与 z 分量分别使用 [f,g] 和 [fz,gz]。
+ * 复用第三体距离仅替代与待估轨道无关的解析位置及距离计算，后续浮点表达式保持不变。
+ */
+void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, double* X, double* LagCoeff,
+                           const iod::IodThirdBodyDistances* third_body_distances = nullptr);
 
 // 计算传播系数对参考位置的偏导数。
 void PartialFG(double tau, double x0, double y0, double z0, double* PFG);

@@ -111,3 +111,9 @@ python3 tests/release_smoke.py --bin-dir build/v1.3.0/bin \
 ```
 
 输出目录须为新目录。两端使用同一源码、输入资料和 OpenLibm 构建，比较同名科学文件的 SHA-256；日志和含机器路径的报告随各次运行保存。
+
+## 论文实验线 CPU 对照
+
+`core_iod_reuse` 检查五种动力学的日月量复用、两种迭代方式的完整数值历史及报告重建。
+`tests/thesis/run_comparison.py` 比较已发布 v1.4.0 与论文分支的三个完整 GLML 算例，保存实际输入、
+逐次耗时和全部候选/轨道/残差校验；使用及验证范围见[论文实验记录](../doc/validation/15_thesis-cpu.md)。
