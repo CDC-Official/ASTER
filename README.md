@@ -1,4 +1,8 @@
+![ASTER — Astrodynamics Simulation Toolkit for Estimation and Research](doc/assets/aster-banner.png)
+
 # ASTER 1.4.0
+
+ASTER 的全称为 **Astrodynamics Simulation Toolkit for Estimation and Research**，意为“用于轨道估计与研究的天体动力学仿真工具库”。
 
 ASTER 是用于轨道研究的个人 C++ 程序库，包含 GL/GLML 初轨确定、地球与地月数值预报、批处理定轨、轨道状态转换、瞬转平，以及地基光学观测生成、地月双向单程测距仿真和配套加噪工具。
 
