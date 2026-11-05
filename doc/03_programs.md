@@ -22,6 +22,33 @@ ASTER 的主程序按任务选择。配置关键词见[配置参考](04_configur
 
 每个程序支持 `--version` 和 `--help`。九个配置型程序通过 `-I setting.txt` 启动；直接转换程序通过位置参数接收方向或单位、输入和输出文件名。配置内的输入和输出相对路径从 setting 所在目录解释，普通程序的父目录由运行前创建；单程测距程序会创建配置指定的输出目录。
 
+<a id="program-changes"></a>
+
+## 各程序最近一次科学计算变更
+
+下表记录各程序最近一次科学计算变更所属的发行版本，当前正式记录已整理至 `v1.4.0`。科学计算变更包括算法、物理常数、坐标与时间转换、数学后端和数值设置的调整；新增程序记入首次发行的版本。开发中的科学变化暂记为“未发布”，并注明上一正式记录。已有版本的归属根据 `v1.0.0` 至 `v1.4.0` 的相邻标签差异及相关公共调用核对。
+
+| 程序或工具 | 最近一次科学计算变更的发行版本 | 变更内容及影响条件 | 详细记录与验证依据 |
+| --- | --- | --- | --- |
+| `aster_generate_observations` | 1.3.0 | 大地站址采用配套 WGS84 椭球；根数星历转直角坐标时采用 IERS 2010 的 TT 地球 GM 与相应数值尺度 | [1.3.0 记录](../CHANGELOG.md#release-1-3-0)、[常数验证](validation/06_constants.md) |
+| `aster_generate_cislunar_observations` | 1.3.0 | 首次发布双向单程测距仿真，提供 TDB 接收钟读数、伪距及收发时刻、距离、引力时延和钟差分项 | [1.3.0 记录](../CHANGELOG.md#release-1-3-0)、[测距接口与算例](06_observations.md#cislunar) |
+| `aster_iod_gl` | 1.3.0 | 站址采用 WGS84；动力学修正采用配套的地球 GM、GGM03C J2 和 TT 日月 GM，更新归一化尺度 | [1.3.0 记录](../CHANGELOG.md#release-1-3-0)、[常数验证](validation/06_constants.md) |
+| `aster_iod_glml` | 1.3.0 | 各候选调用的公共初轨计算同步采用 WGS84 站址、配套 GM、GGM03C J2 和新的归一化尺度 | [1.3.0 记录](../CHANGELOG.md#release-1-3-0)、[常数验证](validation/06_constants.md) |
+| `aster_opn_cartesian` | 1.4.0 | 新增可选地球固体潮；`use_solidtide_perturb=1` 时叠加 GGM03C 尚未包含的二阶日月贡献 | [1.4.0 记录](../CHANGELOG.md#release-1-4-0)、[固体潮验证](validation/12_earth-solid-tide.md) |
+| `aster_opn_nonsingular2` | 1.4.0 | 新增与 Cartesian 入口相同的固体潮开关和加速度，再转换为 NSG2 根数导数参与积分 | [1.4.0 记录](../CHANGELOG.md#release-1-4-0)、[固体潮验证](validation/12_earth-solid-tide.md) |
+| `aster_opn_cislunar` | 1.3.0 | E-BCRS/TDB 动力学使用 DE440 GM，并配套处理地球球谐参数的尺度和光压物理参数 | [1.3.0 记录](../CHANGELOG.md#release-1-3-0)、[地球 GM 验证](validation/05_earth-gm.md)、[常数验证](validation/06_constants.md) |
+| `aster_odn_batch` | 1.3.0 | 采用公共近地传播的 GM、重力场及摄动修正，站址改用 WGS84，解析 STM 使用配套 J2 和日月参数 | [1.3.0 记录](../CHANGELOG.md#release-1-3-0)、[常数验证](validation/06_constants.md)、[发布检查](validation/11_release-1.3.0.md) |
+| `aster_convert_states` | 1.4.0 | 首次发布 `cart`、`kep`、`nsg2` 六向互转，采用当前地球 GM，支持 `deg-m`、`deg-km` | [1.4.0 记录](../CHANGELOG.md#release-1-4-0)、[转换验证](validation/13_station-coordinates.md) |
+| `aster_convert_keplerian_to_cartesian` | 1.3.0 | 根数转位置、速度所用地球 GM 由 3.986004418×10¹⁴ 改为 IERS 2010 TT 值 3.986004415×10¹⁴ m³/s²，并配套更新数值尺度 | [1.3.0 记录](../CHANGELOG.md#release-1-3-0)、[常数定义](11_constants.md)、[发布检查](validation/11_release-1.3.0.md) |
+| `aster_convert_cartesian_to_keplerian` | 1.3.0 | 位置、速度反算根数时采用上述 IERS 2010 TT 地球 GM 与相应数值尺度 | [1.3.0 记录](../CHANGELOG.md#release-1-3-0)、[常数定义](11_constants.md)、[发布检查](validation/11_release-1.3.0.md) |
+| `aster_convert_coordinates` | 1.4.0 | 首次发布大地坐标、ITRS、GCRS 六向位置互转；反算经纬高采用 SOFA 与 WGS84，支持两极和两套输入输出单位 | [1.4.0 记录](../CHANGELOG.md#release-1-4-0)、[转换验证](validation/13_station-coordinates.md) |
+| `aster_convert_osculating_to_mean` | 1.3.0 | 更新 GGM03C 势项尺度、TT 日月 GM、解析田谐自转频率及光压、地影参数；各项按模型开关参与计算 | [1.3.0 记录](../CHANGELOG.md#release-1-3-0)、[常数验证](validation/06_constants.md) |
+| `tools/add_angular_noise.py` | 1.2.0 | 首次收录东西、南北独立高斯加噪及种子派生规则；1.3.0、1.4.0 的脚本内容相同 | [1.2.0 记录](../CHANGELOG.md#release-1-2-0)、[加噪与迁移验证](validation/04_observations.md) |
+
+例如，`aster_iod_gl --version` 在 ASTER 1.4.0 中显示 1.4.0，而表中仍记为 1.3.0：发行号定位整套源码及依赖，表中的版本定位该程序最近一次科学计算变化。1.4.0 对共享站址正转换补充了输入检查和错误追踪，WGS84 与 IAU 2000B 的正转换公式保持不变；GL、GLML 与批处理的现有命令行入口也没有启用固体潮。
+
+以前各次变化按版本保存在 [CHANGELOG](../CHANGELOG.md) 中。准备论文实验时，记录实际使用的发行标签、提交、构建、配置和输入数据；具体方法见[开发维护](09_development.md#实验记录要能找到实际源码)。
+
 ## 先准备七套独立配置
 
 以下命令为 GL、GLML、三套预报、BODN 和瞬转平准备运行目录。它使用 `tests/cases.json` 中已有的输入路径清单，把输入改为仓库资料的绝对路径，输出仍写在各自配置旁。运行结果会保存在 `build/` 中。

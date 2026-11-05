@@ -51,4 +51,4 @@ build/v1.4.0/bin/aster_convert_keplerian_to_cartesian \
 | `tools/` | 测角加噪工具 |
 | `build/` | 本机编译与运行结果，Git 忽略 |
 
-版本内容统一见 [CHANGELOG](CHANGELOG.md)，当前发布见 [v1.4.0](https://github.com/CDC-Official/ASTER/releases/tag/v1.4.0)，代码修改规则见 [AGENTS.md](AGENTS.md)。
+各程序最近一次科学计算变化见[程序变更表](doc/03_programs.md#program-changes)，历次版本内容统一见 [CHANGELOG](CHANGELOG.md)，当前发布见 [v1.4.0](https://github.com/CDC-Official/ASTER/releases/tag/v1.4.0)，代码修改规则见 [AGENTS.md](AGENTS.md)。
