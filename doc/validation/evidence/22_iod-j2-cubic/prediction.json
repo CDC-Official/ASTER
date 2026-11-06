@@ -1,0 +1,149 @@
+{
+  "case": {
+    "case_id": "g000_m2",
+    "geometry": 0,
+    "model": 2,
+    "a_km": 7000.0,
+    "e": 0.0,
+    "nu_deg": 0.0,
+    "inclination_deg": 55.0,
+    "perigee_height_km": 621.8636999999999,
+    "mean_motion_norm": 0.8697483904505703,
+    "period_s": 5828.516639879383,
+    "state_norm": [
+      0.5257790186220112,
+      0.8520577462075251,
+      0.44950938960201753,
+      -0.670393776273726,
+      0.05643747656911988,
+      0.6771627016776633
+    ],
+    "eccentric_anomaly0": 0.0,
+    "transform": [
+      [
+        0.47907003492163225,
+        -0.7023152453698926,
+        0.5265407845183632
+      ],
+      [
+        0.7763629201117719,
+        0.05912480337304772,
+        -0.6275068715971331
+      ],
+      [
+        0.40957602214449584,
+        0.7094064799162225,
+        0.573576436351046
+      ]
+    ]
+  },
+  "constants": {
+    "gm_m3_s2": 398600441500000,
+    "unit_length_m": 6378136.3,
+    "unit_time_s": 806.8109913067326,
+    "j2_normalized": 0.0010826355254914103,
+    "reference_radius_m": 6378136.3
+  },
+  "state_si": [
+    3353490.244451425,
+    5434540.440782403,
+    2867032.1550114704,
+    -5299.708266021797,
+    446.15891685225125,
+    5353.219099780916
+  ],
+  "model": "central gravity + standard Cartesian J2, identical physical initial state",
+  "reference": {
+    "integrator": "SciPy DOP853",
+    "rtol": 5e-14,
+    "atol_normalized": 5e-16,
+    "max_step_s": 11.38382156226442,
+    "refinement_check": "rtol 3e-13, atol 3e-15, max_step period/256 versus period/512",
+    "max_refinement_position_difference_m": 2.675020437006852e-09
+  },
+  "sampling": {
+    "start_s": -300,
+    "stop_s": 300,
+    "step_s": 1,
+    "count": 601
+  },
+  "executables": [
+    {
+      "role": "original",
+      "sha256": "78b5b51ffc6456ad3dadb2df230e57c52ce076e7252073a831643b30f9dbe505"
+    },
+    {
+      "role": "corrected",
+      "sha256": "24634aa2505a230f754af608261230c8ce9bba1e7dde5a280dd64b3dbc0d7aa4"
+    }
+  ],
+  "source": {
+    "paper_equation": "刘林、张巍（2009）第73页，式（18）",
+    "incorrect_term": "J * tau^3/2 * (-2u5)",
+    "correct_term": "J * tau^3/6 * (-2u5)",
+    "symbolic_original_jerk_minus_physical_jerk": "-4*J*vz/(sqrt(x**2 + y**2 + z**2)*(x**4 + 2*x**2*y**2 + 2*x**2*z**2 + y**4 + 2*y**2*z**2 + z**4))",
+    "symbolic_corrected_jerk_minus_physical_jerk": "0",
+    "correction_locations": 4,
+    "twobody_max_component_change": 0.0,
+    "model_cases_recomputed": 152,
+    "time_samples_per_case": 2403,
+    "source_original_sha256": "0c644ea5c0b537b3ddd610961ab54b4783c8613870a65c84b0ac6aa35eb9d79f",
+    "source_corrected_sha256": "e3863cc8e4b3c4f33f5f15f382202dd5e6ac583ebde1364e24eb758da1b3fe43",
+    "original_source_unchanged": true,
+    "short_time_results": [
+      {
+        "time_s": 8.0,
+        "original_position_difference_m": 0.002862864175411693,
+        "corrected_position_difference_m": 9.220211079177548e-08
+      },
+      {
+        "time_s": 32.0,
+        "original_position_difference_m": 0.18321485125285547,
+        "corrected_position_difference_m": 8.628304817639133e-05
+      },
+      {
+        "time_s": 64.0,
+        "original_position_difference_m": 1.465475610113636,
+        "corrected_position_difference_m": 0.0027230268424637753
+      },
+      {
+        "time_s": 120.0,
+        "original_position_difference_m": 9.653289433805622,
+        "corrected_position_difference_m": 0.06251214078457121
+      },
+      {
+        "time_s": 300.0,
+        "original_position_difference_m": 149.45540726188688,
+        "corrected_position_difference_m": 5.962497578458179
+      }
+    ]
+  },
+  "plot_selection": "All 301 nonnegative-time samples; negative times retained for verification.",
+  "checks": [
+    {
+      "time_s": 8.0,
+      "original_m": 0.002862864175411693,
+      "corrected_m": 9.220211079177548e-08
+    },
+    {
+      "time_s": 32.0,
+      "original_m": 0.18321485125285547,
+      "corrected_m": 8.628304817639133e-05
+    },
+    {
+      "time_s": 64.0,
+      "original_m": 1.465475610113636,
+      "corrected_m": 0.0027230268424637753
+    },
+    {
+      "time_s": 120.0,
+      "original_m": 9.653289433805622,
+      "corrected_m": 0.06251214078457121
+    },
+    {
+      "time_s": 300.0,
+      "original_m": 149.45540726188688,
+      "corrected_m": 5.962497578458179
+    }
+  ]
+}

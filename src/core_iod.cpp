@@ -206,10 +206,21 @@ void iod::IodSolution::PrintSummary(std::ostream& output, bool include_iteration
 	output << summary.str();
 }
 
+/**
+ * @brief 由参考状态和相对时间计算GL的拉格朗日传播系数。
+ * @param[in] dynamics_model 取IOD_DYNAMICS_*，选择二体、J2及解析日月摄动组合。
+ * @param[in] epoch_of_IOD 轨道参考历元，单位UTC MJD；用于解析日月位置计算。
+ * @param[in] tau 相对参考历元的时间差，除以Scale::UNIT_TIME_S。
+ * @param[in] X 六维GCRS参考状态[x,y,z,vx,vy,vz]，位置除以Scale::UNIT_LENGTH_M，
+ *     速度乘Scale::UNIT_TIME_S/Scale::UNIT_LENGTH_M；本函数不修改该数组。
+ * @param[out] LagCoeff 四个归一化传播系数[f,g,fz,gz]；x/y使用f、g，z使用fz、gz。
+ * @details 二体部分保留至时间六次项，J2摄动部分保留至四次项。
+ * gz的J2附加三次项为(3J2/2)*tau³*(-2/r0⁵)/6，按位置三阶导数除以3!取得。
+ * 日月距离在对应观测历元使用解析位置计算，所有系数与输入的归一化尺度配套。
+ */
 void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, double* X, double* LagCoeff)
 {
-	//只考虑地心二体，计算拉格朗日系数LagCoeff:F,G,Fz,Gz
-	// dynamicsModel    1-二体    2-J2    3-J2+日月 4—J2+日  5-J2+月
+	// 从参考状态构造径向距离倒数、位置速度内积和时间幂，供所选模型展开使用。
 	double J, u1, u2, u3, u4, u5, u6, u7, u8, u9, sigma, sigma2, v02;
 	u1 = 1.0 / sqrt(X[0] * X[0] + X[1] * X[1] + X[2] * X[2]);
 	u2 = u1 * u1;
@@ -299,7 +310,7 @@ void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, 
 					 tau4 / 24.0 * u7 * (10 * v02 - 6 * u1 - 70 * u2 * sigma2));
 			// Gz
 			LagCoeff[3] = LagCoeff[1] +
-						  J * (tau3 / 2.0 * (-2 * u5) + tau4 / 24.0 * (20 * u7 * sigma));
+						  J * (tau3 / 6.0 * (-2 * u5) + tau4 / 24.0 * (20 * u7 * sigma));
 
 			break;
 		}
@@ -340,7 +351,7 @@ void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, 
 					 tau4 / 24.0 * u7 * (10 * v02 - 6 * u1 - 70 * u2 * sigma2));
 			// Gz
 			LagCoeff[3] = LagCoeff[1] +
-						  J * (tau3 / 2.0 * (-2 * u5) + tau4 / 24.0 * (20 * u7 * sigma));
+						  J * (tau3 / 6.0 * (-2 * u5) + tau4 / 24.0 * (20 * u7 * sigma));
 
 			//这里开始考虑日摄动，要计算每一时刻的日位置
 			double MJD = epoch_of_IOD + tau * NORMALIZED_TIME_TO_DAY;  //对应时刻的MJD
@@ -393,7 +404,7 @@ void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, 
 					 tau4 / 24.0 * u7 * (10 * v02 - 6 * u1 - 70 * u2 * sigma2));
 			// Gz
 			LagCoeff[3] = LagCoeff[1] +
-						  J * (tau3 / 2.0 * (-2 * u5) + tau4 / 24.0 * (20 * u7 * sigma));
+						  J * (tau3 / 6.0 * (-2 * u5) + tau4 / 24.0 * (20 * u7 * sigma));
 
 			//这里开始考虑日摄动，要计算每一时刻的日位置
 			double MJD = epoch_of_IOD + tau * NORMALIZED_TIME_TO_DAY;  //对应时刻的MJD
@@ -447,7 +458,7 @@ void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, 
 					 tau4 / 24.0 * u7 * (10 * v02 - 6 * u1 - 70 * u2 * sigma2));
 			// Gz
 			LagCoeff[3] = LagCoeff[1] +
-						  J * (tau3 / 2.0 * (-2 * u5) + tau4 / 24.0 * (20 * u7 * sigma));
+						  J * (tau3 / 6.0 * (-2 * u5) + tau4 / 24.0 * (20 * u7 * sigma));
 			//这里开始考虑日月摄动，要计算每一时刻的日月位置;日月分开
 			//日
 			double MJD = epoch_of_IOD + tau * NORMALIZED_TIME_TO_DAY;  //对应时刻的MJD

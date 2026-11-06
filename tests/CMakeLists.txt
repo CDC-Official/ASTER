@@ -131,3 +131,7 @@ add_test(NAME conversion_roundtrips COMMAND "${Python3_EXECUTABLE}"
     --bin-dir "${PROJECT_BINARY_DIR}/bin"
     --output "${PROJECT_BINARY_DIR}/test-output/conversion_roundtrips")
 set_tests_properties(conversion_roundtrips PROPERTIES TIMEOUT 60)
+
+add_executable(aster_test_iod_lagrange_j2 core/iod_lagrange_j2.cpp)
+target_link_libraries(aster_test_iod_lagrange_j2 PRIVATE ASTER::core)
+add_test(NAME core_iod_lagrange_j2 COMMAND aster_test_iod_lagrange_j2)

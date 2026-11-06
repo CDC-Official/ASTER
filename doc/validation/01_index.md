@@ -21,6 +21,8 @@
 | GGM03C 之外的固体潮修正、NAO 固定点及一天轨道的永久潮控制比较 | [固体潮实现与验证](12_earth-solid-tide.md) | [源码、配置、开关增量和永久潮诊断](evidence/16_earth-solid-tide.json)、[Orekit 20×20 对照](evidence/17_solid-tide-orekit.json)、[四曲线图件](evidence/18_solid-tide-figure.json) |
 | 六向测站位置转换是否与初轨、SOFA 一致，以及现有程序的结果是否变化 | [测站位置转换](13_station-coordinates.md) | [六向、往返、来源与现有输出校验](evidence/19_station-coordinates.json) |
 | 1.4.0 的发布构建、新增转换与固体潮跨平台结果 | [1.4.0 发布验收](14_release-1.4.0.md) | [十三程序及55份科学输出校验](evidence/20_release-1.4.0.json) |
+| FG 的 z 方向 J₂ 三次项为何修正，以及对预报和初轨的影响 | [公式推导与验证](16_iod-j2-cubic.md) | [预报、定轨及图件证据清单](evidence/22_iod-j2-cubic.json) |
+
 
 <a id="migration"></a>
 ## 1.0.0 迁移来源与核对

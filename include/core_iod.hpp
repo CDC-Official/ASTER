@@ -210,7 +210,18 @@ namespace iod
 
 }
 
-// 根据动力学模型计算拉格朗日传播系数。
+/**
+ * @brief 由参考状态和相对时间计算GL的拉格朗日传播系数。
+ * @param[in] dynamics_model 取IOD_DYNAMICS_*，选择二体、J2及解析日月摄动组合。
+ * @param[in] epoch_of_IOD 轨道参考历元，单位UTC MJD；用于解析日月位置计算。
+ * @param[in] tau 相对参考历元的时间差，除以Scale::UNIT_TIME_S。
+ * @param[in] X 六维GCRS参考状态[x,y,z,vx,vy,vz]，位置除以Scale::UNIT_LENGTH_M，
+ *     速度乘Scale::UNIT_TIME_S/Scale::UNIT_LENGTH_M；本函数不修改该数组。
+ * @param[out] LagCoeff 四个归一化传播系数[f,g,fz,gz]；x/y使用f、g，z使用fz、gz。
+ * @details 二体部分保留至时间六次项，J2摄动部分保留至四次项。
+ * gz的J2附加三次项为(3J2/2)*tau³*(-2/r0⁵)/6，按位置三阶导数除以3!取得。
+ * 日月距离在对应观测历元使用解析位置计算，所有系数与输入的归一化尺度配套。
+ */
 void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, double* X, double* LagCoeff);
 
 // 计算传播系数对参考位置的偏导数。

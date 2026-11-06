@@ -1,0 +1,11 @@
+{
+  "before_selected_candidate": 379,
+  "after_selected_candidate": 766,
+  "before_source_flag": -1,
+  "after_source_flag": -1,
+  "position_change_m": 6291.8812778619595,
+  "velocity_change_mps": 13.024792532138555,
+  "before_rms_rad": 1.160736922853323e-05,
+  "after_rms_rad": 1.1608324422659067e-05,
+  "fixed_random_seed": 20261106
+}

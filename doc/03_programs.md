@@ -32,8 +32,8 @@ ASTER 的主程序按任务选择。配置关键词见[配置参考](04_configur
 | --- | --- | --- | --- |
 | `aster_generate_observations` | 1.3.0 | 大地站址采用配套 WGS84 椭球；根数星历转直角坐标时采用 IERS 2010 的 TT 地球 GM 与相应数值尺度 | [1.3.0 记录](../CHANGELOG.md#release-1-3-0)、[常数验证](validation/06_constants.md) |
 | `aster_generate_cislunar_observations` | 1.3.0 | 首次发布双向单程测距仿真，提供 TDB 接收钟读数、伪距及收发时刻、距离、引力时延和钟差分项 | [1.3.0 记录](../CHANGELOG.md#release-1-3-0)、[测距接口与算例](06_observations.md#cislunar) |
-| `aster_iod_gl` | 1.3.0 | 站址采用 WGS84；动力学修正采用配套的地球 GM、GGM03C J2 和 TT 日月 GM，更新归一化尺度 | [1.3.0 记录](../CHANGELOG.md#release-1-3-0)、[常数验证](validation/06_constants.md) |
-| `aster_iod_glml` | 1.3.0 | 各候选调用的公共初轨计算同步采用 WGS84 站址、配套 GM、GGM03C J2 和新的归一化尺度 | [1.3.0 记录](../CHANGELOG.md#release-1-3-0)、[常数验证](validation/06_constants.md) |
+| `aster_iod_gl` | 未发布（上一正式记录1.3.0） | 修正四个含J2分支的Gz附加三次项，分母2改为6，更新迭代中的传播系数；纯二体分支不变 | [未发布记录](../CHANGELOG.md#unreleased)、[J2修正验证](validation/16_iod-j2-cubic.md) |
+| `aster_iod_glml` | 未发布（上一正式记录1.3.0） | 候选轨道调用的公共GL传播同步修正J2的Gz三次项；候选生成、约束与似然评价规则不变 | [未发布记录](../CHANGELOG.md#unreleased)、[J2修正验证](validation/16_iod-j2-cubic.md) |
 | `aster_opn_cartesian` | 1.4.0 | 新增可选地球固体潮；`use_solidtide_perturb=1` 时叠加 GGM03C 尚未包含的二阶日月贡献 | [1.4.0 记录](../CHANGELOG.md#release-1-4-0)、[固体潮验证](validation/12_earth-solid-tide.md) |
 | `aster_opn_nonsingular2` | 1.4.0 | 新增与 Cartesian 入口相同的固体潮开关和加速度，再转换为 NSG2 根数导数参与积分 | [1.4.0 记录](../CHANGELOG.md#release-1-4-0)、[固体潮验证](validation/12_earth-solid-tide.md) |
 | `aster_opn_cislunar` | 1.3.0 | E-BCRS/TDB 动力学使用 DE440 GM，并配套处理地球球谐参数的尺度和光压物理参数 | [1.3.0 记录](../CHANGELOG.md#release-1-3-0)、[地球 GM 验证](validation/05_earth-gm.md)、[常数验证](validation/06_constants.md) |

@@ -1,0 +1,41 @@
+{
+  "revision": "J2 addition to Gz: denominator 2 -> 6 in four branches",
+  "derivation": "16_iod-j2-cubic.md",
+  "old_jerk_minus_physical": "-4*J*vz0/r0^5",
+  "corrected_jerk_minus_physical": "0",
+  "original_numerical_baseline_commit": "ab7049b135c8486275b4f113d75a3579558c9212",
+  "regression": {
+    "checks": 25,
+    "maximum_normalized_jerk_difference": 5.0830284425984473e-11,
+    "threshold": 2e-08,
+    "old_formula_detected": true
+  },
+  "figure_qa": {
+    "backend": "Python/Matplotlib",
+    "size_mm": [
+      182.88,
+      109.22
+    ],
+    "png_dpi": 600,
+    "pdf_minimum_glyph_pt": 8,
+    "collision_fail": 0,
+    "collision_warn": 0,
+    "source_preflight_warn": "PNG preview with PDF/SVG; no TIFF needed for repository release.",
+    "alignment": "single panel, not applicable",
+    "visual_review": "passed"
+  },
+  "files": {
+    "doc/validation/figures/iod_j2_cubic_comparison.png": "e71fa4049db5337136e4a9eea1dc26e1f4d56e6f6e77f09ecbd8162838ed4349",
+    "doc/validation/figures/iod_j2_cubic_comparison.pdf": "c1d19f9c33e76330475ccff0216d1e1e07222ab095c16da7ea9f1656856964e4",
+    "doc/validation/figures/iod_j2_cubic_comparison.svg": "c9ca54237f25ebb1c4120d756b756cbeb8a55284fc74b4411d7f88f9fb393508",
+    "doc/validation/figures/plot_iod_j2_cubic_comparison.py": "82e28b382332699940aa55f52fe1c19c1e627b04bddca26a5351263304b02c51",
+    "doc/validation/evidence/22_iod-j2-cubic/prediction.csv": "7bcddb2a740e4644cc88fcd34a40024d362c6fbdf6edf119791c6064896c6e0e",
+    "doc/validation/evidence/22_iod-j2-cubic/prediction.json": "ea822ad54393d89cdb71d3eaf9bd2b95ce3356778251c0d9a449a1d977fe83a8",
+    "doc/validation/evidence/22_iod-j2-cubic/prediction.txt": "80f8d2d068612d0588bf751695e57d02d0ebc8a5f7dfa91babed2176c4d45a7b",
+    "doc/validation/evidence/22_iod-j2-cubic/impact_summary.csv": "b7aa595dfd8e3fb26da66c475cc730360843a26a9c957baa55a45b80a47e8a1b",
+    "doc/validation/evidence/22_iod-j2-cubic/glml_entry_comparison.json": "9dff71291c0878184e11351ad6fa6515d557e4e1607dbef7d99917e9b2f32c91",
+    "tests/iod_lagrange_j2/CMakeLists.txt": "9300e217e2ee48274f8fd0ee735adde54a63185d083084ae54653b3b99eff1ce",
+    "tests/iod_lagrange_j2/main_prediction.cpp": "4e513f60c53967b75692ff59df6c3a7287117cbf2f859929d679049a656cdee3",
+    "tests/iod_lagrange_j2/compare_prediction.py": "ff01454061f04a72fcd4b4448f1b84326ab676c6ab93fe27e163b9372ac82674"
+  }
+}
