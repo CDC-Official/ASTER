@@ -59,7 +59,7 @@ def main():
         version_lines = proc.stdout.decode().splitlines()
         assert version_lines[0] == info['target'] + ' ' + version
         assert len(version_lines) >= 2 and version_lines[1].startswith('backend=')
-        assert re.search(r'; commit=[0-9a-f]{40}; source=(clean|modified)', version_lines[1])
+        assert re.search(r'; commit=(?:[0-9a-f]{40}; source=(?:clean|modified)|unknown; source=archive)', version_lines[1])
         if not info.get('conversion'):
             execute(case + '-missing-setting', info['target'], ['-I', str(root / 'missing.txt')])
 
