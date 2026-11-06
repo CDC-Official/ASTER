@@ -85,6 +85,7 @@ def main():
         parser.add_argument('--' + name, type=Path, required=True)
     parser.add_argument('--threads', type=int, nargs='+', default=[32, 64])
     parser.add_argument('--repeats', type=int, default=5)
+    parser.add_argument('--baseline-ref', default='v1.4.1', help='基线标签或提交；复现历史CPU对照时使用v1.4.0。')
     parser.add_argument('--cases', nargs='+', choices=['sensitive10', 'short20', 'long100'],
                         default=['sensitive10', 'short20', 'long100'])
     args = parser.parse_args()
@@ -102,13 +103,13 @@ def main():
         metadata[mode] = {'source': str(source), 'commit': git(source, 'rev-parse', 'HEAD'),
                           'binary': str(binaries[mode]), 'binary_sha256': sha256(binaries[mode]),
                           'version': subprocess.check_output([str(binaries[mode]), '--version'], text=True).strip()}
-    if metadata['baseline']['commit'] != git(sources['baseline'], 'rev-parse', 'v1.4.0^{}'):
-        raise RuntimeError('Baseline must be the published v1.4.0 commit')
+    if metadata['baseline']['commit'] != git(sources['baseline'], 'rev-parse', args.baseline_ref + '^{}'):
+        raise RuntimeError('Baseline source must match ' + args.baseline_ref)
     fixture_root = sources['baseline'] / 'tests'
     fixtures = {'sensitive10': (fixture_root / 'iod_glml', {'display_iterations': '0'}),
                 'short20': (fixture_root / 'math_backend_cases/cases/e070_s3_n020_m0002', {}),
                 'long100': (fixture_root / 'math_backend_cases/cases/e010_s0.5_n100_m0001', {})}
-    summary = {'metadata': metadata, 'uname': list(os.uname()), 'threads': args.threads,
+    summary = {'baseline_ref': args.baseline_ref, 'metadata': metadata, 'uname': list(os.uname()), 'threads': args.threads,
                'repeats': args.repeats, 'timing': 'independent processes; one excluded warm-up per version; alternating baseline/candidate order; perf_counter_ns includes process launch and exit',
                'groups': [], 'all_equal': True}
     for case in args.cases:

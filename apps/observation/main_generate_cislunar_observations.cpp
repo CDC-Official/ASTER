@@ -10,6 +10,7 @@
 #include "model_cislunar_observation.hpp"
 #include "model_ephemeris_jpl.hpp"
 #include "io_settings.hpp"
+#include "math_backend.hpp"
 #include <cmath>
 #include <filesystem>
 #include <fstream>
@@ -21,16 +22,24 @@
 using namespace std;
 using namespace bastion;
 
+/**
+ * @brief 读取双星状态与接收事件，生成两种发收方向的单程测距及物理分项。
+ * @param[in] argc 命令行参数个数，包含程序名。
+ * @param[in] argv -I后接配置路径；--version显示完整版本和构建信息，--help显示用法。
+ * @return 正常完成返回0，缺少参数返回2，输入与计算错误通过tracer记录并失败退出。
+ * @details 状态采用TDB/E-BCRS及m、m/s、s；输出接收钟读数、伪距和各物理分项。
+ */
 int main(int argc, char* argv[])
 {
     // 建立主程序的调用追踪，运行事件和错误写入 program_log。
     Overwatch tracer(__FILE__, __func__, __LINE__);
     ofstream program_log;
 
-    // 请求版本号时，打印当前程序版本并结束。
+    // 请求版本号时，输出与其他入口一致的版本、数学后端及源码提交。
     if (argc == 2 && string(argv[1]) == "--version")
     {
         cout << "aster_generate_cislunar_observations " << ASTER_PROGRAM_VERSION << '\n';
+        cout << aster::math_backend::BuildDescription() << '\n';
         tracer.CheckOut(__func__);
         return 0;
     }
