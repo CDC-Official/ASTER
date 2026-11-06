@@ -249,6 +249,7 @@ void Prepare_ThirdBodyDistances(bastion::Overwatch &tracer, int dynamics_model, 
  *     传入 nullptr 时现场计算所需的日月位置；二体及 J2 模型不读取此记录。
  * @details 以参考状态展开 f/g，x/y 与 z 分量分别使用 [f,g] 和 [fz,gz]。
  * 复用第三体距离仅替代与待估轨道无关的解析位置及距离计算，后续浮点表达式保持不变。
+ * @note gz的J2附加三次项按位置三阶导数除以3!计算，分母为6。
  */
 void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, double* X, double* LagCoeff,
                            const iod::IodThirdBodyDistances* third_body_distances = nullptr);

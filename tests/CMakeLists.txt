@@ -137,3 +137,7 @@ add_executable(aster_test_iod_reuse core/iod_reuse.cpp)
 target_link_libraries(aster_test_iod_reuse PRIVATE ASTER::core)
 add_test(NAME core_iod_reuse COMMAND aster_test_iod_reuse)
 set_tests_properties(core_iod_reuse PROPERTIES TIMEOUT 60)
+
+add_executable(aster_test_iod_lagrange_j2 core/iod_lagrange_j2.cpp)
+target_link_libraries(aster_test_iod_lagrange_j2 PRIVATE ASTER::core)
+add_test(NAME core_iod_lagrange_j2 COMMAND aster_test_iod_lagrange_j2)

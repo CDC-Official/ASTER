@@ -284,6 +284,7 @@ void Prepare_ThirdBodyDistances(Overwatch &tracer, int dynamics_model, double ep
  *     传入 nullptr 时现场计算所需的日月位置；二体及 J2 模型不读取此记录。
  * @details 以参考状态展开 f/g，x/y 与 z 分量分别使用 [f,g] 和 [fz,gz]。
  * 复用第三体距离仅替代与待估轨道无关的解析位置及距离计算，后续浮点表达式保持不变。
+ * @note gz的J2附加三次项按位置三阶导数除以3!计算，分母为6。
  */
 void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, double* X, double* LagCoeff,
                            const IodThirdBodyDistances* third_body_distances)
@@ -378,7 +379,7 @@ void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, 
 					 tau4 / 24.0 * u7 * (10 * v02 - 6 * u1 - 70 * u2 * sigma2));
 			// Gz
 			LagCoeff[3] = LagCoeff[1] +
-						  J * (tau3 / 2.0 * (-2 * u5) + tau4 / 24.0 * (20 * u7 * sigma));
+						  J * (tau3 / 6.0 * (-2 * u5) + tau4 / 24.0 * (20 * u7 * sigma));
 
 			break;
 		}
@@ -419,7 +420,7 @@ void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, 
 					 tau4 / 24.0 * u7 * (10 * v02 - 6 * u1 - 70 * u2 * sigma2));
 			// Gz
 			LagCoeff[3] = LagCoeff[1] +
-						  J * (tau3 / 2.0 * (-2 * u5) + tau4 / 24.0 * (20 * u7 * sigma));
+						  J * (tau3 / 6.0 * (-2 * u5) + tau4 / 24.0 * (20 * u7 * sigma));
 
 			// 读取本次观测的太阳距离，用于 f/g 中的太阳摄动项。
 			double MJD = epoch_of_IOD + tau * NORMALIZED_TIME_TO_DAY;  // 观测历元，UTC MJD。
@@ -482,7 +483,7 @@ void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, 
 					 tau4 / 24.0 * u7 * (10 * v02 - 6 * u1 - 70 * u2 * sigma2));
 			// Gz
 			LagCoeff[3] = LagCoeff[1] +
-						  J * (tau3 / 2.0 * (-2 * u5) + tau4 / 24.0 * (20 * u7 * sigma));
+						  J * (tau3 / 6.0 * (-2 * u5) + tau4 / 24.0 * (20 * u7 * sigma));
 
 			// 读取本次观测的月球距离，用于 f/g 中的月球摄动项。
 			double MJD = epoch_of_IOD + tau * NORMALIZED_TIME_TO_DAY;  // 观测历元，UTC MJD。
@@ -546,7 +547,7 @@ void Lagrange_Coefficients(int dynamics_model, double epoch_of_IOD, double tau, 
 					 tau4 / 24.0 * u7 * (10 * v02 - 6 * u1 - 70 * u2 * sigma2));
 			// Gz
 			LagCoeff[3] = LagCoeff[1] +
-						  J * (tau3 / 2.0 * (-2 * u5) + tau4 / 24.0 * (20 * u7 * sigma));
+						  J * (tau3 / 6.0 * (-2 * u5) + tau4 / 24.0 * (20 * u7 * sigma));
 			// 太阳、月球的距离按观测历元复用，两个摄动贡献分别加入 f/g。
 			double MJD = epoch_of_IOD + tau * NORMALIZED_TIME_TO_DAY;  // 观测历元，UTC MJD。
 			double u3_sun;

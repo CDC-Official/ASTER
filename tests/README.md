@@ -21,6 +21,7 @@ ctest --test-dir build/v1.3.0 \
 | `core_batch_determination` / `core_batch_parameters` | 批处理轨道、权重、剔除、协方差及附加 AMR |
 | `core_rkf78_safety` / `core_adams_safety` | 实际阶段历元、反向/零时长、接受步长、起步与错误状态 |
 | `core_iod_eccentricity` | 偏心率约束与独立参考表 |
+| `core_iod_lagrange_j2` | 从标准J2加速度独立检查Fz、Gz合成位置的三次项，覆盖二体及四个含J2分支 |
 | `core_earth_solid_tide` | 固定位置与参数的 NAO 二阶潮汐参考、独立势梯度、两极位置、永久部分及两套动力学接入 |
 | `math_backend_sofa` | SOFA 本身的验证入口，与当前后端一起构建 |
 | `invalid_inputs` | 九个原有主程序的格式、有限值、版本和写出失败路径；新增生成器的输入检查由 observation_runtime 覆盖 |
