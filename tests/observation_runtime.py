@@ -71,6 +71,8 @@ with tempfile.TemporaryDirectory(prefix='cdc-observation-') as folder:
     invoke(['--help'])
     version = invoke(['--version'])
     expected_version = re.search(r'project\(ASTER VERSION ([0-9.]+)', (project/'CMakeLists.txt').read_text()).group(1)
+    expected_version += re.search(r'set\(ASTER_VERSION_SUFFIX "([^"]*)"\)',
+                                  (project/'CMakeLists.txt').read_text()).group(1)
     require(version.stdout.startswith('aster_generate_observations '+expected_version+'\n')
             and 'backend=' in version.stdout, 'Missing program version or math backend')
     no_arguments = subprocess.run([str(binary)], cwd=root, capture_output=True, text=True, timeout=10)

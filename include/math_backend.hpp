@@ -10,7 +10,7 @@
 namespace aster::math_backend
 {
 /**
- * @brief 返回本次构建的数学后端和浮点配置。
+ * @brief 返回本次构建的数学后端、浮点配置、源码提交和状态。
  * @return 供版本输出和诊断使用的静态字符串。
  */
 const char* BuildDescription() noexcept;

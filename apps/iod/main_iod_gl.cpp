@@ -121,7 +121,8 @@ int main(int argc, char* argv[])
 			   << " (jobId = " << jobId << ")";
 		tracer.LogEvent(__FILE__, __func__, __LINE__, jobMsg.str(), bastion::EventType::MESSAGE, FORCE_ALERT_ON);
 
-		const std::string version_message = "Program: " + program_name + " | Version: v" + ASTER_PROGRAM_VERSION;
+		const std::string version_message = "Program: " + program_name + " | Version: v" + ASTER_PROGRAM_VERSION
+			+ " | " + aster::math_backend::BuildDescription();
 		tracer.LogEvent(__FILE__, __func__, __LINE__, version_message, EventType::MESSAGE, FORCE_ALERT_ON);
 
 		// =================================== 02 解析命令行参数 ===================================
@@ -1101,6 +1102,7 @@ int main(int argc, char* argv[])
 
 			report << "GL initial orbit determination report\n"
 				   << "Program       : " << program_name << " | Version: v" << ASTER_PROGRAM_VERSION
+				   << "\nBuild         : " << aster::math_backend::BuildDescription()
 				   << "\nJob ID        : " << jobId << "\nStarted at    : " << timeStr
 				   << "\nInput setting : " << fn_iod_input << '\n'
 				   << general_settings.str() << observation_summary.str() << iod_settings.str()

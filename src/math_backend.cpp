@@ -7,6 +7,7 @@
  * sin/cos 以完整 binary64 参数缓存，每函数每线程最多 65536 项，冲突时重新求值。
  */
 #include "math_backend.hpp"
+#include "version_config.hpp"
 
 #if ASTER_MATH_OPENLIBM
 #include <array>
@@ -204,10 +205,11 @@ extern "C" double ldexp(double value, int exponent) ASTER_MATH_NOEXCEPT { return
 #endif // ASTER_MATH_OPENLIBM
 
 /**
- * @brief 返回本次构建的数学后端和浮点配置。
+ * @brief 返回本次构建的数学后端、浮点配置、源码提交和状态。
  * @return 供版本输出和诊断使用的静态字符串。
  */
 const char* aster::math_backend::BuildDescription() noexcept
 {
-    return ASTER_MATH_BUILD_DESCRIPTION "; build=" ASTER_MATH_BUILD_TYPE;
+    return ASTER_MATH_BUILD_DESCRIPTION "; build=" ASTER_MATH_BUILD_TYPE
+           "; commit=" ASTER_SOURCE_COMMIT "; source=" ASTER_SOURCE_STATE;
 }

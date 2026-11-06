@@ -13,6 +13,7 @@ ASTER 是用于轨道研究的 C++ 程序库。可以直接运行命令行程序
 | 从星历生成观测并加噪 | [观测生成](06_observations.md) | 地基测角与地月测距、可见性筛选、状态输入、钟差和随机种子 |
 | 在自己的 C++ 主程序中调用计算 | [公共接口参考](07_interfaces.md) | 链接方法、参数方向、归一化、返回状态和调用示例 |
 | 理解数学后端与平台差异 | [数学后端](08_math-backend.md) | OPENLIBM/SYSTEM 开关、共享库、浮点设置与验收依据 |
+| 判断升级影响了哪些程序 | [程序变更表](03_programs.md#program-changes)与 [CHANGELOG](../CHANGELOG.md) | 各程序最近一次科学计算变化及历次版本记录 |
 | 修改源码、做检查、保存版本 | [开发与 Git 维护](09_development.md) | 源码组织、测试入口、临时分支、提交和版本标签 |
 | 在现有 Linux 服务器工作 | [服务器使用与同步](10_server.md) | 既有目录、SSH、构建、实验目录和 Git bundle 中转 |
 | 追查迁移、诊断和验收依据 | [验证资料索引](validation/01_index.md) | 独有科学验证、适用版本与原始 JSON 的对应关系 |
@@ -47,13 +48,15 @@ flowchart LR
 仓库其他入口各有自己的用途：
 
 - [根 README](../README.md)：项目简介和常用入口。
-- [CHANGELOG](../CHANGELOG.md)：统一的版本变更记录。
+- [CHANGELOG](../CHANGELOG.md)：按发行版本保存具体变化；[程序变更表](03_programs.md#program-changes)集中列出各程序最近一次科学计算变化。
 - [tests/README.md](../tests/README.md)：检查命令、比较方式和参考结果来源。
 - [物理常数与模型参数](11_constants.md)：参数来源、分组和各计算场景的选用方式。
 - [data/README.md](../data/README.md)：公共科学数据的用途、覆盖时间和校验清单。
 - [third_party/README.md](../third_party/README.md)：固定第三方源码及其许可。
 - [AGENTS.md](../AGENTS.md)：修改科研代码时遵循的规则。
 
-本套指南对应 1.2.0 源码。命令默认从 ASTER 仓库根目录执行；`build/v1.2.0` 是本版既有构建目录，运行结果也放在 `build/` 下。
+本套指南随 main 更新。复现某次正式发布时，使用对应标签中的指南和构建目录；日常命令默认从 ASTER 仓库根目录执行，运行结果放在 `build/` 下。
 
 地月单程测距从两颗星的状态、钟差和真实接收事件生成观测，输入输出见[观测指南](06_observations.md#cislunar)。当前 GL、GLML 与 BODN 的观测类型分别在[数据格式](05_data-formats.md)中说明。
+
+本次版本的 [J₂ 系数推导与预报对照](validation/16_iod-j2-cubic.md)交代公式来源、修正与实际定轨影响；[发布验收](validation/18_release-1.4.1-thesis.1.md)保存两端构建和代表算例结果。

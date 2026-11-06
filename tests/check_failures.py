@@ -51,13 +51,15 @@ def main():
     version_match = re.search(r'project\(ASTER VERSION (\d+\.\d+\.\d+) LANGUAGES',
                               (tests.parent / 'CMakeLists.txt').read_text())
     assert version_match, 'Missing ASTER project version'
-    version = version_match.group(1)
+    version = version_match.group(1) + re.search(
+        r'set\(ASTER_VERSION_SUFFIX "([^"]*)"\)', (tests.parent / 'CMakeLists.txt').read_text()).group(1)
     cases = json.loads((tests / 'cases.json').read_text())
     for case, info in cases.items():
         proc = execute(case + '-version', info['target'], ['--version'], good=True)
         version_lines = proc.stdout.decode().splitlines()
         assert version_lines[0] == info['target'] + ' ' + version
         assert len(version_lines) >= 2 and version_lines[1].startswith('backend=')
+        assert re.search(r'; commit=[0-9a-f]{40}; source=(clean|modified)', version_lines[1])
         if not info.get('conversion'):
             execute(case + '-missing-setting', info['target'], ['-I', str(root / 'missing.txt')])
 
