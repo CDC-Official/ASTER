@@ -132,6 +132,8 @@ python3 tests/iod_lagrange_j2/compare_prediction.py \
     --output build/iod-j2-comparison-new
 ```
 
+本次发布已实际按上述入口编译原生 v1.4.0 与修正版，在 601 个正反向时刻重新运行。重算表格与图件源数据的最大位置差数值变化为 9.32×10⁻¹⁰ m，复现通过；[运行与程序校验记录](evidence/22_iod-j2-cubic/native_release_check.json)随库保存。
+
 比较脚本需要 NumPy、SciPy，绘图另需 Matplotlib；普通 C++ 回归不依赖这些绘图库。历史标签、原始实验结果及原构建继续保存，新实验采用新标签与独立构建目录。
 
 ## 文献

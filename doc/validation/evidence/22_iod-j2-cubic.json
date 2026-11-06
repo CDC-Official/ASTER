@@ -36,6 +36,8 @@
     "doc/validation/evidence/22_iod-j2-cubic/glml_entry_comparison.json": "9dff71291c0878184e11351ad6fa6515d557e4e1607dbef7d99917e9b2f32c91",
     "tests/iod_lagrange_j2/CMakeLists.txt": "9300e217e2ee48274f8fd0ee735adde54a63185d083084ae54653b3b99eff1ce",
     "tests/iod_lagrange_j2/main_prediction.cpp": "4e513f60c53967b75692ff59df6c3a7287117cbf2f859929d679049a656cdee3",
-    "tests/iod_lagrange_j2/compare_prediction.py": "ff01454061f04a72fcd4b4448f1b84326ab676c6ab93fe27e163b9372ac82674"
-  }
+    "tests/iod_lagrange_j2/compare_prediction.py": "ff01454061f04a72fcd4b4448f1b84326ab676c6ab93fe27e163b9372ac82674",
+    "doc/validation/evidence/22_iod-j2-cubic/native_release_check.json": "40408916a16f85479128745fda3a83479e9db30ab7156fc2dd015229c3c87fed"
+  },
+  "native_release_reproduction": "v1.4.0 and corrected main; all 601 samples reproduced, see native_release_check.json"
 }

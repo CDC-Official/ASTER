@@ -23,7 +23,8 @@
 | 1.4.0 的发布构建、新增转换与固体潮跨平台结果 | [1.4.0 发布验收](14_release-1.4.0.md) | [十三程序及55份科学输出校验](evidence/20_release-1.4.0.json) |
 | 论文实验线的两处 CPU 优化是否保持候选、轨道、残差和迭代文字 | [论文 CPU 对照](15_thesis-cpu.md) | [构建、逐次计时与科学输出校验](evidence/21_thesis-cpu.json) |
 | FG 的 z 方向 J₂ 三次项为何修正，以及对预报和初轨的影响 | [公式推导与验证](16_iod-j2-cubic.md) | [预报、定轨及图件证据清单](evidence/22_iod-j2-cubic.json) |
-
+| 1.4.1 的公共 J₂ 修正、版本信息与跨平台发布检查 | [1.4.1 发布验收](17_release-1.4.1.md) | [两端版本、回归、输入与55份科学输出校验](evidence/23_release-1.4.1.json) |
+| J₂ 修正后的论文 CPU 实验版本及原阶段如何保存 | [1.4.1-thesis.1 发布验收](18_release-1.4.1-thesis.1.md) | [实验版两端验收与正式版输出比较](evidence/24_release-1.4.1-thesis.1.json) |
 
 <a id="migration"></a>
 ## 1.0.0 迁移来源与核对
