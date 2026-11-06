@@ -1,0 +1,518 @@
+{
+  "version": "1.4.1",
+  "tag": "v1.4.1",
+  "validated_source_commit": "04a3d8f11a9f740e4c6d5e274993e864d6814619",
+  "scientific_tree_sha256": "b104a8a702847b28e95907f583e706aa1434119b27a4531ca6b2840797f54034",
+  "finalization": "Subsequent release commits contain documentation/evidence only; final binaries are reconfigured and checked against the tag commit.",
+  "configuration": {
+    "build_type": "Release",
+    "math_backend": "OPENLIBM-0.8.8",
+    "eigen": "3.4.0",
+    "sofa": "2018-01-30",
+    "solver_seed": 20261106,
+    "smoke_threads": 2,
+    "ctest_omp_num_threads": 1,
+    "ctest_omp_dynamic": false
+  },
+  "platforms": {
+    "mac": {
+      "platform": "macOS-26.6.2-arm64-arm-64bit",
+      "compiler": "AppleClang 21",
+      "full_current_tests_passed": 23,
+      "full_regression_commit": "eb3a8f8bab24e275a5d469ee91afe40802110de0",
+      "following_change": "cislunar --version metadata; archive-compatible version assertion; thesis baseline selector",
+      "updated_entry_checks_passed": 3,
+      "full_target_build": "passed",
+      "programs": {
+        "aster_iod_gl": {
+          "version_output": "aster_iod_gl 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_iod_glml": {
+          "version_output": "aster_iod_glml 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_odn_batch": {
+          "version_output": "aster_odn_batch 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_opn_cartesian": {
+          "version_output": "aster_opn_cartesian 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_opn_nonsingular2": {
+          "version_output": "aster_opn_nonsingular2 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_opn_cislunar": {
+          "version_output": "aster_opn_cislunar 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_convert_osculating_to_mean": {
+          "version_output": "aster_convert_osculating_to_mean 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_convert_keplerian_to_cartesian": {
+          "version_output": "aster_convert_keplerian_to_cartesian 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_convert_cartesian_to_keplerian": {
+          "version_output": "aster_convert_cartesian_to_keplerian 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_generate_observations": {
+          "version_output": "aster_generate_observations 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_generate_cislunar_observations": {
+          "version_output": "aster_generate_cislunar_observations 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_convert_coordinates": {
+          "version_output": "aster_convert_coordinates 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_convert_states": {
+          "version_output": "aster_convert_states 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        }
+      },
+      "full_ctest_log": "Internal ctest changing into directory: /Users/chendingcun/CLionProjects/ASTER/build/v1.4.1\nTest project /Users/chendingcun/CLionProjects/ASTER/build/v1.4.1\n      Start 10: core_frame_coordinates\n 1/23 Test #10: core_frame_coordinates ...........   Passed    1.18 sec\n      Start 11: core_orbit_averaging\n 2/23 Test #11: core_orbit_averaging .............   Passed    1.03 sec\n      Start 12: core_batch_determination\n 3/23 Test #12: core_batch_determination .........   Passed   25.19 sec\n      Start 13: core_batch_parameters\n 4/23 Test #13: core_batch_parameters ............   Passed  134.58 sec\n      Start 14: core_rkf78_safety\n 5/23 Test #14: core_rkf78_safety ................   Passed    1.65 sec\n      Start 15: core_adams_safety\n 6/23 Test #15: core_adams_safety ................   Passed    1.10 sec\n      Start 16: core_iod_eccentricity\n 7/23 Test #16: core_iod_eccentricity ............   Passed    0.64 sec\n      Start 17: invalid_inputs\n 8/23 Test #17: invalid_inputs ...................   Passed    0.64 sec\n      Start 18: data_integrity\n 9/23 Test #18: data_integrity ...................   Passed    0.07 sec\n      Start 19: iod_batch_handoff\n10/23 Test #19: iod_batch_handoff ................   Passed    0.37 sec\n      Start 21: math_backend_sofa\n11/23 Test #21: math_backend_sofa ................   Passed    0.49 sec\n      Start 22: observation_runtime\n12/23 Test #22: observation_runtime ..............   Passed    5.68 sec\n      Start 23: observation_geometry\n13/23 Test #23: observation_geometry .............   Passed    4.74 sec\n      Start 24: observation_angular_noise\n14/23 Test #24: observation_angular_noise ........   Passed    0.76 sec\n      Start 25: cislunar_interpolation\n15/23 Test #25: cislunar_interpolation ...........   Passed    0.58 sec\n      Start 26: core_cislunar_observation\n16/23 Test #26: core_cislunar_observation ........   Passed    1.04 sec\n      Start 27: cislunar_observation_runtime\n17/23 Test #27: cislunar_observation_runtime .....   Passed    0.07 sec\n      Start 28: gravity_conventions\n18/23 Test #28: gravity_conventions ..............   Passed    1.03 sec\n      Start 29: core_earth_solid_tide\n19/23 Test #29: core_earth_solid_tide ............   Passed    1.04 sec\n      Start 30: core_station_coordinates\n20/23 Test #30: core_station_coordinates .........   Passed    1.27 sec\n      Start 31: station_coordinates_runtime\n21/23 Test #31: station_coordinates_runtime ......   Passed    1.38 sec\n      Start 32: conversion_roundtrips\n22/23 Test #32: conversion_roundtrips ............   Passed    1.32 sec\n      Start 33: core_iod_lagrange_j2\n23/23 Test #33: core_iod_lagrange_j2 .............   Passed    0.69 sec\n\n100% tests passed, 0 tests failed out of 23\n\nTotal Test time (real) = 186.56 sec\n",
+      "updated_ctest_log": "Internal ctest changing into directory: /Users/chendingcun/CLionProjects/ASTER/build/v1.4.1\nTest project /Users/chendingcun/CLionProjects/ASTER/build/v1.4.1\n    Start 17: invalid_inputs\n1/3 Test #17: invalid_inputs ...................   Passed   10.42 sec\n    Start 27: cislunar_observation_runtime\n2/3 Test #27: cislunar_observation_runtime .....   Passed    1.55 sec\n    Start 33: core_iod_lagrange_j2\n3/3 Test #33: core_iod_lagrange_j2 .............   Passed    2.03 sec\n\n100% tests passed, 0 tests failed out of 3\n\nTotal Test time (real) =  13.99 sec\n"
+    },
+    "linux": {
+      "platform": "Linux-6.17.0-1017-oem-x86_64-with-glibc2.39",
+      "compiler": "GCC 13.3",
+      "full_current_tests_passed": 23,
+      "full_regression_commit": "04a3d8f11a9f740e4c6d5e274993e864d6814619",
+      "full_target_build": "passed",
+      "programs": {
+        "aster_iod_gl": {
+          "version_output": "aster_iod_gl 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_iod_glml": {
+          "version_output": "aster_iod_glml 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_odn_batch": {
+          "version_output": "aster_odn_batch 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_opn_cartesian": {
+          "version_output": "aster_opn_cartesian 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_opn_nonsingular2": {
+          "version_output": "aster_opn_nonsingular2 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_opn_cislunar": {
+          "version_output": "aster_opn_cislunar 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_convert_osculating_to_mean": {
+          "version_output": "aster_convert_osculating_to_mean 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_convert_keplerian_to_cartesian": {
+          "version_output": "aster_convert_keplerian_to_cartesian 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_convert_cartesian_to_keplerian": {
+          "version_output": "aster_convert_cartesian_to_keplerian 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_generate_observations": {
+          "version_output": "aster_generate_observations 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_generate_cislunar_observations": {
+          "version_output": "aster_generate_cislunar_observations 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_convert_coordinates": {
+          "version_output": "aster_convert_coordinates 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        },
+        "aster_convert_states": {
+          "version_output": "aster_convert_states 1.4.1\nbackend=OPENLIBM-0.8.8; fp=no-fast-math,contract-off; Eigen=3.4.0,scalar; builtin=sin/cos-off; build=Release; commit=04a3d8f11a9f740e4c6d5e274993e864d6814619; source=clean",
+          "help_passed": true
+        }
+      },
+      "validation_steps": [
+        {
+          "name": "configure",
+          "command": [
+            "cmake",
+            "-S",
+            "/home/cdc/projects/ASTER",
+            "-B",
+            "/home/cdc/projects/ASTER/build/v1.4.1",
+            "-DCMAKE_BUILD_TYPE=Release",
+            "-DBUILD_TESTING=ON",
+            "-DASTER_BOOST_INCLUDE_DIR=/home/cdc/projects/aster-deployment-20261101/dependencies/boost_1_87_0"
+          ],
+          "exit": 0,
+          "seconds": 1.4525623610243201,
+          "log": "/home/cdc/projects/ASTER/build/v1.4.1/acceptance/configure.log"
+        },
+        {
+          "name": "build",
+          "command": [
+            "cmake",
+            "--build",
+            "/home/cdc/projects/ASTER/build/v1.4.1",
+            "--parallel",
+            "8"
+          ],
+          "exit": 0,
+          "seconds": 21.005240507423878,
+          "log": "/home/cdc/projects/ASTER/build/v1.4.1/acceptance/build.log"
+        },
+        {
+          "name": "ctest",
+          "command": [
+            "ctest",
+            "--test-dir",
+            "/home/cdc/projects/ASTER/build/v1.4.1",
+            "-R",
+            "^(core_|math_backend_sofa|invalid_inputs|data_integrity|iod_batch_handoff|observation_|cislunar_|gravity_conventions|station_coordinates_|conversion_roundtrips)",
+            "--output-on-failure",
+            "--output-junit",
+            "/home/cdc/projects/ASTER/build/v1.4.1/acceptance/current-tests.xml"
+          ],
+          "exit": 0,
+          "seconds": 155.0575040206313,
+          "log": "/home/cdc/projects/ASTER/build/v1.4.1/acceptance/ctest.log"
+        },
+        {
+          "name": "smoke",
+          "command": [
+            "python3",
+            "/home/cdc/projects/ASTER/tests/release_smoke.py",
+            "--bin-dir",
+            "/home/cdc/projects/ASTER/build/v1.4.1/bin",
+            "--output",
+            "/home/cdc/projects/ASTER/build/v1.4.1/acceptance/candidate",
+            "--seed",
+            "20261106"
+          ],
+          "exit": 0,
+          "seconds": 4.747601627372205,
+          "log": "/home/cdc/projects/ASTER/build/v1.4.1/acceptance/smoke.log"
+        }
+      ],
+      "full_ctest_log": "Internal ctest changing into directory: /home/cdc/projects/ASTER/build/v1.4.1\nTest project /home/cdc/projects/ASTER/build/v1.4.1\n      Start 10: core_frame_coordinates\n 1/23 Test #10: core_frame_coordinates ...........   Passed    0.00 sec\n      Start 11: core_orbit_averaging\n 2/23 Test #11: core_orbit_averaging .............   Passed    0.03 sec\n      Start 12: core_batch_determination\n 3/23 Test #12: core_batch_determination .........   Passed   22.78 sec\n      Start 13: core_batch_parameters\n 4/23 Test #13: core_batch_parameters ............   Passed  120.91 sec\n      Start 14: core_rkf78_safety\n 5/23 Test #14: core_rkf78_safety ................   Passed    0.02 sec\n      Start 15: core_adams_safety\n 6/23 Test #15: core_adams_safety ................   Passed    0.14 sec\n      Start 16: core_iod_eccentricity\n 7/23 Test #16: core_iod_eccentricity ............   Passed    0.03 sec\n      Start 17: invalid_inputs\n 8/23 Test #17: invalid_inputs ...................   Passed    0.44 sec\n      Start 18: data_integrity\n 9/23 Test #18: data_integrity ...................   Passed    0.10 sec\n      Start 19: iod_batch_handoff\n10/23 Test #19: iod_batch_handoff ................   Passed    0.46 sec\n      Start 21: math_backend_sofa\n11/23 Test #21: math_backend_sofa ................   Passed    0.01 sec\n      Start 22: observation_runtime\n12/23 Test #22: observation_runtime ..............   Passed    4.62 sec\n      Start 23: observation_geometry\n13/23 Test #23: observation_geometry .............   Passed    3.37 sec\n      Start 24: observation_angular_noise\n14/23 Test #24: observation_angular_noise ........   Passed    0.73 sec\n      Start 25: cislunar_interpolation\n15/23 Test #25: cislunar_interpolation ...........   Passed    0.00 sec\n      Start 26: core_cislunar_observation\n16/23 Test #26: core_cislunar_observation ........   Passed    0.00 sec\n      Start 27: cislunar_observation_runtime\n17/23 Test #27: cislunar_observation_runtime .....   Passed    0.06 sec\n      Start 28: gravity_conventions\n18/23 Test #28: gravity_conventions ..............   Passed    0.05 sec\n      Start 29: core_earth_solid_tide\n19/23 Test #29: core_earth_solid_tide ............   Passed    0.04 sec\n      Start 30: core_station_coordinates\n20/23 Test #30: core_station_coordinates .........   Passed    0.05 sec\n      Start 31: station_coordinates_runtime\n21/23 Test #31: station_coordinates_runtime ......   Passed    0.75 sec\n      Start 32: conversion_roundtrips\n22/23 Test #32: conversion_roundtrips ............   Passed    0.45 sec\n      Start 33: core_iod_lagrange_j2\n23/23 Test #33: core_iod_lagrange_j2 .............   Passed    0.00 sec\n\n100% tests passed, 0 tests failed out of 23\n\nTotal Test time (real) = 155.05 sec\n"
+    }
+  },
+  "scientific_file_count": 55,
+  "four_way_scientific_outputs_identical": true,
+  "input_hashes_identical": true,
+  "input_sha256": {
+    "iod_gl/file_observation": "af7162642cdc65ef2c30fa643b477dbec186935f4b4253eea9fd967d277b3881",
+    "iod_gl/file_observer": "c6e72782bee0286b3893e48a44fa3f568d00d11c2dc25cc682137a1fbe2afe1b",
+    "iod_gl/file_EOP": "d60ce7d6de3befd2699804d1069c29297604c270e05f13f27bf34ce95bb24882",
+    "iod_glml/file_observation": "af7162642cdc65ef2c30fa643b477dbec186935f4b4253eea9fd967d277b3881",
+    "iod_glml/file_observer": "c6e72782bee0286b3893e48a44fa3f568d00d11c2dc25cc682137a1fbe2afe1b",
+    "iod_glml/file_EOP": "d60ce7d6de3befd2699804d1069c29297604c270e05f13f27bf34ce95bb24882",
+    "odn_batch/file_observation": "11bdbbd5e2b342de6159b510df8a499712f0878e2bf3954034e16b72435b4bc3",
+    "odn_batch/file_EOP": "d60ce7d6de3befd2699804d1069c29297604c270e05f13f27bf34ce95bb24882",
+    "opn_cartesian/file_EOP": "d60ce7d6de3befd2699804d1069c29297604c270e05f13f27bf34ce95bb24882",
+    "opn_cartesian/file_JPLEPH": "9459bf98bb46dfec80bf7a931e9957cc4877eb011ccaca4c2175a254f8e25427",
+    "opn_cartesian/file_atmosphere_density": "edd6fb3e96f3450e620500cb0186cab9ae15e3457897afc73078b52c80ef8715",
+    "opn_cartesian/file_lunar_gravity_field": "16832b9d9090bdda2a3981497ea501f542a3cdd45d82afa029da152930cb2d1d",
+    "opn_nonsingular2/file_EOP": "d60ce7d6de3befd2699804d1069c29297604c270e05f13f27bf34ce95bb24882",
+    "opn_nonsingular2/file_JPLEPH": "9459bf98bb46dfec80bf7a931e9957cc4877eb011ccaca4c2175a254f8e25427",
+    "opn_nonsingular2/file_atmosphere_density": "edd6fb3e96f3450e620500cb0186cab9ae15e3457897afc73078b52c80ef8715",
+    "opn_nonsingular2/file_lunar_gravity_field": "16832b9d9090bdda2a3981497ea501f542a3cdd45d82afa029da152930cb2d1d",
+    "opn_cislunar/file_EOP": "d60ce7d6de3befd2699804d1069c29297604c270e05f13f27bf34ce95bb24882",
+    "opn_cislunar/file_JPLEPH": "9459bf98bb46dfec80bf7a931e9957cc4877eb011ccaca4c2175a254f8e25427",
+    "opn_cislunar/file_atmosphere_density": "edd6fb3e96f3450e620500cb0186cab9ae15e3457897afc73078b52c80ef8715",
+    "opn_cislunar/file_lunar_gravity_field": "16832b9d9090bdda2a3981497ea501f542a3cdd45d82afa029da152930cb2d1d",
+    "convert_osculating_to_mean/input_file": "27d06bd6396843c46413049b2ba42c0c771384fbbfa8121293d6fb306298d8c6"
+  },
+  "data_manifest_sha256": "697e7ec3ae3f0e0143c49a71701f1a9430ae9d2993b1644dfcc96d2a3517dbc5",
+  "scientific_files": {
+    "iod_gl/gl_residuals.txt": {
+      "sha256": "f3fc5e188f2fabb1100a3ce6eb362153247f32ad2b1bc5f31f28d8f6e010cd06",
+      "bytes": 790,
+      "rows": 10
+    },
+    "iod_gl/gl_solution.txt": {
+      "sha256": "829006c786806da7ba364f977aac626e884cedce449a84f6ac08ceadff7b5b0e",
+      "bytes": 403,
+      "rows": 7
+    },
+    "iod_glml/glml_residuals.txt": {
+      "sha256": "bebbed97b6a43437e79f65d8ac157c55df55f6d8658acf204f931435ab1d9da9",
+      "bytes": 789,
+      "rows": 10
+    },
+    "iod_glml/glml_candidates.csv": {
+      "sha256": "8d6116528707c2bae7fda7f3050720f7e48906eefb4b7a4a6ed69377393a00e2",
+      "bytes": 2772899,
+      "rows": 10002
+    },
+    "iod_glml/glml_solution.txt": {
+      "sha256": "b044495a024c1f83716059703583d377550ca48a594de654f1be4939fa246e97",
+      "bytes": 499,
+      "rows": 10
+    },
+    "odn_batch/bodn_residuals.txt": {
+      "sha256": "bd39e608aa3b0bf771995218ff412b4da9a7df79606a56149375ec4c870267c2",
+      "bytes": 22568,
+      "rows": 182
+    },
+    "opn_cartesian/propagation_ephemeris_nsg2.txt": {
+      "sha256": "d21ff6934408cae1f6fb4b573872cdcdf61ea0d051376ade2e2349b38032e5ad",
+      "bytes": 9882,
+      "rows": 61
+    },
+    "opn_cartesian/propagation_ephemeris_cartesian.txt": {
+      "sha256": "d949c74ae64067ead89af2ae85efa90e6641ba685116179745ae80b3b2f94049",
+      "bytes": 9882,
+      "rows": 61
+    },
+    "opn_cartesian/propagation_ephemeris_keplerian.txt": {
+      "sha256": "cce21ca3304c5f1f720e60d1f76c448d119f2e815b37cdec2cc0685642e4f757",
+      "bytes": 9882,
+      "rows": 61
+    },
+    "opn_nonsingular2/propagation_ephemeris_nsg2.txt": {
+      "sha256": "4fdd8061a323a333291a348dc3df450b477ce218534364344f808d01da460ab9",
+      "bytes": 9882,
+      "rows": 61
+    },
+    "opn_nonsingular2/propagation_ephemeris_cartesian.txt": {
+      "sha256": "e6ab85dbd3e78d825e11c7311bc769f415728cdcd226fc5abb394da5a73b957e",
+      "bytes": 9882,
+      "rows": 61
+    },
+    "opn_nonsingular2/propagation_ephemeris_keplerian.txt": {
+      "sha256": "d457001a74cb8104409d9781d1f0ce285fc2291d8fceb756a695e82067642cfe",
+      "bytes": 9882,
+      "rows": 61
+    },
+    "opn_cislunar/propagation_ephemeris_cartesian.txt": {
+      "sha256": "ca7cfc40a4056f71fb11918af4d2acf4e6f800c6323b69e097f30f60befca120",
+      "bytes": 1782,
+      "rows": 11
+    },
+    "convert_osculating_to_mean/o2m_ephemeris_mean_keplerian.txt": {
+      "sha256": "3e51aa88d99eff192dc123c2f215c4e1dcb7aaf7da4f2a84546572294631620b",
+      "bytes": 2710,
+      "rows": 20
+    },
+    "convert_keplerian_to_cartesian/result.txt": {
+      "sha256": "7906e011bf326710defd1ad756f388411149383a8074aca6a803fdbe46d20260",
+      "bytes": 155,
+      "rows": 1
+    },
+    "convert_cartesian_to_keplerian/result.txt": {
+      "sha256": "91d72ec815720eb7b89b8da84c96660a7dab9fcbb04f9cf04cb8c3c29b5b09f7",
+      "bytes": 155,
+      "rows": 1
+    },
+    "opn_cartesian_solid_tide/propagation_ephemeris_nsg2.txt": {
+      "sha256": "5a444de965fdb0d25d0bab68e549b9471abfc8dec64b6b47eb2c45518f660105",
+      "bytes": 9882,
+      "rows": 61
+    },
+    "opn_cartesian_solid_tide/propagation_ephemeris_cartesian.txt": {
+      "sha256": "0087e4b48c58999ea32e4d7cd15a2e43d5481e3ae04b2b77936a89d036b006de",
+      "bytes": 9882,
+      "rows": 61
+    },
+    "opn_cartesian_solid_tide/propagation_ephemeris_keplerian.txt": {
+      "sha256": "9aa015380e5c310f9033551bbf020688bebac946915d74965ddcac88c79c0b16",
+      "bytes": 9882,
+      "rows": 61
+    },
+    "opn_nonsingular2_solid_tide/propagation_ephemeris_nsg2.txt": {
+      "sha256": "3497468762f56332cfb95103b1e7c25b5fb05959a3a6f05b79f358e3e0568c29",
+      "bytes": 9882,
+      "rows": 61
+    },
+    "opn_nonsingular2_solid_tide/propagation_ephemeris_cartesian.txt": {
+      "sha256": "3277a3424a365057d4e95b0cc140a76b7b5cdb4d354011e596aea84df95e3c80",
+      "bytes": 9882,
+      "rows": 61
+    },
+    "opn_nonsingular2_solid_tide/propagation_ephemeris_keplerian.txt": {
+      "sha256": "4b17cf522b4f901f2e6bd1bc84db805bf6555a236fd1815eb9261443131c7872",
+      "bytes": 9882,
+      "rows": 61
+    },
+    "generate_observations/all_LEO_2body_0001_60927.5063541667.txt": {
+      "sha256": "bffef33b4b5eea0aa00eb4735c9cd465c5a141593083ffe005c7b6543175f8d8",
+      "bytes": 675836,
+      "rows": 8641
+    },
+    "generate_observations/cart_LEO_2body_0001_00001_60927.8496412037.txt": {
+      "sha256": "8f4a666ce81d0fe8252a35cd94a146883f6ccecbe0c93a3e055915510f6b3881",
+      "bytes": 6355,
+      "rows": 41
+    },
+    "generate_observations/cart_LEO_2body_0001_00002_60927.9185069445.txt": {
+      "sha256": "b154c3824f6fc8a047a4285b512d846ab83da1602c2ceb98b8de16d1a1dadc1e",
+      "bytes": 10075,
+      "rows": 65
+    },
+    "generate_observations/cart_LEO_2body_0001_00003_60927.9891087963.txt": {
+      "sha256": "ab427e2a6ff88518c1158cb51a4bc2f9f7ea766d8a4249f681f297d3876bbdfc",
+      "bytes": 10540,
+      "rows": 68
+    },
+    "generate_observations/cart_LEO_2body_0001_00004_60928.0601736111.txt": {
+      "sha256": "b75034b1dfcfe6715ff987834bf16346517c0a9674453f1d46ed515f58c81042",
+      "bytes": 10385,
+      "rows": 67
+    },
+    "generate_observations/cart_LEO_2body_0001_00005_60928.1311226852.txt": {
+      "sha256": "69da684957bcf5b8d9ef8a90b9fe0be331f66050d28859d7fa5b490f7b9e814c",
+      "bytes": 10385,
+      "rows": 67
+    },
+    "generate_observations/cart_LEO_2body_0001_00006_60928.2021875000.txt": {
+      "sha256": "97c69d7234ce7e8202fb7d239a01fa88275afe5a099c150bfbf10fc88a50be10",
+      "bytes": 8680,
+      "rows": 56
+    },
+    "generate_observations/kep_LEO_2body_0001_00001_60927.8496412037.txt": {
+      "sha256": "58fd4fde9589ce06dd8b474eb00abbb4541c581c0ecc8b5896075d28b927c014",
+      "bytes": 6355,
+      "rows": 41
+    },
+    "generate_observations/kep_LEO_2body_0001_00002_60927.9185069445.txt": {
+      "sha256": "b5303651ec41f7f48a494c19ffc9f526e2d59bcba4e813b2385384359428e2f9",
+      "bytes": 10075,
+      "rows": 65
+    },
+    "generate_observations/kep_LEO_2body_0001_00003_60927.9891087963.txt": {
+      "sha256": "536cad14af74359125089758c724c76043c6830b25103d69da1e4c26770d9e77",
+      "bytes": 10540,
+      "rows": 68
+    },
+    "generate_observations/kep_LEO_2body_0001_00004_60928.0601736111.txt": {
+      "sha256": "d6ef65d30287d91ea515ff02e461fc9fb720870cd5db4fa558799aa784e36d42",
+      "bytes": 10385,
+      "rows": 67
+    },
+    "generate_observations/kep_LEO_2body_0001_00005_60928.1311226852.txt": {
+      "sha256": "f540e0f985ef1c6405c875dbc0d709c1bd571f8c93d4f6fc66ba1e8cf2fa3e26",
+      "bytes": 10385,
+      "rows": 67
+    },
+    "generate_observations/kep_LEO_2body_0001_00006_60928.2021875000.txt": {
+      "sha256": "4ade426e3e9baf2394c3554905c6a5ba321384a118c7363a9908e129d3520f01",
+      "bytes": 8680,
+      "rows": 56
+    },
+    "generate_observations/obs_LEO_2body_0001_00001_60927.8496412037.txt": {
+      "sha256": "4999e21875ba36e096066ee8c27b6efa5b4a909422f5c9cdc833f144e4dc1df3",
+      "bytes": 2933,
+      "rows": 41
+    },
+    "generate_observations/obs_LEO_2body_0001_00002_60927.9185069445.txt": {
+      "sha256": "5ae53c07ee590148c3973b6864a3f57569c0cd4657861b72862e39fdb2b3d20e",
+      "bytes": 4615,
+      "rows": 65
+    },
+    "generate_observations/obs_LEO_2body_0001_00003_60927.9891087963.txt": {
+      "sha256": "f414d01e65e78f7ea768afface27771d67eb5734599f5e72213505ed9ab03224",
+      "bytes": 4797,
+      "rows": 68
+    },
+    "generate_observations/obs_LEO_2body_0001_00004_60928.0601736111.txt": {
+      "sha256": "dfcccebeb1b1270b970aa9ce31353d501766a7fd6f19738cb419cee64bb5a5b3",
+      "bytes": 4722,
+      "rows": 67
+    },
+    "generate_observations/obs_LEO_2body_0001_00005_60928.1311226852.txt": {
+      "sha256": "fc79bf77f767dc5308e583fe80df2831aaf7a72c90743f3293c70a0b065f52b1",
+      "bytes": 4744,
+      "rows": 67
+    },
+    "generate_observations/obs_LEO_2body_0001_00006_60928.2021875000.txt": {
+      "sha256": "9adb8b24fd8bd47d9dfafcb9a6a08bf5cb9d61372e2b8b62b9b1b398a935af18",
+      "bytes": 3989,
+      "rows": 56
+    },
+    "generate_cislunar_observations/observations.txt": {
+      "sha256": "d97debe5924afaf5b769f809def10c8d2ce4ece7bf6223e9465b07e4f1c2f0f5",
+      "bytes": 206,
+      "rows": 3
+    },
+    "generate_cislunar_observations/components.csv": {
+      "sha256": "8d2a3883d936d8d8be18253e9855d28ba735bbb5466aec8baac87055f7575840",
+      "bytes": 823,
+      "rows": 4
+    },
+    "convert_coordinates/geodetic_to_itrs.txt": {
+      "sha256": "d4667f3ed3bb29f69dcf5264dfeb58ab06308bcb938b31622fbd11a49ece4234",
+      "bytes": 653,
+      "rows": 11
+    },
+    "convert_coordinates/geodetic_to_gcrs.txt": {
+      "sha256": "c1b44f09986476a0922f4697d17e7caaf5132132999ad035d4ab2391edd2d9e4",
+      "bytes": 705,
+      "rows": 11
+    },
+    "convert_coordinates/itrs_to_geodetic.txt": {
+      "sha256": "581557b596570a0ed92c839af28961261fcf829324a00aa6d45d792fa7e11993",
+      "bytes": 544,
+      "rows": 11
+    },
+    "convert_coordinates/itrs_to_gcrs.txt": {
+      "sha256": "37e389b73105dc10ea53524c420e4c366e60142452081ae48ad17de3c04e568d",
+      "bytes": 689,
+      "rows": 11
+    },
+    "convert_coordinates/gcrs_to_itrs.txt": {
+      "sha256": "b74b1e05889c43fda68bd0e9da0b2e784e83ea8257c9116b4b257a1b59cad5ef",
+      "bytes": 716,
+      "rows": 11
+    },
+    "convert_coordinates/gcrs_to_geodetic.txt": {
+      "sha256": "7d1091c2bd62538fe78c925f3d47c0391c670e2eb9869990f19373cd40a9ba5f",
+      "bytes": 666,
+      "rows": 11
+    },
+    "convert_states/kep_to_cart.txt": {
+      "sha256": "b17066d599108c1204097ca4e7e329cf54db622cf0a599b5aae06e2efd0a7a21",
+      "bytes": 354,
+      "rows": 4
+    },
+    "convert_states/kep_to_nsg2.txt": {
+      "sha256": "d7596271c171dab0b032f31f9d95bcc64c112ff545e98983c7b1c93b376336b8",
+      "bytes": 332,
+      "rows": 4
+    },
+    "convert_states/cart_to_kep.txt": {
+      "sha256": "7004556386f00572d36011c00ddef09f37811fa9febcd4d3cbc6ad37e634e142",
+      "bytes": 332,
+      "rows": 4
+    },
+    "convert_states/cart_to_nsg2.txt": {
+      "sha256": "992097b04e95466ad30bfa403e7bd2bfbd674660fc400ea861567f02fc41d156",
+      "bytes": 348,
+      "rows": 4
+    },
+    "convert_states/nsg2_to_cart.txt": {
+      "sha256": "3a9d9d2313f1d89da41756c8e3d50b27c77c6b85baa1821ef5beeb24e5f434ab",
+      "bytes": 354,
+      "rows": 4
+    },
+    "convert_states/nsg2_to_kep.txt": {
+      "sha256": "bbe6c66b4a5766d474e2dbd0baadbaf13c40cdab56b500ebb7df93ea851e484a",
+      "bytes": 301,
+      "rows": 4
+    }
+  },
+  "evidence_sources": {
+    "mac_smoke_summary_sha256": "511cf26c43c0a6c5dcb4bc8081891d1d32c98598030c22a24269ce224ff41d6c",
+    "linux_smoke_summary_sha256": "096c0edf6dbaf601a6b358b9f049a1f67e74fd433d3fffd9c78052e8374a6365",
+    "linux_validation_sha256": "96da6c12ddaea90cae3035557579be68fc283da94f6e6fe6b512a4dea66ed114"
+  }
+}

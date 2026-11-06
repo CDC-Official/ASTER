@@ -22,7 +22,7 @@
 | 六向测站位置转换是否与初轨、SOFA 一致，以及现有程序的结果是否变化 | [测站位置转换](13_station-coordinates.md) | [六向、往返、来源与现有输出校验](evidence/19_station-coordinates.json) |
 | 1.4.0 的发布构建、新增转换与固体潮跨平台结果 | [1.4.0 发布验收](14_release-1.4.0.md) | [十三程序及55份科学输出校验](evidence/20_release-1.4.0.json) |
 | FG 的 z 方向 J₂ 三次项为何修正，以及对预报和初轨的影响 | [公式推导与验证](16_iod-j2-cubic.md) | [预报、定轨及图件证据清单](evidence/22_iod-j2-cubic.json) |
-
+| 1.4.1 的公共 J₂ 修正、版本信息与跨平台发布检查 | [1.4.1 发布验收](17_release-1.4.1.md) | [两端版本、回归、输入与55份科学输出校验](evidence/23_release-1.4.1.json) |
 
 <a id="migration"></a>
 ## 1.0.0 迁移来源与核对
