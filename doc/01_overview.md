@@ -58,3 +58,5 @@ flowchart LR
 本套指南随 main 更新。复现某次正式发布时，使用对应标签中的指南和构建目录；日常命令默认从 ASTER 仓库根目录执行，运行结果放在 `build/` 下。
 
 地月单程测距从两颗星的状态、钟差和真实接收事件生成观测，输入输出见[观测指南](06_observations.md#cislunar)。当前 GL、GLML 与 BODN 的观测类型分别在[数据格式](05_data-formats.md)中说明。
+
+本次版本的 [J₂ 系数推导与预报对照](validation/16_iod-j2-cubic.md)交代公式来源、修正与实际定轨影响；[发布验收](validation/17_release-1.4.1.md)保存两端构建和代表算例结果。

@@ -10,15 +10,15 @@ cd /home/cdc/projects/ASTER
 git status --short --branch
 ```
 
-服务器源码目录固定为 `/home/cdc/projects/ASTER`，日常使用 main。当前正式版本为 1.4.0，两端在相同发布源码上分别构建；[发布验收](validation/14_release-1.4.0.md)记录编译器和科学输出核对结果。程序在各自的 `build/v1.4.0/bin/`，旧版源码通过标签查看，旧版构建可继续保留在对应 `build/` 子目录。
+服务器源码目录固定为 `/home/cdc/projects/ASTER`，日常使用 main。当前正式版本为 1.4.1，两端在相同发布源码上分别构建；[发布验收](validation/17_release-1.4.1.md)记录编译器和科学输出核对结果。程序在各自的 `build/v1.4.1/bin/`，旧版源码通过标签查看，旧版构建可继续保留在对应 `build/` 子目录。
 
 在服务器执行：
 
 ```sh
-cmake -S . -B build/v1.4.0 -DCMAKE_BUILD_TYPE=Release \
+cmake -S . -B build/v1.4.1 -DCMAKE_BUILD_TYPE=Release \
     -DASTER_BOOST_ROOT=/home/cdc/projects/aster-deployment-20261101/dependencies/boost_1_87_0
-cmake --build build/v1.4.0 --parallel 3
-build/v1.4.0/bin/aster_iod_gl --version
+cmake --build build/v1.4.1 --parallel 3
+build/v1.4.1/bin/aster_iod_gl --version
 ```
 
 发布构建使用 Linux x86_64 / GCC 13.3、既有 libgomp 和 Boost 1.87.0。Eigen、SOFA、OpenLibm 随仓库源码构建。早期 Linux 数值对照见[验证索引](validation/01_index.md#linux)，编译器与短弧候选对照见[GLML 诊断](validation/02_glml-sensitivity.md)，统一后端的后续结果见[1.1.0 验收](validation/03_math-backend.md)。
@@ -30,7 +30,7 @@ build/v1.4.0/bin/aster_iod_gl --version
 GLML 的 OpenMP 线程数可在启动时填写，例如：
 
 ```sh
-OMP_NUM_THREADS=2 OMP_DYNAMIC=FALSE build/v1.4.0/bin/aster_iod_glml \
+OMP_NUM_THREADS=2 OMP_DYNAMIC=FALSE build/v1.4.1/bin/aster_iod_glml \
     -I build/examples/trial-001/iod_glml/setting.txt
 ```
 
@@ -80,3 +80,9 @@ git log -1 --oneline
 bundle 传送提交历史，origin 的地址继续保持 GitHub。服务器有独立新提交时，先从服务器生成该分支的 bundle 传回 Mac，在 Mac 获取并整合，再推送和同步；保留双方的新提交。祖先检查或快进失败时，从 `git log --graph --decorate --oneline --all` 查看分叉位置。
 
 这里的增量包只传 main 新提交。发布标签随发布流程单独同步，日常文档或功能同步不移动已有版本标签。
+
+## 当前论文实验版
+
+`experiment/thesis` 的源码工作树为 `/home/cdc/projects/ASTER/build/experiment-thesis-src`。本次 `v1.4.1-thesis.1` 的独立构建为 `/home/cdc/projects/ASTER/build/v1.4.1-thesis.1`，与正式版 `build/v1.4.1` 分开。旧 `build/experiment-thesis` 保留为历史 CPU 实验构建，其源码版本见[原实验记录](https://github.com/CDC-Official/ASTER/blob/experiment/thesis/doc/validation/15_thesis-cpu.md)。
+
+每次在源工作树提交或同步完成后，使用对应的 `-S` 源码目录、`-B` 版本目录执行配置和构建，运行前检查 `bin/aster_iod_glml --version`。完整实验编号及结果目录规则见[开发维护](09_development.md#论文实验版本)。

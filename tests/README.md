@@ -107,8 +107,10 @@ ctest --test-dir build/release -R '^(core_station_coordinates|station_coordinate
 `release_smoke.py` 复用九个既有程序的最小输入，并运行地基测角、双向单程测距及六向位置坐标、轨道状态转换。它检查各程序的版本与帮助，保存科学文件的 SHA-256、行数和实际运行配置。
 
 ```sh
-python3 tests/release_smoke.py --bin-dir build/v1.3.0/bin \
-    --output build/v1.3.0/acceptance/local
+python3 tests/release_smoke.py --bin-dir build/v1.4.1/bin \
+    --output build/v1.4.1/acceptance/local
 ```
 
 输出目录须为新目录。两端使用同一源码、输入资料和 OpenLibm 构建，比较同名科学文件的 SHA-256；日志和含机器路径的报告随各次运行保存。
+
+发布代表检查同时运行两套 20×20＋固体潮的 600 s 预报，合计保存 55 份科学输出；GLML 固定 `--seed`（默认 20261106），程序版本、完整提交与输入校验写入 `summary.json`。两端在同一源码提交上运行，按同名科学文件校验，日志和任务报告各自保留。

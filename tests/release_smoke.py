@@ -13,15 +13,17 @@ from run_case import prepare
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--bin-dir', type=Path, required=True)
 parser.add_argument('--output', type=Path, required=True)
+parser.add_argument('--seed', type=int, default=20261106, help='GLML候选的固定随机种子。')
 args = parser.parse_args()
 root = Path(__file__).resolve().parent.parent
 binary = args.bin_dir.resolve()
 output = args.output.resolve()
 output.mkdir(parents=True, exist_ok=False)
 version = re.search(r'project\(ASTER VERSION ([0-9.]+)', (root / 'CMakeLists.txt').read_text()).group(1)
+version += re.search(r'set\(ASTER_VERSION_SUFFIX "([^"]*)"\)', (root / 'CMakeLists.txt').read_text()).group(1)
 manifest = {'platform': platform.platform(), 'version': version,
             'commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip(),
-            'threads': 2, 'programs': {}, 'scientific_files': {}}
+            'threads': 2, 'solver_seed': args.seed, 'programs': {}, 'scientific_files': {}, 'inputs': {}}
 
 def run_program(name, command, directory):
     """运行一次完整主程序，保留日志并检查退出状态。"""
@@ -48,14 +50,43 @@ for name in programs:
     h = subprocess.run([str(binary / name), '--help'], capture_output=True, text=True, check=True)
     assert v.stdout.splitlines()[0] == f'{name} {version}', (name, v.stdout)
     assert name in h.stdout + h.stderr, name
+    assert '; commit=' + manifest['commit'] + '; source=clean' in v.stdout, (name, v.stdout)
     manifest['programs'][name] = {'version_output': v.stdout.strip(), 'help_passed': True}
 
 for case, _ in cases.items():
     info, fixture, directory, command = prepare(case, output / case)
+    if case == 'iod_glml':
+        with (directory / 'setting.txt').open('a') as stream:
+            stream.write(f'\nrandom_seed = {args.seed}\n')
+
+    # 保存实际配置和已解析输入的校验，路径只作为本次运行的定位信息。
+    for key, value in [line.split('=', 1) for line in (directory / 'setting.txt').read_text().splitlines()
+                       if '=' in line] if not info.get('conversion') else []:
+        path = Path(value.strip())
+
+        if key.strip() in info['input_keys'] and value.strip() and path.is_file():
+            manifest['inputs'][case + '/' + key.strip()] = hashlib.sha256(path.read_bytes()).hexdigest()
+
     run_program(info['target'], command, directory)
 
     for name in info['references']:
         record_file(case, directory / name)
+
+# 两个地球预报入口各补充20×20加二阶固体潮的600秒代表算例。
+for case in ('opn_cartesian', 'opn_nonsingular2'):
+    label = case + '_solid_tide'
+    info, fixture, directory, command = prepare(case, output / label)
+    config = directory / 'setting.txt'
+    settings = {key.strip(): value.strip() for line in config.read_text().splitlines()
+                if '=' in line for key, value in [line.split('=', 1)]}
+    settings.update(earth_zonal_order='20', earth_tesseral_degree='20', propagation_length='600',
+                    integrator_stepsize='10', use_solidtide_perturb='1', solar_gravity='0',
+                    lunar_gravity='0', use_lunar_NSG='0', use_drag_perturb='0', use_SRP_perturb='0')
+    config.write_text('\n'.join(f'{key} = {value}' for key, value in settings.items()) + '\n')
+    run_program(info['target'], command, directory)
+
+    for name in info['references']:
+        record_file(label, directory / name)
 
 # 地基测角同时保存各弧的观测与两种轨道真值，输出由同一配置准备。
 case = root / 'tests/generate_observations'
