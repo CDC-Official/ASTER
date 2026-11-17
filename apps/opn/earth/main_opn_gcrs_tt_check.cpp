@@ -85,11 +85,17 @@ int main(int argc, char* argv[])
         input.ReadSimpleInput(tracer, setting_file, true);
         if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
-        // 全部关键词为必选项。对照算例显式写出开关，避免漏写后双方使用不同模型。
+        // 沿用原 Cartesian 主程序的关键词；各字段的单位、开关和路径含义保持原定义。
         const std::set<std::string> keywords = {
-            "reference_epoch", "x_km", "y_km", "z_km", "vx_km_s", "vy_km_s", "vz_km_s",
-            "duration_s", "step_s", "earth_degree", "moon_degree", "use_sun", "use_moon", "use_planets",
-            "file_jpl", "file_eop", "file_moon_gravity", "output_directory"
+            "reference_epoch", "reference_Keplerian", "reference_Cartesian", "propagation_length",
+            "file_EOP", "file_JPLEPH", "file_atmosphere_density", "file_lunar_gravity_field",
+            "earth_zonal_order", "earth_tesseral_degree", "solar_gravity", "lunar_gravity",
+            "use_lunar_NSG", "lunar_zonal_order", "lunar_tesseral_degree", "use_drag_perturb",
+            "use_SRP_perturb", "use_solidtide_perturb", "satellite_id", "satellite_mass",
+            "satellite_drag_cross_area", "satellite_srp_cross_area", "satellite_drag_Cd", "satellite_srp_eta",
+            "integrator_id", "integrator_adams_steps", "integrator_stepsize", "integrator_maxTE",
+            "file_eph_Cartesian", "file_eph_Keplerian", "file_eph_NonSingular2", "file_report",
+            "file_programlog", "output_state_units", "display_model", "display_setting", "display_progress"
         };
 
         for (size_t i = 0; i < input.Count(); ++i)
@@ -105,91 +111,200 @@ int main(int argc, char* argv[])
             }
         }
 
-        for (const auto& keyword : keywords)
+        // 输出文件分别采用原有 file_* 关键词，相对路径以 setting 目录为基准。
+        const std::string cartesian_name = input.GetString(tracer, "file_eph_Cartesian");
+        if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
+
+        if (cartesian_name.empty())
         {
-            if (!input.HasKeyword(keyword))
+            tracer.LogEvent(__FILE__, __func__, __LINE__, "file_eph_Cartesian must be nonempty for the Cartesian comparison.", EventType::ERROR);
+            tracer.EmergencyExit(program_log);
+        }
+
+        const fs::path cartesian_path = base / cartesian_name;
+        fs::create_directories(cartesian_path.parent_path());
+        std::string report_name, log_name;
+
+        if (input.HasKeyword("file_report")) input.GetString(tracer, "file_report", report_name);
+
+        if (input.HasKeyword("file_programlog")) input.GetString(tracer, "file_programlog", log_name);
+
+        if (!log_name.empty())
+        {
+            fs::create_directories((base / log_name).parent_path());
+            program_log.open(base / log_name);
+
+            if (!program_log)
             {
-                tracer.LogEvent(__FILE__, __func__, __LINE__, "Missing keyword: " + keyword, EventType::ERROR);
+                tracer.LogEvent(__FILE__, __func__, __LINE__, "Cannot open file_programlog: " + log_name, EventType::ERROR);
+                tracer.EmergencyExit(program_log);
+            }
+
+            // 原始配置随日志保存，核对实际输入及模型开关。
+            std::ifstream setting_stream(setting_path);
+            program_log << "Input settings:\n" << setting_stream.rdbuf() << "\nEvents:\n";
+        }
+
+        OrbitPropagationJob job;
+        double epoch_utc, duration_s, step_s, max_te_setting;
+        double state_km[6];
+        const std::string epoch_text = input.GetString(tracer, "reference_epoch");
+        if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
+
+        // reference_epoch 保留 UTC MJD、JD 和六项年月日时分秒三种原有形式。
+        std::vector<std::string> epoch_parts;
+        split(epoch_text, epoch_parts);
+
+        if (epoch_parts.size() == 1)
+        {
+            input.GetDoubleStrict(tracer, "reference_epoch", epoch_utc);
+            if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
+
+            if (epoch_utc > constants::MJD_OFFSET) epoch_utc -= constants::MJD_OFFSET;
+        }
+        else if (epoch_parts.size() == 6)
+        {
+            int year, month, day, hour, minute;
+            double second;
+            std::istringstream epoch_stream(epoch_text);
+            epoch_stream >> year >> month >> day >> hour >> minute >> second;
+
+            if (!epoch_stream || !std::isfinite(second) || hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second >= 60)
+            {
+                tracer.LogEvent(__FILE__, __func__, __LINE__, "Invalid reference_epoch calendar fields.", EventType::ERROR);
+                tracer.EmergencyExit(program_log);
+            }
+
+            const int status = Calendar2MJD(year, month, day, hour, minute, second, epoch_utc);
+            if (status != 0)
+            {
+                tracer.LogEvent(__FILE__, __func__, __LINE__, "Invalid reference_epoch calendar date.", EventType::ERROR);
+                tracer.EmergencyExit(program_log);
+            }
+        }
+        else
+        {
+            tracer.LogEvent(__FILE__, __func__, __LINE__, "reference_epoch requires UTC MJD, JD, or six calendar fields.", EventType::ERROR);
+            tracer.EmergencyExit(program_log);
+        }
+
+        // 原 reference_Cartesian 一行接收 x y z vx vy vz，单位 km、km/s。
+        const std::string state_text = input.GetString(tracer, "reference_Cartesian");
+        if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
+
+        std::istringstream state_stream(state_text);
+
+        for (double& component : state_km)
+        {
+            state_stream >> component;
+
+            if (!state_stream || !std::isfinite(component))
+            {
+                tracer.LogEvent(__FILE__, __func__, __LINE__, "reference_Cartesian requires six finite values in km and km/s.", EventType::ERROR);
                 tracer.EmergencyExit(program_log);
             }
         }
 
-        // 文件路径相对于配置目录；file_eop 空值表示整段使用零定向参数。
-        const std::string output_name = input.GetString(tracer, "output_directory");
-        if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
+        std::string extra_state;
+        state_stream >> extra_state;
 
-        if (output_name.empty())
+        std::string keplerian_text;
+
+        if (input.HasKeyword("reference_Keplerian"))
         {
-            tracer.LogEvent(__FILE__, __func__, __LINE__, "output_directory must be nonempty.", EventType::ERROR);
-            tracer.EmergencyExit(program_log);
-        }
-
-        const fs::path output_dir = base / output_name;
-        fs::create_directories(output_dir);
-        program_log.open(output_dir / "program.log");
-
-        if (!program_log)
-        {
-            tracer.LogEvent(__FILE__, __func__, __LINE__, "Cannot open program.log in " + output_dir.string(), EventType::ERROR);
-            tracer.EmergencyExit(program_log);
-        }
-
-        // 原始配置随运行日志保存，便于确认实际使用的初值和模型。
-        std::ifstream setting_stream(setting_path);
-        program_log << "Input settings:\n" << setting_stream.rdbuf() << "\nEvents:\n";
-
-        OrbitPropagationJob job;
-        double epoch_utc, duration_s, step_s;
-        double state_km[6];
-        const std::array<std::string, 6> state_keys = {"x_km", "y_km", "z_km", "vx_km_s", "vy_km_s", "vz_km_s"};
-        input.GetDoubleStrict(tracer, "reference_epoch", epoch_utc);
-        if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
-
-        for (int component = 0; component < 6; ++component)
-        {
-            input.GetDoubleStrict(tracer, state_keys[component], state_km[component]);
+            input.GetString(tracer, "reference_Keplerian", keplerian_text);
             if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
         }
 
-        // 时长与固定步长以 TT 秒给出；最后不足一步时补齐到精确终点。
-        input.GetDoubleStrict(tracer, "duration_s", duration_s);
+        if (!extra_state.empty() || !keplerian_text.empty())
+        {
+            tracer.LogEvent(__FILE__, __func__, __LINE__, "Use six reference_Cartesian values and leave reference_Keplerian empty for this comparison.", EventType::ERROR);
+            tracer.EmergencyExit(program_log);
+        }
+
+        // 原积分设置仍以秒给出；102 为 RKF78 定步长，maxTE 为归一化局部误差告警阈值。
+        input.GetDoubleStrict(tracer, "propagation_length", duration_s);
         if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
-        input.GetDoubleStrict(tracer, "step_s", step_s);
+        input.GetDoubleStrict(tracer, "integrator_stepsize", step_s);
         if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
-        int earth_degree, moon_degree;
-        bool use_sun, use_moon, use_planets;
-        input.GetIntegerStrict(tracer, "earth_degree", earth_degree);
+        input.GetDoubleStrict(tracer, "integrator_maxTE", max_te_setting);
         if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
-        input.GetIntegerStrict(tracer, "moon_degree", moon_degree);
+        // 原有地月带谐与田谐分别设置；use_lunar_NSG 独立控制月球非球形项。
+        int earth_order, earth_degree, moon_order, moon_degree;
+        int solar_gravity, lunar_gravity, use_lunar_nsg, integrator_id, output_units;
+        int use_drag, use_srp, display_model, display_setting, display_progress;
+        input.GetIntegerStrict(tracer, "earth_zonal_order", earth_order);
         if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
-        input.GetBoolean(tracer, "use_sun", use_sun);
+        input.GetIntegerStrict(tracer, "earth_tesseral_degree", earth_degree);
         if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
-        input.GetBoolean(tracer, "use_moon", use_moon);
+        input.GetIntegerStrict(tracer, "lunar_zonal_order", moon_order);
         if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
-        input.GetBoolean(tracer, "use_planets", use_planets);
+        input.GetIntegerStrict(tracer, "lunar_tesseral_degree", moon_degree);
         if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
-        // 0 关闭对应非球形项；2—80 同时设置带谐与田谐的最高次数。
-        if (duration_s < 0 || step_s <= 0 || duration_s / step_s > 1e8
-            || earth_degree < 0 || earth_degree == 1 || earth_degree > 80
-            || moon_degree < 0 || moon_degree == 1 || moon_degree > 80
-            || (moon_degree > 0 && !use_moon)
+        input.GetIntegerStrict(tracer, "solar_gravity", solar_gravity);
+        if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
+
+        input.GetIntegerStrict(tracer, "lunar_gravity", lunar_gravity);
+        if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
+
+        input.GetIntegerStrict(tracer, "use_lunar_NSG", use_lunar_nsg);
+        if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
+
+        input.GetIntegerStrict(tracer, "integrator_id", integrator_id);
+        if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
+
+        input.GetIntegerStrict(tracer, "output_state_units", output_units);
+        if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
+
+        input.GetIntegerStrict(tracer, "use_drag_perturb", use_drag);
+        if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
+
+        input.GetIntegerStrict(tracer, "use_SRP_perturb", use_srp);
+        if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
+
+        input.GetIntegerStrict(tracer, "display_model", display_model);
+        if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
+
+        input.GetIntegerStrict(tracer, "display_setting", display_setting);
+        if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
+
+        input.GetIntegerStrict(tracer, "display_progress", display_progress);
+        if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
+
+        int use_solid_tide = 0;
+
+        if (input.HasKeyword("use_solidtide_perturb"))
+        {
+            input.GetIntegerStrict(tracer, "use_solidtide_perturb", use_solid_tide);
+            if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
+        }
+
+        // 核对入口运行本次约定的定步长、日月 DE440 引力模型，检查误设的其他模型开关。
+        if (duration_s < 0 || step_s <= 0 || duration_s / step_s > 1e8 || max_te_setting <= 0
+            || earth_order < 0 || earth_order > 80 || earth_degree < 0 || earth_degree > 80
+            || moon_order < 0 || moon_order > 80 || moon_degree < 0 || moon_degree > 80
+            || integrator_id != 102 || output_units != 2 || use_drag != 0 || use_srp != 0 || use_solid_tide != 0
+            || solar_gravity < 0 || solar_gravity > 1 || lunar_gravity < 0 || lunar_gravity > 1
+            || use_lunar_nsg < 0 || use_lunar_nsg > 1 || (use_lunar_nsg && lunar_gravity != 1)
+            || display_model < 0 || display_model > 1 || display_setting < 0 || display_setting > 1
+            || display_progress < 0 || display_progress > 2
             || std::hypot(state_km[0], state_km[1], state_km[2]) == 0)
         {
-            tracer.LogEvent(__FILE__, __func__, __LINE__, "Require duration>=0, step>0, <=1e8 steps, nonzero position, degrees=0 or 2..80, and Moon enabled for lunar harmonics.", EventType::ERROR);
+            tracer.LogEvent(__FILE__, __func__, __LINE__, "Check propagation_length>=0, integrator_stepsize>0, maxTE>0, gravity degrees 0..80, integrator_id=102, output_state_units=2, solar/lunar_gravity=0 or 1, and disabled drag/SRP/tides.", EventType::ERROR);
             tracer.EmergencyExit(program_log);
         }
 
         // ==================== 2. 历表、EOP 与力模型 ====================
         const double epoch_tt = UTC2TT(epoch_utc);
         const double end_tt = epoch_tt + duration_s / constants::SECONDS_PER_DAY;
-        const std::string jpl_name = input.GetString(tracer, "file_jpl");
+        const std::string jpl_name = input.GetString(tracer, "file_JPLEPH");
         if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
         const int jpl_status = Read_JPLEPH((base / jpl_name).string());
@@ -203,7 +318,7 @@ int main(int argc, char* argv[])
 
         // 有资料时按日插值；超出覆盖范围时定向量归零，DAT 由 SOFA 单独取得。
         job.opn_EOP.SetZeroFallback(true);
-        const std::string eop_name = input.GetString(tracer, "file_eop");
+        const std::string eop_name = input.GetString(tracer, "file_EOP");
         if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
         if (!eop_name.empty())
@@ -213,27 +328,25 @@ int main(int argc, char* argv[])
             if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
         }
 
-        job.opn_model.use_earth_NSG = earth_degree > 0;
-        job.opn_model.earth_zonal_order = earth_degree;
+        job.opn_model.use_earth_NSG = earth_order > 0 || earth_degree > 0;
+        job.opn_model.earth_zonal_order = earth_order;
         job.opn_model.earth_tesseral_degree = earth_degree;
-        job.opn_model.solar_gravity_config = use_sun ? SOLAR_GRAVITY_JPL : SOLAR_GRAVITY_OFF;
-        job.opn_model.lunar_gravity_config = use_moon ? LUNAR_GRAVITY_JPL : LUNAR_GRAVITY_OFF;
-        job.opn_model.use_lunar_NSG = moon_degree > 0;
-        job.opn_model.lunar_zonal_order = moon_degree;
+        job.opn_model.solar_gravity_config = solar_gravity;
+        job.opn_model.lunar_gravity_config = lunar_gravity;
+        job.opn_model.use_lunar_NSG = use_lunar_nsg != 0;
+        job.opn_model.lunar_zonal_order = moon_order;
         job.opn_model.lunar_tesseral_degree = moon_degree;
-
-        if (use_planets) job.opn_model.cartesian_planetary_body_id = {1, 2, 4, 5, 6, 7, 8, 9};
 
         // 月球场的参考半径与 C/S 来自文件；本次核对将 GM 显式覆盖为与月球质点相同的 TT 值。
         double lunar_file_gm = 0;
         const double moon_gm_tt = constants::DE440::GM_TDB[9] * constants::TDB_TO_TT_SCALE;
-        const std::string moon_name = input.GetString(tracer, "file_moon_gravity");
+        const std::string moon_name = input.GetString(tracer, "file_lunar_gravity_field");
         if (tracer.Code() != ERR_NOERROR) tracer.EmergencyExit(program_log);
 
-        if (moon_degree > 0)
+        if (use_lunar_nsg)
         {
             const bool loaded = moon_gravity_field.Load((base / moon_name).string());
-            if (!loaded || moon_degree > moon_gravity_field.max_degree)
+            if (!loaded || std::max(moon_order, moon_degree) > moon_gravity_field.max_degree)
             {
                 tracer.LogEvent(__FILE__, __func__, __LINE__, "Cannot load lunar field at requested degree.", EventType::ERROR);
                 tracer.EmergencyExit(program_log);
@@ -260,8 +373,8 @@ int main(int argc, char* argv[])
                 << "epoch_UTC_MJD=" << epoch_utc << "; epoch_TT_MJD=" << epoch_tt << '\n'
                 << "TT_minus_UTC_s=" << (epoch_tt - epoch_utc) * constants::SECONDS_PER_DAY << '\n'
                 << "EOP=interpolate_if_covered_else_zero_orientation; DAT=SOFA_leap_table\n"
-                << "Earth_degree=" << earth_degree << "; Moon_degree=" << moon_degree << '\n'
-                << "Sun=" << use_sun << "; Moon=" << use_moon << "; other_planets=" << use_planets << '\n'
+                << "Earth_order_degree=" << earth_order << "," << earth_degree << "; Moon_NSG=" << use_lunar_nsg << "; Moon_order_degree=" << moon_order << "," << moon_degree << '\n'
+                << "Sun=" << solar_gravity << "; Moon=" << lunar_gravity << "; other_planets=0" << '\n'
                 << "SRP=off; drag=off; tides=off\n"
                 << "Earth_GM_TT_km3_s2=" << UNIT_GM_M3_S2 / 1e9 << '\n'
                 << "Earth_radius_m=" << constants::GGM03C::REFERENCE_RADIUS << '\n'
@@ -279,7 +392,7 @@ int main(int argc, char* argv[])
 
         summary << "Earth force uses Earth_GM_TT above; DE440 Earth row is for comparison.\n";
 
-        if (moon_degree > 0)
+        if (use_lunar_nsg)
         {
             summary << "Moon_field_file_GM_km3_s2=" << lunar_file_gm / 1e9 << '\n'
                     << "Moon_field_effective_GM_TT_km3_s2=" << moon_gravity_field.GM / 1e9 << '\n'
@@ -292,25 +405,35 @@ int main(int argc, char* argv[])
         for (const double component : state_km) summary << ' ' << component;
 
         summary << '\n';
-        std::cout << summary.str() << std::flush;
-        std::ofstream report(output_dir / "summary.txt");
-        std::ofstream ephemeris(output_dir / "cartesian.csv");
 
-        if (!report || !ephemeris)
+        if (display_model || display_setting) std::cout << summary.str() << std::flush;
+
+        std::ofstream report;
+
+        if (!report_name.empty())
         {
-            tracer.LogEvent(__FILE__, __func__, __LINE__, "Cannot create summary.txt or cartesian.csv.", EventType::ERROR);
+            fs::create_directories((base / report_name).parent_path());
+            report.open(base / report_name);
+        }
+
+        std::ofstream ephemeris(cartesian_path);
+
+        if ((!report_name.empty() && !report) || !ephemeris)
+        {
+            tracer.LogEvent(__FILE__, __func__, __LINE__, "Cannot create file_report or file_eph_Cartesian.", EventType::ERROR);
             tracer.EmergencyExit(program_log);
         }
 
-        report << summary.str();
+        if (report.is_open()) report << summary.str();
+
         ephemeris << std::setprecision(17) << "elapsed_TT_s,MJD_UTC,MJD_TT,x_km,y_km,z_km,vx_km_s,vy_km_s,vz_km_s\n";
 
         // ==================== 4. 定步长积分与 Cartesian 输出 ====================
         job.opn_setting.t0_MJD_UTC = epoch_utc;
         job.opn_setting.t0_MJD_TT = epoch_tt;
         job.opn_setting.rkf.fixed_step = true;
-        job.opn_setting.rkf.maxTE_norm = 1e-12;
-        job.opn_setting.display_progress = 0;
+        job.opn_setting.rkf.maxTE_norm = max_te_setting;
+        job.opn_setting.display_progress = display_progress == 2 ? 2 : 0;
         double state_norm[6];
 
         for (int component = 0; component < 6; ++component)
@@ -356,7 +479,7 @@ int main(int argc, char* argv[])
             elapsed_s = next_elapsed;
             max_te = std::max(max_te, accepted_te);
 
-            if (100.0 * elapsed_s / duration_s >= next_progress)
+            if (display_progress > 0 && 100.0 * elapsed_s / duration_s >= next_progress)
             {
                 std::cout << "Propagation " << static_cast<int>(100.0 * elapsed_s / duration_s) << "%; elapsed_TT_s=" << elapsed_s << std::endl;
                 next_progress += 10;
@@ -378,20 +501,30 @@ int main(int argc, char* argv[])
         }
 
         results << '\n';
-        report << results.str();
-        ephemeris.close();
-        report.close();
 
-        if (!ephemeris || !report)
+        if (report.is_open())
+        {
+            report << results.str();
+            report.close();
+        }
+
+        ephemeris.close();
+
+        if (!ephemeris || (!report_name.empty() && !report))
         {
             tracer.LogEvent(__FILE__, __func__, __LINE__, "Failed while writing propagation output.", EventType::ERROR);
             tracer.EmergencyExit(program_log);
         }
 
         tracer.CheckOut(__func__);
-        tracer.ReportEvents(program_log);
-        program_log.close();
-        std::cout << results.str() << "Output: " << output_dir.lexically_normal().string() << '\n';
+
+        if (program_log.is_open())
+        {
+            tracer.ReportEvents(program_log);
+            program_log.close();
+        }
+
+        std::cout << results.str() << "Output: " << cartesian_path.lexically_normal().string() << '\n';
     }
     catch (const std::exception& error)
     {

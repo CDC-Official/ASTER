@@ -1,6 +1,6 @@
 # GCRS/TT 核对算例
 
-从仓库根目录运行专用入口；Windows 构建和 GM 说明见[交付文档](../../doc/18_gcrs-tt-orbit-check.md)。所有配置项均在 `setting.txt` 中显式给出。
+从仓库根目录运行专用入口；Windows 构建和 GM 说明见[交付文档](../../doc/18_gcrs-tt-orbit-check.md)。`setting.txt` 沿用原 Cartesian 关键词，并补充本次 GM、单位和开关说明。
 
 - `reference_cartesian.csv`：60 s 步长的完整十天参考轨迹，14401 行，含初态；位置 km、速度 km/s。
 - `reference_summary.txt`：该次运行的实际 GM、模型、初末状态和构建信息。

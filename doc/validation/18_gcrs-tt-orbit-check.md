@@ -60,4 +60,11 @@ ctest --test-dir build/client -C Release -R '^(core_gcrs_tt_check|gcrs_tt_check_
 build/client/bin/aster_opn_gcrs_tt_check -I tests/gcrs_tt_orbit_check/setting.txt
 ```
 
-30 s 复算使用同目录中复制的配置，将 `step_s` 改为 30，并另设输出目录；取其每两行一个节点与 60 s 结果对齐。Windows 使用专用 preset，执行路径见交付说明。
+30 s 复算使用同目录中复制的配置，将 `integrator_stepsize` 改为 30，并另设输出目录；取其每两行一个节点与 60 s 结果对齐。Windows 使用专用 preset，执行路径见交付说明。
+
+
+## 恢复原 setting 关键词后的核对
+
+测试入口已恢复原 Cartesian 配置中的 `reference_Cartesian`、`propagation_length`、`integrator_stepsize`、`file_JPLEPH` 等字段，地月带谐与田谐继续分别设置。配置旁补充单位、GM 和模型说明；主程序、运行检查和使用文档同步更新。
+
+恢复后的十天计算与上述完整参考 CSV 逐字节一致，14401 行的各历元和六维状态全部相同。运行检查还覆盖原 `reference_epoch` 的 MJD、JD、年月日时分秒形式，以及分别设置地球带谐、田谐的行为。

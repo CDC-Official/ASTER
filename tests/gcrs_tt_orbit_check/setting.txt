@@ -1,24 +1,55 @@
-# GCRS/TT 客户核对算例；路径均相对于本文件目录。
-# UTC 2028-05-01 00:00:00，GCRS km、km/s。
+# GCRS/TT 核对算例，使用原 Cartesian setting 的关键词和单位。
+# 相对文件路径均以本 setting 所在目录为基准。
+# UTC 2028-05-01 00:00:00；reference_epoch 支持 UTC MJD、JD 或年月日时分秒。
 reference_epoch = 61892.0
-x_km = -172078.764589166
-y_km = 316878.877578190
-z_km = 136905.589039608
-vx_km_s = -0.343284732289
-vy_km_s = -0.175709556631
-vz_km_s = -0.114628368645
-# TT 秒，RKF78 定步长；十天、每 60 秒一行，含初态 14401 行。
-duration_s = 864000
-step_s = 60
-# 0 关闭，2—80 同时指定最高次数和阶数。
-earth_degree = 12
-moon_degree = 0
-use_sun = true
-use_moon = true
-# true 加入水星、金星、火星至冥王星的第三体质点摄动。
-use_planets = false
-file_jpl = ../../data/ephemeris/JPLEPH_C.440
-# 2028 年超出此文件覆盖范围，自动使用零定向参数；DAT 仍按 SOFA 闰秒表。
-file_eop = ../../data/eop/EOP-All_250516.txt
-file_moon_gravity = ../../data/gravity/grail.txt
-output_directory = ../../build/gcrs-tt-check-output
+# 本次直接给出 GCRS Cartesian 初态；单位依次为 km、km/s，Keplerian 留空。
+reference_Keplerian =
+reference_Cartesian = -172078.764589166  316878.877578190  136905.589039608  -0.343284732289  -0.175709556631  -0.114628368645
+# 预报时长，TT 秒：十天。
+propagation_length = 864000
+# EOP 覆盖外的定向参数置零；DAT 仍取 SOFA 闰秒表，本算例为 37 s。
+file_EOP = ../../data/eop/EOP-All_250516.txt
+# 日月位置及月球天平动统一使用 DE440。
+file_JPLEPH = ../../data/ephemeris/JPLEPH_C.440
+file_atmosphere_density = ../../data/atmosphere/atmosphere.txt
+# 开启月球非球形后，读取参考半径和 C/S；有效 GM 采用 DE440 月球 TT 值。
+file_lunar_gravity_field = ../../data/gravity/grail.txt
+# 地球质点和非球形共同采用 GM_TT=398600.4415 km^3/s^2、参考半径 6378.1363 km。
+# 地球带谐、田谐分别按原关键词设为 12 阶。
+earth_zonal_order = 12
+earth_tesseral_degree = 12
+# 0 关闭质点摄动，1 使用 JPL；日月 GM 从 DE440 TDB 值乘 (1-L_G)/(1-L_B) 得到 TT 值。
+solar_gravity = 1
+lunar_gravity = 1
+# 默认关闭月球非球形；置 1 后使用下述独立带谐、田谐截断。
+use_lunar_NSG = 0
+lunar_zonal_order = 20
+lunar_tesseral_degree = 20
+# 本次引力核对关闭阻力和光压；保留原 setting 中的卫星参数关键词。
+use_drag_perturb = 0
+use_SRP_perturb = 0
+satellite_id = GCRS-TT-check
+satellite_mass = 1
+satellite_drag_cross_area = 0.01
+satellite_srp_cross_area = 0.01
+satellite_drag_Cd = 2.2
+satellite_srp_eta = 0.44
+# 102：RKF78 定步长；步长单位 s。Adams 参数在此模式下不参与计算。
+integrator_id = 102
+integrator_adams_steps = 9
+integrator_stepsize = 60.0
+# 归一化局部截断误差的监测阈值，定步长模式保留设定步长。
+integrator_maxTE = 1e-12
+# 本次仅输出 Cartesian；保留原输出关键词，Keplerian 和 NSG2 路径留空。
+file_eph_Cartesian = ../../build/gcrs-tt-check-output/cartesian.csv
+file_eph_Keplerian =
+file_eph_NonSingular2 =
+file_report = ../../build/gcrs-tt-check-output/summary.txt
+# 原有可选运行日志关键词；留空关闭日志文件。
+file_programlog = ../../build/gcrs-tt-check-output/program.log
+# 2：km、km/s；本次输出固定采用此单位，便于逐列核对。
+output_state_units = 2
+display_model = 1
+display_setting = 1
+# 0 静默，1 每 10% 输出进度，2 另显示每个接受步的误差估计。
+display_progress = 1

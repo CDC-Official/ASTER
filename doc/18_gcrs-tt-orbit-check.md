@@ -41,11 +41,20 @@ macOS/Linux 使用 `cmake --preset gcrs-tt-check` 和 `cmake --build --preset gc
 | 积分器 | RKF78，固定步长 60 s；末段不足一步时补齐 |
 | 地球引力 | 地球质点 + GGM03C 12×12 阶非球形 |
 | 第三体 | DE440 太阳、月球质点 |
-| 月球非球形、其他行星 | 默认关闭，可分别开启 |
+| 月球非球形、其他行星 | 默认关闭；月球非球形由原 `use_lunar_NSG` 开关控制 |
 | 光压、阻力、固体潮、1PN 项 | 关闭 |
 | EOP | 资料覆盖内插值；缺测时定向参数置零 |
 
-配置见 [setting.txt](../tests/gcrs_tt_orbit_check/setting.txt)，所有关键词均须给出，数值单位写在关键词或注释中。`earth_degree` 和 `moon_degree` 支持 0 或 2—80，同时指定带谐和田谐截断；0 表示关闭对应非球形项。开启 `moon_degree` 时须保留 `use_moon=true`。`use_planets=true` 加入水星、金星、火星、木星、土星、天王星、海王星和冥王星；火星至冥王星采用行星系统质心和系统 GM。
+配置见 [setting.txt](../tests/gcrs_tt_orbit_check/setting.txt)，使用原 Cartesian setting 的关键词和单位，并在原字段旁补充本次模型说明：
+
+- `reference_Cartesian` 一行给出 `x y z vx vy vz`，单位 km、km/s；本次 `reference_Keplerian` 留空。
+- `propagation_length` 给出 TT 秒数；`integrator_id=102` 选择 RKF78 定步长，`integrator_stepsize=60` 给出秒步长，`integrator_maxTE` 给出归一化误差阈值。
+- `earth_zonal_order`、`earth_tesseral_degree` 分别设置地球带谐和田谐截断，范围 0—80。
+- `solar_gravity`、`lunar_gravity` 取 1 使用 JPL，取 0 关闭对应质点摄动。
+- `use_lunar_NSG=1` 开启月球非球形，分别使用 `lunar_zonal_order`、`lunar_tesseral_degree`，并要求 `lunar_gravity=1`。
+- `file_JPLEPH`、`file_EOP`、`file_lunar_gravity_field` 指定数据文件；`file_eph_Cartesian`、`file_report`、原有可选 `file_programlog` 分别指定输出文件。
+
+保留原模板中的大气、卫星、Adams 和其他输出字段。本次入口使用 Cartesian 初态、固定步长、`output_state_units=2`，阻力、光压及潮汐关闭；Keplerian 和 NSG2 输出路径留空。其他行星的 GM 列在摘要中供核对，本算例的摄动开关使用原有日月字段。
 
 文件路径相对于配置文件所在目录。默认输出到 `build/gcrs-tt-check-output/`：
 
@@ -53,7 +62,7 @@ macOS/Linux 使用 `cmake --preset gcrs-tt-check` 和 `cmake --build --preset gc
 - `summary.txt`：构建信息、模型开关、GM 表、地月质量参数比、初末状态与零 EOP 查询次数。
 - `program.log`：原始配置、事件和失败调用链。
 
-积分器的嵌入误差阈值为归一化状态的 `1e-12`，固定步长模式将其用于监测。`max_local_TE_normalized` 是局部误差估计；位置差应使用两套程序在同一历元输出的 Cartesian 坐标计算。运行使用的 RKF78 是现有 13 级实现，输出采用其八阶更新。
+配置 `integrator_maxTE=1e-12` 指定归一化状态的嵌入误差阈值，固定步长模式将其用于监测。`max_local_TE_normalized` 是局部误差估计；位置差应使用两套程序在同一历元输出的 Cartesian 坐标计算。运行使用的 RKF78 是现有 13 级实现，输出采用其八阶更新。
 
 ## 本分支如何使用 GM
 
@@ -92,7 +101,7 @@ L_G=6.969290134\times10^{-10},\quad L_B=1.550519768\times10^{-8}.
 
 ### 月球非球形项
 
-打开 `moon_degree` 后，程序读取 `data/gravity/grail.txt` 的参考半径和无量纲归一化 C/S；文件头 GM 读取后保存在摘要中供核对，**有效 GM 随即覆盖为 DE440 月球的 TT 值 `4902.800190601984`**。这保证本入口的月球质点项与非球形项使用同一个有效月球 GM。
+将 `use_lunar_NSG` 设为 1 后，程序读取 `data/gravity/grail.txt` 的参考半径和无量纲归一化 C/S；文件头 GM 读取后保存在摘要中供核对，**有效 GM 随即覆盖为 DE440 月球的 TT 值 `4902.800190601984`**。这保证本入口的月球质点项与非球形项使用同一个有效月球 GM。
 
 配套文件为 GRGM660PRIM 的 80 阶截取，文件头 GM 为 `4902.79980693169`，参考半径为 `1738 km`。本次约定保留原参考半径及 C/S，所以相对于文件原模型，球谐加速度幅度乘以“有效 GM / 文件 GM”。摘要在开启后打印两个 GM 和该幅度比。主库其他入口仍使用其已有的文件 GM 逻辑。
 
@@ -104,7 +113,7 @@ DE440 为仓库随附的原生二进制文件 `data/ephemeris/JPLEPH_C.440`，�
 
 本入口沿用当前 Cartesian 右函数的约定：**以 TT 近似 JPL 查询参数 TDB，直接使用 JPL 的地心位置差矢量**。GM 采用上述 TT 尺度，动力学包含牛顿引力和所选球谐项。完整的相对论 BCRS—GCRS 坐标变换及 1PN 动力学见 [1]；本交付程序只实现这里列出的比较模型。双方核对时须对齐这两处历表近似以及力模型开关。
 
-随库 EOP 文件截止到 2025-11-12，故本次 2028 年算例会将 `UT1−UTC`、`xp`、`yp`、`dX`、`dY` 全部置零；`UT1=UTC`，岁差、章动和地球自转模型照常计算。`file_eop` 留空也可显式采用整段零定向参数；给出的路径不存在或文件格式损坏时报告输入错误。
+随库 EOP 文件截止到 2025-11-12，故本次 2028 年算例会将 `UT1−UTC`、`xp`、`yp`、`dX`、`dY` 全部置零；`UT1=UTC`，岁差、章动和地球自转模型照常计算。`file_EOP` 留空也可显式采用整段零定向参数；给出的路径不存在或文件格式损坏时报告输入错误。
 
 **TAI−UTC（DAT）按 SOFA 闰秒表处理。** 随库 SOFA 表对本算例给出 DAT=37 s，因此 TT−UTC=69.184 s。2028 年算例据此假定起始时刻前仍为该闰秒差；双方比较应使用同一假定。EOP 置零只改变地球定向参数。
 

@@ -47,7 +47,13 @@
     "data/ephemeris/JPLEPH_C.440": "0cff70007ea4f21d9cc29d1c772b335af2a0fbed145a5dab682d5dc25ce8cde2",
     "data/eop/EOP-All_250516.txt": "d60ce7d6de3befd2699804d1069c29297604c270e05f13f27bf34ce95bb24882",
     "data/gravity/grail.txt": "16832b9d9090bdda2a3981497ea501f542a3cdd45d82afa029da152930cb2d1d",
-    "tests/gcrs_tt_orbit_check/setting.txt": "1dbb4c1f6332936201a6de1b33f261cc63c69a37e805f254823f58f575eb62e9",
+    "tests/gcrs_tt_orbit_check/setting.txt": "3474c7f1f71aa4381efc63e79d5041f3bef02457ea15be1c737a24ed41a8817b",
     "tests/gcrs_tt_orbit_check/reference_cartesian.csv": "e104b3b98a4222fbe214b88fd89f8cd378c3674c913edff6ba8d6848ad82b342"
+  },
+  "original_settings_sha256": "1dbb4c1f6332936201a6de1b33f261cc63c69a37e805f254823f58f575eb62e9",
+  "settings_compatibility_check": {
+    "base_commit": "a5e8a35",
+    "change": "Restored original Cartesian setting keywords; same physical inputs and output values.",
+    "reference_csv_byte_identical": true
   }
 }

@@ -2,6 +2,8 @@
 
 ## 未发布：GCRS/TT 轨道核对分支
 
+- 恢复客户入口对原 Cartesian setting 关键词的读取，保留六维 `reference_Cartesian`、独立带谐／田谐、积分和输出字段；在原字段旁补注释，移除另设的配置命名。
+
 - 新增 `aster_opn_gcrs_tt_check`：DE440、TT 积分、RKF78 固定步长、Cartesian 初值与输出；提供 Windows SYSTEM 后端 preset、十天配置、参考轨迹及正式参考文献。
 - 本入口明确地球 GGM03C/IERS TT GM，日月及额外行星采用 DE440 TDB GM 的 TT 换算值；可选月球球谐项的有效 GM 覆盖为同一个月球 TT GM，并输出文件头原值。
 - EOP 新增显式开启的零定向参数回退，保留 SOFA DAT；其他入口维持严格覆盖检查。
