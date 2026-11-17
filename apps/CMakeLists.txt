@@ -12,3 +12,5 @@ target_link_libraries(aster_iod_glml PRIVATE OpenMP::OpenMP_CXX)
 aster_add_app(aster_generate_cislunar_observations observation/main_generate_cislunar_observations.cpp)
 aster_add_app(aster_convert_coordinates conversion/main_convert_coordinates.cpp)
 aster_add_app(aster_convert_states conversion/main_convert_states.cpp)
+
+aster_add_app(aster_opn_gcrs_tt_check opn/earth/main_opn_gcrs_tt_check.cpp)

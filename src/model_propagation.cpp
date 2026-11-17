@@ -74,7 +74,7 @@ void OrbitPropagationSetting::Display(bastion::Overwatch& tracer, int integrator
  * @param[in,out] output 接收模型文本的输出流；函数保持该流原有的格式状态。
  * @param[in] precision 面积、AMR、系数和大气表头条件等普通数值的有效数字位数。
  * @param[in] label_width 冒号前的字段显示列宽，包含层级符号和缩进，最小采用 31。
- * @details 读取地月非球形开关及截断、日月历表模式、固体潮、阻力和光压开关、sat 和密度表条件。
+ * @details 读取地月非球形开关及截断、日月历表模式、Cartesian 额外行星编号、固体潮、阻力和光压开关、sat 和密度表条件。
  * 面积乘 ae² 恢复为 m²，AMR 乘 ae²/MASS_OF_EARTH 恢复为 m²/kg。
  * 月球引力截断为 0 / 0 时注明仅考虑质点引力；缺少密度表头条件时显示 Not provided。
  * 固体潮采用 k2=0.3 的日月二阶弹性模型，使用 JPL 位置并扣除 GGM03C 已含的永久贡献。
@@ -128,6 +128,16 @@ void OrbitPropagationNModel::Display(bastion::Overwatch& tracer, std::ostream& o
     if (solar_gravity_config)
     {
         text << '\n' << std::setw(label_width) << "  > Ephemeris" << ": " << (solar_gravity_config == SOLAR_GRAVITY_JPL ? "JPL" : "Analytical");
+    }
+
+    // Cartesian 扩展行星列表与实际右函数采用的 JPL 编号一致。
+    if (!cartesian_planetary_body_id.empty())
+    {
+        text << "\n\n" << std::setw(label_width) << "- Cartesian planets (JPL IDs)" << ":";
+
+        for (const int body : cartesian_planetary_body_id) text << ' ' << body;
+
+        text << " (DE440 TT-compatible GM)";
     }
 
     // Ap、F10.7 是密度表提供的条件；未提供时分别注明，不能补成固定默认值。

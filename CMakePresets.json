@@ -9,6 +9,21 @@
         "CMAKE_BUILD_TYPE": "Release",
         "BUILD_TESTING": "ON"
       }
+    },
+    {
+      "name": "gcrs-tt-check",
+      "binaryDir": "${sourceDir}/build/client",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BUILD_TESTING": "OFF",
+        "ASTER_MATH_BACKEND": "SYSTEM"
+      }
+    },
+    {
+      "name": "gcrs-tt-check-windows",
+      "inherits": "gcrs-tt-check",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64"
     }
   ],
   "buildPresets": [
@@ -16,6 +31,22 @@
       "name": "release",
       "configurePreset": "release",
       "jobs": 3
+    },
+    {
+      "name": "gcrs-tt-check",
+      "configurePreset": "gcrs-tt-check",
+      "configuration": "Release",
+      "targets": [
+        "aster_opn_gcrs_tt_check"
+      ]
+    },
+    {
+      "name": "gcrs-tt-check-windows",
+      "configurePreset": "gcrs-tt-check-windows",
+      "configuration": "Release",
+      "targets": [
+        "aster_opn_gcrs_tt_check"
+      ]
     }
   ],
   "testPresets": [

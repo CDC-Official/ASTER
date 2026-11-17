@@ -21,3 +21,5 @@ JPL 文本标题保留了原始更长的时间区间，使用时以二进制头�
 `gravity/grail.txt` 对应 [NASA PDS 的 GRGM660PRIM](https://pds-geosciences.wustl.edu/grail/grail-l-lgrs-5-rdr-v1/grail_1001/shadr/gggrx_0660pm_sha.lbl)。已逐行核对本地保留的 3320 条系数记录，均与官方文件的 1 至 80 阶一致。文件头半径为 1738000 m，GM 为 4.90279980693169×10¹² m³/s²；GM 标准差同步换算到 SI，最大阶次注明为 80。官方文件和本地文件的 SHA-256、下载地址及转换步骤见 `manifest.json`。
 
 该模型发布时使用 DE421 的月球主轴固连系。ASTER 当前用所加载 JPL 历表的天平动旋转到月固系；更换历表时须同时核对月固轴系。月球质点项采用所选 DE440 GM，二阶及以上球谐项采用本文件配套 GM、参考半径和系数。
+
+轨道核对入口 `aster_opn_gcrs_tt_check` 按双方约定将月球球谐 GM 覆盖为 DE440 月球 TT 值，并保留上述原始数据文件。其文件值、有效值和幅度比均写入运行摘要，详见[说明](../doc/18_gcrs-tt-orbit-check.md)。

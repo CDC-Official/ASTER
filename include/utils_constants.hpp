@@ -11,6 +11,9 @@
 #include <cmath>
 #include <sofam.h>
 
+// SOFA 的 DC 宏会覆盖 Eigen 向量化代码的局部变量；光速在本库使用具名常量。
+#undef DC
+
 namespace constants
 {
 

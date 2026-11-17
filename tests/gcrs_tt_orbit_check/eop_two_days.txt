@@ -1,0 +1,5 @@
+# Synthetic EOP for interpolation/fallback checks, angles in arcsec.
+BEGIN OBSERVED
+2028 5 1 61892 1 2 0.1 0 0 0 0.01 0.02 37
+2028 5 2 61893 3 4 0.3 0 0 0 0.03 0.04 37
+END OBSERVED

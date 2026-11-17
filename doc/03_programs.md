@@ -10,6 +10,7 @@ ASTER 的主程序按任务选择。配置关键词见[配置参考](04_configur
 | 两星状态生成单程测距 | `aster_generate_cislunar_observations` | [generate_cislunar_observations/aster.settings](../tests/generate_cislunar_observations/aster.settings) | 接收钟读数、伪距、计算分项与日志 |
 | GL 初轨确定 | `aster_iod_gl` | [iod_gl/setting.txt](../tests/iod_gl/setting.txt) | 参考历元轨道、测角残差、报告 |
 | GLML 初轨确定 | `aster_iod_glml` | [iod_glml/setting.txt](../tests/iod_glml/setting.txt) | 最小 J 轨道、候选表、残差、报告 |
+| GCRS/TT 双方核对 | `aster_opn_gcrs_tt_check` | [gcrs_tt_orbit_check/setting.txt](../tests/gcrs_tt_orbit_check/setting.txt) | Cartesian CSV、有效 GM 表、初末状态；[Windows 说明](18_gcrs-tt-orbit-check.md) |
 | 地球 Cartesian 数值预报 | `aster_opn_cartesian` | [opn_cartesian/setting.txt](../tests/opn_cartesian/setting.txt) | Cartesian、Keplerian、NSG2 星历 |
 | 地球 NSG2 数值预报 | `aster_opn_nonsingular2` | [opn_nonsingular2/setting.txt](../tests/opn_nonsingular2/setting.txt) | 同上，以 NSG2 积分 |
 | 地月空间数值预报 | `aster_opn_cislunar` | [opn_cislunar/setting.txt](../tests/opn_cislunar/setting.txt) | E-BCRS/TDB Cartesian 星历 |
@@ -34,7 +35,8 @@ ASTER 的主程序按任务选择。配置关键词见[配置参考](04_configur
 | `aster_generate_cislunar_observations` | 1.3.0 | 首次发布双向单程测距仿真，提供 TDB 接收钟读数、伪距及收发时刻、距离、引力时延和钟差分项 | [1.3.0 记录](../CHANGELOG.md#release-1-3-0)、[测距接口与算例](06_observations.md#cislunar) |
 | `aster_iod_gl` | 1.4.1 | 修正四个含J2分支的Gz附加三次项，分母2改为6，更新迭代中的传播系数；纯二体分支不变 | [1.4.1 记录](../CHANGELOG.md#release-1-4-1)、[J2修正验证](validation/16_iod-j2-cubic.md) |
 | `aster_iod_glml` | 1.4.1 | 候选轨道调用的公共GL传播同步修正J2的Gz三次项；候选生成、约束与似然评价规则不变 | [1.4.1 记录](../CHANGELOG.md#release-1-4-1)、[J2修正验证](validation/16_iod-j2-cubic.md) |
-| `aster_opn_cartesian` | 1.4.0 | 新增可选地球固体潮；`use_solidtide_perturb=1` 时叠加 GGM03C 尚未包含的二阶日月贡献 | [1.4.0 记录](../CHANGELOG.md#release-1-4-0)、[固体潮验证](validation/12_earth-solid-tide.md) |
+| `aster_opn_gcrs_tt_check` | 未发布（核对分支） | 新增 DE440、SYSTEM、RKF78 固定步长 Cartesian 入口，显式 TT GM 与可选月球球谐 GM 覆盖、零 EOP 及行星摄动 | [交付说明](18_gcrs-tt-orbit-check.md)、[验证](validation/18_gcrs-tt-orbit-check.md) |
+| `aster_opn_cartesian` | 未发布（上一正式记录 1.4.0） | Cartesian 右函数删除未使用的根数转换，支持零角动量状态；默认摄动和 GM 保持原设置。此前 1.4.0： 新增可选地球固体潮；`use_solidtide_perturb=1` 时叠加 GGM03C 尚未包含的二阶日月贡献 | [1.4.0 记录](../CHANGELOG.md#release-1-4-0)、[固体潮验证](validation/12_earth-solid-tide.md) |
 | `aster_opn_nonsingular2` | 1.4.0 | 新增与 Cartesian 入口相同的固体潮开关和加速度，再转换为 NSG2 根数导数参与积分 | [1.4.0 记录](../CHANGELOG.md#release-1-4-0)、[固体潮验证](validation/12_earth-solid-tide.md) |
 | `aster_opn_cislunar` | 1.3.0 | E-BCRS/TDB 动力学使用 DE440 GM，并配套处理地球球谐参数的尺度和光压物理参数 | [1.3.0 记录](../CHANGELOG.md#release-1-3-0)、[地球 GM 验证](validation/05_earth-gm.md)、[常数验证](validation/06_constants.md) |
 | `aster_odn_batch` | 1.3.0 | 采用公共近地传播的 GM、重力场及摄动修正，站址改用 WGS84，解析 STM 使用配套 J2 和日月参数 | [1.3.0 记录](../CHANGELOG.md#release-1-3-0)、[常数验证](validation/06_constants.md)、[发布检查](validation/11_release-1.3.0.md) |

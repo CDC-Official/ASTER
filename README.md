@@ -1,3 +1,7 @@
+> **GCRS/TT 轨道核对专用分支：DE440 + RKF78 定步长 + Cartesian 输出。**
+> Windows 请从[交付说明](doc/18_gcrs-tt-orbit-check.md)开始，使用 `gcrs-tt-check-windows` preset 和 **SYSTEM 数学后端**。
+> 默认十天算例配置位于 `tests/gcrs_tt_orbit_check/setting.txt`，完整参考轨迹随该目录提供。
+
 ![ASTER — Astrodynamics Simulation Toolkit for Estimation and Research](doc/assets/aster-banner.png)
 
 # ASTER 1.4.1

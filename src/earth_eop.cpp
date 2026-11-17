@@ -104,32 +104,71 @@ void EOP::Read_EOP(Overwatch& tracer, std::string& fn_EOP)
 	tracer.CheckOut(__func__);
 }
 
+/**
+ * @brief 设置覆盖范围外的零 EOP 策略，并重置调用计数。
+ * @param[in] enabled true 时令缺测时刻的 dut1、xp、yp、dx00、dy00 为零，DAT 仍取 SOFA 闰秒表；false 恢复严格覆盖检查。
+ */
+void EOP::SetZeroFallback(bool enabled)
+{
+    m_zero_fallback = enabled;
+    m_zero_fallback_count = 0;
+}
+
+/**
+ * @brief 查询 UTC 时刻的地球定向参数，按显式策略处理缺测。
+ * @param[in,out] tracer 记录覆盖、时间转换错误及首次零 EOP 事件。
+ * @param[in] MJD_UTC 查询时刻，单位 UTC MJD。
+ * @param[out] eopNeed 输出 dut1、dat（s）及 xp、yp、dx00、dy00（rad），并记录查询时刻；失败时保持原值。
+ * @param[in] fit_or_not 0 取当日零时记录，其余值做日间线性插值；整日零时无需下一日记录。
+ * @details 默认要求连续每日记录。启用 SetZeroFallback 后，覆盖外或未载入资料时定向参数置零，DAT 从 SOFA 获取。
+ */
 void EOP::Get_EOP(Overwatch& tracer, double MJD_UTC, aEOP& eopNeed, int fit_or_not) const
 {
-	/*
-	 * fit_or_not 默认为1;为0时，不拟合，直接取0h的值，否则做线性拟合
-	 * MJD_UTC 需要读取EOP的UTC
-	 * eopNeed 需要的EOP  单位 s rad
-	 * 其中会令eopNeed.MJD_UTC=MJD_UTC,
-	 * 因此传入参数的时候需要注意最好不要循环，除非事先定义了eopNeed中的UTC
-	 */
+    if (tracer.Code() != ERR_NOERROR) return;
 
-	tracer.CheckIn(__FILE__, __func__, __LINE__);
+    tracer.CheckIn(__FILE__, __func__, __LINE__);
 
+    // 插值需要下一日资料；整日零时只需当日记录。
     const double day = std::floor(MJD_UTC);
-    if (!std::isfinite(MJD_UTC) || mEOP.empty() || day < mEOP.front().MJD_UTC || day > mEOP.back().MJD_UTC) {
-        tracer.LogEvent(__FILE__, __func__, __LINE__, "Invalid EOP coverage.", EventType::ERROR); return;
-    }
-    const double offset = day - mEOP.front().MJD_UTC;
-    if (offset < 0 || offset >= static_cast<double>(mEOP.size())) {
-        tracer.LogEvent(__FILE__, __func__, __LINE__, "Invalid EOP coverage.", EventType::ERROR); return;
-    }
-    const size_t index = static_cast<size_t>(offset);
-    const double MJD_int_part = day;
     const bool interpolate = fit_or_not != 0 && MJD_UTC != day;
-    if (mEOP[index].MJD_UTC != day || (interpolate && (index+1 >= mEOP.size() || mEOP[index+1].MJD_UTC != day+1))) {
-        tracer.LogEvent(__FILE__, __func__, __LINE__, "Invalid EOP coverage.", EventType::ERROR); return;
+    const bool outside = mEOP.empty() || day < mEOP.front().MJD_UTC
+        || day > mEOP.back().MJD_UTC || (interpolate && day == mEOP.back().MJD_UTC);
+
+    if (!std::isfinite(MJD_UTC) || (outside && !m_zero_fallback))
+    {
+        tracer.LogEvent(__FILE__, __func__, __LINE__, "Invalid EOP coverage at UTC MJD " + std::to_string(MJD_UTC), EventType::ERROR);
+        return;
     }
+
+    // 零 EOP 只改变地球定向。UTC 与 TT 仍按 SOFA 的闰秒表转换。
+    if (outside)
+    {
+        int year, month, month_day;
+        double day_fraction;
+        aEOP zero;
+        zero.MJD_UTC = MJD_UTC;
+        const int calendar_status = iauJd2cal(constants::MJD_OFFSET, MJD_UTC, &year, &month, &month_day, &day_fraction);
+
+        if (calendar_status != 0 || iauDat(year, month, month_day, day_fraction, &zero.dat) < 0)
+        {
+            tracer.LogEvent(__FILE__, __func__, __LINE__, "Cannot obtain DAT for zero EOP fallback.", EventType::ERROR);
+            return;
+        }
+
+        if (m_zero_fallback_count == 0)
+        {
+            tracer.LogEvent(__FILE__, __func__, __LINE__, "EOP outside coverage: zero orientation parameters; DAT from SOFA.", EventType::WARNING);
+        }
+
+        ++m_zero_fallback_count;
+        eopNeed = zero;
+        tracer.CheckOut(__func__);
+        return;
+    }
+
+    // Read_EOP 已保证记录逐日连续，覆盖检查后可直接定位。
+    const size_t index = static_cast<size_t>(day - mEOP.front().MJD_UTC);
+    const double MJD_int_part = day;
 
 	if (!interpolate)//不需要拟合
 	{

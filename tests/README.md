@@ -114,3 +114,7 @@ python3 tests/release_smoke.py --bin-dir build/v1.4.1/bin \
 输出目录须为新目录。两端使用同一源码、输入资料和 OpenLibm 构建，比较同名科学文件的 SHA-256；日志和含机器路径的报告随各次运行保存。
 
 发布代表检查同时运行两套 20×20＋固体潮的 600 s 预报，合计保存 55 份科学输出；GLML 固定 `--seed`（默认 20261106），程序版本、完整提交与输入校验写入 `summary.json`。两端在同一源码提交上运行，按同名科学文件校验，日志和任务报告各自保留。
+
+## GCRS/TT 对比入口
+
+`gcrs_tt_orbit_check/setting.txt` 提供 DE440、12×12 地球引力、日月质点、60 s 步长的十天算例。Windows 使用 SYSTEM 后端，见[交付说明](../doc/18_gcrs-tt-orbit-check.md)。`core_gcrs_tt_check` 核对 EOP 和八颗行星加速度，`gcrs_tt_check_runtime` 在 SYSTEM 构建下检查解析圆轨道、末步和月球 GM 覆盖等运行行为。

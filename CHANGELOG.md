@@ -1,5 +1,15 @@
 # 版本记录
 
+## 未发布：GCRS/TT 轨道核对分支
+
+- 新增 `aster_opn_gcrs_tt_check`：DE440、TT 积分、RKF78 固定步长、Cartesian 初值与输出；提供 Windows SYSTEM 后端 preset、十天配置、参考轨迹及正式参考文献。
+- 本入口明确地球 GGM03C/IERS TT GM，日月及额外行星采用 DE440 TDB GM 的 TT 换算值；可选月球球谐项的有效 GM 覆盖为同一个月球 TT GM，并输出文件头原值。
+- EOP 新增显式开启的零定向参数回退，保留 SOFA DAT；其他入口维持严格覆盖检查。
+- Cartesian 右函数删除未参与计算的根数转换，并提供默认空列表的额外行星质点项。现有公共调用也可接受原来会在根数转换处报错的零角动量 Cartesian 状态。
+- 隔离 SOFA `DC` 宏与 Eigen 向量化变量的命名冲突；MSVC 按 UTF-8 读取源码。通用数学后端默认设置保持原值，专用 preset 明确选择 SYSTEM。
+- [交付说明](doc/18_gcrs-tt-orbit-check.md)和[验证记录](doc/validation/18_gcrs-tt-orbit-check.md)说明本分支的输入、模型与实际检查。
+
+
 本文件按发行版本保存重要变化。各程序最近一次科学计算变更所属的版本集中列在[程序变更表](doc/03_programs.md#program-changes)，具体记录保存在下列对应版本中。
 
 <a id="unreleased"></a>

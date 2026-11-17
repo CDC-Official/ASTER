@@ -50,7 +50,7 @@ void Acceleration_NSG2(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 /**
  * @brief 计算 GCRS/TT 下 Cartesian 状态的动力学右函数。
  * @param[in,out] tracer 记录函数调用和模型计算中的错误。
- * @param[in] thisjob 提供摄动开关、EOP、大气参考参数和卫星质量、面积、光学及阻力参数。
+ * @param[in] thisjob 提供摄动开关、Cartesian 额外行星编号、EOP、大气参考参数和卫星质量、面积、光学及阻力参数。
  * @param[in] MJD_TT 当前右函数评估点的 TT 时刻，单位 MJD，由积分器传入。
  * @param[in] n 状态维数，当前使用 6 维状态。
  * @param[in] x GCRS 状态 [x,y,z,vx,vy,vz]；位置尺度为 Scale::UNIT_LENGTH_M，速度尺度为 Scale::UNIT_LENGTH_M/Scale::UNIT_TIME_S。

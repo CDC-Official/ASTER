@@ -135,3 +135,16 @@ set_tests_properties(conversion_roundtrips PROPERTIES TIMEOUT 60)
 add_executable(aster_test_iod_lagrange_j2 core/iod_lagrange_j2.cpp)
 target_link_libraries(aster_test_iod_lagrange_j2 PRIVATE ASTER::core)
 add_test(NAME core_iod_lagrange_j2 COMMAND aster_test_iod_lagrange_j2)
+
+# 对比入口的零 EOP 策略、行星加速度及完整运行协议。
+add_executable(aster_test_gcrs_tt_check gcrs_tt_orbit_check/core_check.cpp)
+target_link_libraries(aster_test_gcrs_tt_check PRIVATE ASTER::core)
+add_test(NAME core_gcrs_tt_check COMMAND aster_test_gcrs_tt_check
+    "${CMAKE_CURRENT_SOURCE_DIR}/gcrs_tt_orbit_check/eop_two_days.txt"
+    "${PROJECT_SOURCE_DIR}/data/ephemeris/JPLEPH_C.440")
+if(ASTER_MATH_BACKEND STREQUAL "SYSTEM")
+    add_test(NAME gcrs_tt_check_runtime COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/gcrs_tt_orbit_check/check_runtime.py"
+        --binary $<TARGET_FILE:aster_opn_gcrs_tt_check>
+        --output "${PROJECT_BINARY_DIR}/test-output/gcrs_tt_check")
+endif()

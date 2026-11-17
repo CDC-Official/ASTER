@@ -6,6 +6,11 @@ if(NOT ASTER_MATH_BACKEND MATCHES "^(OPENLIBM|SYSTEM)$")
 endif()
 
 add_library(aster_math_backend_rules INTERFACE)
+# Windows 读取 UTF-8 科研源码；现有标准 C 文件接口使用 MSVC 对应实现。
+if(MSVC)
+    target_compile_options(aster_math_backend_rules INTERFACE /utf-8)
+    target_compile_definitions(aster_math_backend_rules INTERFACE _CRT_SECURE_NO_WARNINGS)
+endif()
 set(ASTER_MATH_OPENLIBM 0)
 set(ASTER_MATH_DESCRIPTION "backend=SYSTEM; fp=toolchain-default; Eigen=3.4.0")
 if(ASTER_MATH_BACKEND STREQUAL "OPENLIBM")

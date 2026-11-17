@@ -688,7 +688,7 @@ void Acceleration_NSG2(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 /**
  * @brief 计算 GCRS/TT 下 Cartesian 状态的动力学右函数。
  * @param[in,out] tracer 记录函数调用和模型计算中的错误。
- * @param[in] thisjob 提供摄动开关、EOP、大气参考参数和卫星质量、面积、光学及阻力参数。
+ * @param[in] thisjob 提供摄动开关、Cartesian 额外行星编号、EOP、大气参考参数和卫星质量、面积、光学及阻力参数。
  * @param[in] MJD_TT 当前右函数评估点的 TT 时刻，单位 MJD，由积分器传入。
  * @param[in] n 状态维数，当前使用 6 维状态。
  * @param[in] x GCRS 状态 [x,y,z,vx,vy,vz]；位置尺度为 Scale::UNIT_LENGTH_M，速度尺度为 Scale::UNIT_LENGTH_M/Scale::UNIT_TIME_S。
@@ -735,15 +735,9 @@ void Acceleration_Cart(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 		return;
 	}
 
-	//x[]定义/转换得到的三个等价的状态量
-	NonSingular2 nsg2;
-	Keplerian kep;
-	Cartesian cart;
-	double kep_array[6] = {0}, cart_array[6] = {0};
-	cart.Set(x[0], x[1], x[2], x[3], x[4], x[5], true);
-	cart.ToArray(cart_array);
-	cart.ToKeplerian(tracer, kep_array);
-	if (tracer.Code() != ERR_NOERROR) return;
+    // 直接使用归一化 Cartesian 状态，力模型无需转换为根数。
+    double cart_array[6];
+    std::copy_n(x, 6, cart_array);
 
 	double r3 =
 		pow(cart_array[0] * cart_array[0] + cart_array[1] * cart_array[1] + cart_array[2] * cart_array[2], 1.5);//r^3
@@ -757,6 +751,7 @@ void Acceleration_Cart(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 	double axyz_nsGravity_moon[3] = {0};//月球非球形引力
 	double axyz_sunGravity[3] = {0};//太阳引力
 	double axyz_moonGravity[3] = {0};//月球引力
+    double axyz_planets[3] = {0}; // 额外行星的地心第三体加速度。
 	double axyz_srp[3] = {0};//光压加速度
 	double axyz_solid_tide[3] = {0};//GGM03C 之外的固体潮附加加速度
 	double rho_atm = 0, axyz_atmDrag[3] = {0};//大气密度和大气阻力加速度
@@ -828,6 +823,30 @@ void Acceleration_Cart(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 		Cart_MeanMoon(MJDs_t.UT1, rv_moon);
 		Thirdbody_Gravity_Acceleration(axyz_moonGravity, cart_array, rv_moon, NORMALIZED_MOON_GM_TT);
 	}
+
+    // 行星位置采用 JPL 地心差矢量，GM 按与日月相同的 TDB→TT 比例换算。
+    for (const int body : thisjob.opn_model.cartesian_planetary_body_id)
+    {
+        if (body < 1 || body > 9 || body == 3)
+        {
+            tracer.LogEvent(__FILE__, __func__, __LINE__, "Cartesian planetary JPL ID must be 1, 2, or 4 through 9.", EventType::ERROR);
+            return;
+        }
+
+        double rv_planet[6], acceleration[3];
+        const int status = Get_JPLEPH(MJDs_t.TT, body, 3, rv_planet);
+        if (status <= 0)
+        {
+            tracer.LogEvent(__FILE__, __func__, __LINE__, "Cannot query planetary DE440 position.", EventType::ERROR);
+            return;
+        }
+
+        // 第三体公式已扣除行星作用于地心的加速度；结果按同一归一化尺度累加。
+        const double gm_norm = constants::DE440::GM_TDB[body - 1] * constants::TDB_TO_TT_SCALE / UNIT_GM_M3_S2;
+        Thirdbody_Gravity_Acceleration(acceleration, cart_array, rv_planet, gm_norm);
+
+        for (int axis = 0; axis < 3; ++axis) axyz_planets[axis] += acceleration[axis];
+    }
 
 	// 固体潮使用 JPL 日月位置；其他摄动力继续使用各自选定的历表。
 	if (thisjob.opn_model.UseSolidTide)
@@ -965,13 +984,13 @@ void Acceleration_Cart(bastion::Overwatch& tracer, const OrbitPropagationJob& th
 	f[2] = cart_array[5];    //	z\dot=vz
 	f[3] =
 		(axyz_tb[0] + axyz_nsGravity_earth[0]) + (axyz_sunGravity[0] + axyz_moonGravity[0] + axyz_nsGravity_moon[0]) +
-		axyz_atmDrag[0] + axyz_srp[0] + axyz_solid_tide[0];    //x\ddot=ax
+		axyz_atmDrag[0] + axyz_srp[0] + axyz_solid_tide[0] + axyz_planets[0];    //x\ddot=ax
 	f[4] =
 		(axyz_tb[1] + axyz_nsGravity_earth[1]) + (axyz_sunGravity[1] + axyz_moonGravity[1] + axyz_nsGravity_moon[1]) +
-		axyz_atmDrag[1] + axyz_srp[1] + axyz_solid_tide[1];    //y\ddot=ay
+		axyz_atmDrag[1] + axyz_srp[1] + axyz_solid_tide[1] + axyz_planets[1];    //y\ddot=ay
 	f[5] =
 		(axyz_tb[2] + axyz_nsGravity_earth[2]) + (axyz_sunGravity[2] + axyz_moonGravity[2] + axyz_nsGravity_moon[2]) +
-		axyz_atmDrag[2] + axyz_srp[2] + axyz_solid_tide[2];    //z\ddot=az
+		axyz_atmDrag[2] + axyz_srp[2] + axyz_solid_tide[2] + axyz_planets[2];    //z\ddot=az
 
 	tracer.CheckOut(__func__);
 }

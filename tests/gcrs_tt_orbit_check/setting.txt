@@ -1,0 +1,24 @@
+# GCRS/TT 客户核对算例；路径均相对于本文件目录。
+# UTC 2028-05-01 00:00:00，GCRS km、km/s。
+reference_epoch = 61892.0
+x_km = -172078.764589166
+y_km = 316878.877578190
+z_km = 136905.589039608
+vx_km_s = -0.343284732289
+vy_km_s = -0.175709556631
+vz_km_s = -0.114628368645
+# TT 秒，RKF78 定步长；十天、每 60 秒一行，含初态 14401 行。
+duration_s = 864000
+step_s = 60
+# 0 关闭，2—80 同时指定最高次数和阶数。
+earth_degree = 12
+moon_degree = 0
+use_sun = true
+use_moon = true
+# true 加入水星、金星、火星至冥王星的第三体质点摄动。
+use_planets = false
+file_jpl = ../../data/ephemeris/JPLEPH_C.440
+# 2028 年超出此文件覆盖范围，自动使用零定向参数；DAT 仍按 SOFA 闰秒表。
+file_eop = ../../data/eop/EOP-All_250516.txt
+file_moon_gravity = ../../data/gravity/grail.txt
+output_directory = ../../build/gcrs-tt-check-output

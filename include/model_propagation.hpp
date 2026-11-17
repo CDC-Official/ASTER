@@ -105,7 +105,7 @@ struct OrbitPropagationSetting
 
 struct OrbitPropagationNModel
 {
-	// 250529 数值法轨道预报的动力学模型Model，默认地球为中心天体，仅支持考虑日月第三体摄动
+	// 250529 数值法轨道预报的动力学模型Model，默认地球为中心天体，日月第三体摄动及 Cartesian 可选行星摄动
 	/* ----------------------- controlling parameters ---------------------- */
 	bool use_earth_NSG = false;                    // 是否使用中心天体非球形引力摄动，不使用即为二体质点
 	bool use_SRP = false;                    // 是否使用光压摄动
@@ -115,6 +115,9 @@ struct OrbitPropagationNModel
 	int earth_tesseral_degree = 0;                 // 地球田谐项的最高 n（含扇谐项，m=1..n）；0 关闭该部分
 	int solar_gravity_config = SOLAR_GRAVITY_OFF;  // 太阳第三体质点摄动
 	int lunar_gravity_config = LUNAR_GRAVITY_OFF;  // 月亮第三体的质点摄动
+
+    // Cartesian 右函数使用的额外行星 JPL 编号：1、2、4—9；空列表关闭，GM 使用 DE440 TT 相容值。
+    vector<int> cartesian_planetary_body_id;
 
 	// 需要注意 开启月球非球形必须要读JPL历表
 	bool use_lunar_NSG = false;              // 是否使用月球非球形引力摄动（不含质点引力），进阶选项，仅在考虑JPL月球第三体后才能额外开启此选项（因为月固坐标转换必须要读JPL文件）
@@ -142,7 +145,7 @@ struct OrbitPropagationNModel
 	 * @param[in,out] output 接收模型文本的输出流；函数保持该流原有的格式状态。
 	 * @param[in] precision 面积、AMR、系数和大气表头条件等普通数值的有效数字位数。
 	 * @param[in] label_width 冒号前的字段显示列宽，包含层级符号和缩进，最小采用 31。
-	 * @details 读取地月非球形开关及截断、日月历表模式、固体潮、阻力和光压开关、sat 和密度表条件。
+	 * @details 读取地月非球形开关及截断、日月历表模式、Cartesian 额外行星编号、固体潮、阻力和光压开关、sat 和密度表条件。
 	 * 面积乘 ae² 恢复为 m²，AMR 乘 ae²/MASS_OF_EARTH 恢复为 m²/kg。
 	 * 月球引力截断为 0 / 0 时注明仅考虑质点引力；缺少密度表头条件时显示 Not provided。
 	 * 固体潮采用 k2=0.3 的日月二阶弹性模型，使用 JPL 位置并扣除 GGM03C 已含的永久贡献。
