@@ -1,0 +1,36 @@
+aster_opn_gcrs_tt_check 1.4.1
+backend=SYSTEM; fp=toolchain-default; Eigen=3.4.0; build=Release; commit=598e1813837c3f037d4a9b7b3dfb1d8c9ae9119b; source=clean
+Frame=GCRS; independent_time=TT; ephemeris=DE440
+JPL_argument=TT_approx_TDB; vectors=geocentric_ephemeris_difference; 1PN=off
+Integrator=RKF78_fixed; step_s=60; duration_s=864000
+epoch_UTC_MJD=61892; epoch_TT_MJD=61892.000800740738
+TT_minus_UTC_s=69.183999742381275
+EOP=interpolate_if_covered_else_zero_orientation; DAT=SOFA_leap_table
+Earth_degree=12; Moon_degree=0
+Sun=1; Moon=1; other_planets=0
+SRP=off; drag=off; tides=off
+Earth_GM_TT_km3_s2=398600.44150000002
+Earth_radius_m=6378136.2999999998
+TDB_to_TT_GM_factor=1.0000000148082691
+Earth_over_Moon_effective=81.300568247521909
+Moon_over_Earth_effective=0.012300037029943891
+DE440_header_EMRAT=81.300568221497215
+GM table: body,DE440_TDB_km3_s2,DE440_scaled_TT_km3_s2
+Mercury,22031.868551,22031.868877253837
+Venus,324858.592,324858.59681059344
+Earth,398600.43550700002,398600.44140958251
+Mars_system,42828.375816,42828.376450214113
+Jupiter_system,126712764.09999999,126712765.97639671
+Saturn_system,37940584.841799997,37940585.403634392
+Uranus_system,5794556.4000000004,5794556.4858073499
+Neptune_system,6836527.1005800003,6836527.2018171335
+Pluto_system,975.5,975.50001444546638
+Moon,4902.8001180000001,4902.8001906019836
+Sun,132712440041.27942,132712442006.52094
+Earth force uses Earth_GM_TT above; DE440 Earth row is for comparison.
+Initial_cartesian_km_km_s= -172078.76458916601 316878.87757819 136905.58903960799 -0.34328473228900003 -0.17570955663099999 -0.11462836864500001
+rows=14401
+final_TT_MJD=61902.000800740738; final_UTC_MJD=61902
+max_local_TE_normalized=7.469482193081852e-19
+zero_EOP_queries=187200
+Final_cartesian_km_km_s= -80006.714747643215 -345511.81276058516 -172415.17830684679 0.34752202371829721 -0.18836278607179291 -0.058359701674503849

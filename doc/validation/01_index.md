@@ -48,3 +48,7 @@ git show d138c98:doc/server.md
 ```
 
 `evidence/` 的六份 JSON 只调整目录和文件名，内容及 SHA-256 保持不变。它们内部的提交和机器路径记录当时的证据位置；本索引给出现在的对应入口。
+
+## GCRS/TT 客户核对分支
+
+[轨道核对验证](18_gcrs-tt-orbit-check.md)记录 DE440、SYSTEM、RKF78 60 s 十天参考轨迹、30 s 步长复算、EOP 边界与月球 GM 覆盖检查。

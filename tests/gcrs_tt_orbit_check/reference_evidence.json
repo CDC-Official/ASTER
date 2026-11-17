@@ -1,0 +1,53 @@
+{
+  "source_commit": "598e1813837c3f037d4a9b7b3dfb1d8c9ae9119b",
+  "source_state": "clean at reference build",
+  "platform": "macOS 26.6.2, arm64",
+  "compiler": "Apple clang 21.0.0 (clang-2100.1.1.101)",
+  "backend": "SYSTEM",
+  "build_type": "Release",
+  "frame": "GCRS",
+  "integration_time": "TT",
+  "ephemeris": "DE440",
+  "step_s": 60,
+  "duration_s": 864000,
+  "rows": 14401,
+  "earth_degree": 12,
+  "moon_degree": 0,
+  "sun": true,
+  "moon": true,
+  "other_planets": false,
+  "EOP": "orientation zero outside coverage; DAT=37 s from SOFA table",
+  "JPL_argument": "TT approximates TDB",
+  "final_state": {
+    "elapsed_TT_s": 864000.0,
+    "MJD_UTC": 61902.0,
+    "MJD_TT": 61902.00080074074,
+    "x_km": -80006.71474764321,
+    "y_km": -345511.81276058516,
+    "z_km": -172415.1783068468,
+    "vx_km_s": 0.3475220237182972,
+    "vy_km_s": -0.1883627860717929,
+    "vz_km_s": -0.05835970167450385
+  },
+  "step_60_vs_30": {
+    "max_position_difference_m": 0.0019409426961725298,
+    "final_position_difference_m": 0.001895079655508572,
+    "at_elapsed_TT_s": 858300.0
+  },
+  "tests_passed": [
+    "core_frame_coordinates",
+    "core_rkf78_safety",
+    "gravity_conventions",
+    "core_gcrs_tt_check",
+    "gcrs_tt_check_runtime"
+  ],
+  "all_targets_build": "passed on macOS with SYSTEM",
+  "windows_execution": "not performed; Windows SYSTEM preset and instructions supplied",
+  "sha256": {
+    "data/ephemeris/JPLEPH_C.440": "0cff70007ea4f21d9cc29d1c772b335af2a0fbed145a5dab682d5dc25ce8cde2",
+    "data/eop/EOP-All_250516.txt": "d60ce7d6de3befd2699804d1069c29297604c270e05f13f27bf34ce95bb24882",
+    "data/gravity/grail.txt": "16832b9d9090bdda2a3981497ea501f542a3cdd45d82afa029da152930cb2d1d",
+    "tests/gcrs_tt_orbit_check/setting.txt": "1dbb4c1f6332936201a6de1b33f261cc63c69a37e805f254823f58f575eb62e9",
+    "tests/gcrs_tt_orbit_check/reference_cartesian.csv": "e104b3b98a4222fbe214b88fd89f8cd378c3674c913edff6ba8d6848ad82b342"
+  }
+}
